@@ -54,19 +54,35 @@ class AnalysisEngine:
             if cusp_data['sign_lord'] == planet_short_name:
                 significators.add(cusp)
         
-        # --- 4. Find houses ruled by the planet's Nakshatra Lord ---
+        # --- 4. Find houses ruled AND occupied by the planet's Nakshatra Lord ---
         planet_nl_short = planet_info['nl']
         
         if isinstance(planet_nl_short, str) and planet_nl_short:
             try:
                 nl_full_name = [p for p in self.planets.index if p.startswith(planet_nl_short)][0]
+                nl_info = self.planets.loc[nl_full_name]
                 nl_short_name = nl_full_name[:2]
+
+                # Add houses ruled by the Nakshatra Lord
                 for cusp, cusp_data in self.cusps.iterrows():
                     if cusp_data['sign_lord'] == nl_short_name:
                         significators.add(cusp)
+
+                # Add the house OCCUPIED by the Nakshatra Lord (This is the crucial addition)
+                for i in range(1, 13):
+                    cusp_start = self.cusps.loc[i]['longitude']
+                    normalized_nl_lon = (nl_info['longitude'] - cusp_start + 360) % 360
+                    
+                    next_cusp_num = i % 12 + 1
+                    cusp_end = self.cusps.loc[next_cusp_num]['longitude']
+                    normalized_cusp_end = (cusp_end - cusp_start + 360) % 360
+
+                    if normalized_nl_lon < normalized_cusp_end:
+                        significators.add(i)
+                        break
+
             except IndexError:
                 # Defensively skip if the Nakshatra Lord short name is invalid or not found.
-                # This prevents a crash if data is unexpectedly malformed.
                 pass
 
         return sorted(list(significators))
