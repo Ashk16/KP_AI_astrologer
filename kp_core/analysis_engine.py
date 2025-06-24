@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 import sys
+from collections import defaultdict
 
 # --- Path Correction ---
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -9,9 +10,36 @@ if project_root not in sys.path:
 
 from kp_core.kp_engine import KPEngine
 
+# --- Weighting System ---
+
+SIGNIFICATOR_RULE_WEIGHTS = {
+    1: 1.0,   # Strongest
+    2: 0.85,
+    3: 0.70,
+    4: 0.60   # Weakest
+}
+
+HOUSE_WEIGHTS = {
+    # Favorable for Ascendant (Team A)
+    6: 1.0,   # Victory over opponents
+    11: 0.9,  # Gains and success
+    1: 0.7,   # The self, vitality
+    10: 0.6,  # Performance, status
+    3: 0.5,   # Courage, effort
+    2: 0.4,   # Resources, runs
+    9: 0.2,   # Luck
+    # Unfavorable for Ascendant (Team A)
+    12: -1.0, # Loss, self-undoing
+    8: -0.9,  # Sudden obstacles, defeat
+    5: -0.8,  # Opponent's gains
+    7: -0.6,  # The opponent
+    4: -0.3,  # End of the matter, home comfort
+}
+
+
 class AnalysisEngine:
     """
-    Generates astrological analysis and predictions based on a calculated chart.
+    Generates astrological analysis and predictions based on a weighted, hierarchical system.
     """
     def __init__(self, engine: KPEngine, team_a_name: str, team_b_name: str):
         self.engine = engine
@@ -20,152 +48,153 @@ class AnalysisEngine:
         self.planets = engine.get_all_planets_df()
         self.cusps = engine.get_all_cusps_df()
 
-    def get_significators(self, planet_name):
-        """Finds houses signified by a planet (robust implementation)."""
-        significators = set()
+        # --- Pre-computation for efficiency ---
+        self._precompute_chart_data()
 
-        # --- 1. Find the planet's full details ---
-        if not isinstance(planet_name, str) or not planet_name:
-            return []  # Invalid input
+    def _precompute_chart_data(self):
+        """Pre-calculates essential chart data for quick lookups."""
+        self.planet_house_map = {p: self._get_house_occupancy(p_info['longitude']) for p, p_info in self.planets.iterrows()}
+        
+        self.house_occupants_map = defaultdict(list)
+        for planet, house in self.planet_house_map.items():
+            if house:
+                self.house_occupants_map[house].append(planet)
+        
+        self.vacant_houses = [h for h in range(1, 13) if not self.house_occupants_map[h]]
 
-        try:
-            # Find the full name (e.g., 'Sun') from the short name ('Su')
-            planet_full_name = [p for p in self.planets.index if p.startswith(planet_name)][0]
-            planet_info = self.planets.loc[planet_full_name]
-        except IndexError:
-            return []  # Planet short name not found in index
-
-        # --- 2. Find house the planet occupies ---
+    def _get_house_occupancy(self, longitude):
+        """Finds which house a given longitude falls into."""
         for i in range(1, 13):
             cusp_start = self.cusps.loc[i]['longitude']
-            normalized_planet_lon = (planet_info['longitude'] - cusp_start + 360) % 360
-            
             next_cusp_num = i % 12 + 1
             cusp_end = self.cusps.loc[next_cusp_num]['longitude']
-            normalized_cusp_end = (cusp_end - cusp_start + 360) % 360
+            
+            normalized_lon = (longitude - cusp_start + 360) % 360
+            normalized_end = (cusp_end - cusp_start + 360) % 360
 
-            if normalized_planet_lon < normalized_cusp_end:
-                significators.add(i)
-                break  # A planet can only be in one house
+            if normalized_lon < normalized_end:
+                return i
+        return None # Should not happen
 
-        # --- 3. Find houses ruled by the planet itself ---
-        planet_short_name = planet_info.name[:2]
-        for cusp, cusp_data in self.cusps.iterrows():
-            if cusp_data['sign_lord'] == planet_short_name:
-                significators.add(cusp)
-        
-        # --- 4. Find houses ruled AND occupied by the planet's Nakshatra Lord ---
-        planet_nl_short = planet_info['nl']
-        
-        if isinstance(planet_nl_short, str) and planet_nl_short:
-            try:
-                nl_full_name = [p for p in self.planets.index if p.startswith(planet_nl_short)][0]
-                nl_info = self.planets.loc[nl_full_name]
-                nl_short_name = nl_full_name[:2]
-
-                # Add houses ruled by the Nakshatra Lord
-                for cusp, cusp_data in self.cusps.iterrows():
-                    if cusp_data['sign_lord'] == nl_short_name:
-                        significators.add(cusp)
-
-                # Add the house OCCUPIED by the Nakshatra Lord (This is the crucial addition)
-                for i in range(1, 13):
-                    cusp_start = self.cusps.loc[i]['longitude']
-                    normalized_nl_lon = (nl_info['longitude'] - cusp_start + 360) % 360
-                    
-                    next_cusp_num = i % 12 + 1
-                    cusp_end = self.cusps.loc[next_cusp_num]['longitude']
-                    normalized_cusp_end = (cusp_end - cusp_start + 360) % 360
-
-                    if normalized_nl_lon < normalized_cusp_end:
-                        significators.add(i)
-                        break
-
-            except IndexError:
-                # Defensively skip if the Nakshatra Lord short name is invalid or not found.
-                pass
-
-        return sorted(list(significators))
-
-    def get_all_planet_significators_df(self):
+    def get_significators(self, planet_name):
         """
-        Calculates significators for all planets and adds them to the planets DataFrame.
+        Calculates significators for a single planet using the 4-step hierarchical method.
+        Returns a list of tuples: [(house, rule_number), ...].
         """
-        significators_list = []
-        # Ensure we iterate in the same order as the DataFrame index
-        for planet_name in self.planets.index:
-            sigs = self.get_significators(planet_name)
-            # Convert list to a comma-separated string for clean display
-            significators_list.append(", ".join(map(str, sigs)))
+        significations = []
+        planet_info = self.planets.loc[planet_name]
+        star_lord_name = planet_info['nl']
+        star_lord_full_name = [p for p in self.planets.index if p.startswith(star_lord_name)][0]
 
-        planets_with_sigs_df = self.planets.copy()
-        planets_with_sigs_df['Significators'] = significators_list
-        return planets_with_sigs_df
+        # Rule 1: Planet in the Star of Occupants of a House
+        for house, occupants in self.house_occupants_map.items():
+            if star_lord_full_name in occupants:
+                significations.append((house, 1))
+
+        # Rule 2: Occupants of a House
+        house_occupied = self.planet_house_map.get(planet_name)
+        if house_occupied:
+            significations.append((house_occupied, 2))
+
+        # Rule 3: Planet in the Star of the Lord of a House (only if house is vacant)
+        for house in self.vacant_houses:
+            house_lord_name = self.cusps.loc[house]['sign_lord']
+            if star_lord_name == house_lord_name:
+                significations.append((house, 3))
+
+        # Rule 4: Owners of a House (only if house is vacant)
+        for house in self.vacant_houses:
+            house_lord_name = self.cusps.loc[house]['sign_lord']
+            if planet_info.name[:2] == house_lord_name:
+                significations.append((house, 4))
+        
+        # --- Rahu & Ketu Special Logic (simplified agency) ---
+        if planet_name in ['Rahu', 'Ketu']:
+            sign_lord_short = planet_info['sign_lord']
+            sign_lord_full = [p for p in self.planets.index if p.startswith(sign_lord_short)][0]
+            # Add significations of their sign lord
+            significations.extend(self.get_significators(sign_lord_full))
+        
+        # Remove duplicate (house, rule) tuples if any
+        return sorted(list(set(significations)), key=lambda x: x[0])
+    
+    def calculate_planet_score(self, planet_name):
+        """Calculates a normalized score for a planet based on its weighted significations."""
+        significations = self.get_significators(planet_name)
+        if not significations:
+            return 0.0
+
+        total_score = 0
+        for house, rule in significations:
+            rule_weight = SIGNIFICATOR_RULE_WEIGHTS.get(rule, 0)
+            house_weight = HOUSE_WEIGHTS.get(house, 0)
+            total_score += (rule_weight * house_weight)
+            
+        unique_houses = set([s[0] for s in significations])
+        if not unique_houses:
+            return 0.0
+            
+        return total_score / len(unique_houses)
+
+    def get_all_planet_scores_df(self):
+        """Calculates scores for all planets and adds them to the planets DataFrame."""
+        scores = {planet: self.calculate_planet_score(planet) for planet in self.planets.index}
+        df = self.engine.get_all_planets_df() # Get fresh df
+        df['Score'] = df.index.map(scores)
+        return df
 
     def analyze_muhurta_chart(self):
-        """
-        Provides a high-level analysis of the Muhurta chart.
-        Rule: Favor the team whose ascendant lord is stronger and signifies favorable houses.
-        """
+        """Provides a high-level analysis based on Ascendant/Descendant lord scores."""
         asc_lord_name = self.cusps.loc[1]['sign_lord']
         desc_lord_name = self.cusps.loc[7]['sign_lord']
+        
+        asc_lord_full_name = [p for p in self.planets.index if p.startswith(asc_lord_name)][0]
+        desc_lord_full_name = [p for p in self.planets.index if p.startswith(desc_lord_name)][0]
 
-        asc_sigs = self.get_significators(asc_lord_name)
-        desc_sigs = self.get_significators(desc_lord_name)
-
-        # Favorable houses for victory: 1, 2, 3, 6, 10, 11
-        # Unfavorable: 5, 8, 12
-        fav_houses = {1, 2, 3, 6, 10, 11}
-        unfav_houses = {5, 8, 12}
-
-        asc_score = len(fav_houses.intersection(asc_sigs)) - len(unfav_houses.intersection(desc_sigs))
-        desc_score = len(fav_houses.intersection(desc_sigs)) - len(unfav_houses.intersection(asc_sigs))
+        asc_score = self.calculate_planet_score(asc_lord_full_name)
+        desc_score = self.calculate_planet_score(desc_lord_full_name)
 
         synopsis = (
-            f"Ascendant Lord ({asc_lord_name}) signifies houses: {asc_sigs}. "
-            f"Descendant Lord ({desc_lord_name}) signifies houses: {desc_sigs}. "
-            f"Favorable houses for victory for Ascendant are 1, 2, 3, 6, 10, 11. "
-            f"Favorable for Descendant are 7, 8, 9, 12, 4, 5."
+            f"Ascendant Lord ({asc_lord_name}) Score: {asc_score:.2f}. "
+            f"Descendant Lord ({desc_lord_name}) Score: {desc_score:.2f}."
         )
 
         if asc_score > desc_score:
-            verdict = f"Favors {self.team_a}"
+            verdict = f"Overall chart favors {self.team_a}"
         elif desc_score > asc_score:
-            verdict = f"Favors {self.team_b}"
+            verdict = f"Overall chart favors {self.team_b}"
         else:
-            verdict = "Neutral / Tightly Contested"
+            verdict = "Chart is neutral or tightly contested."
             
         return f"{synopsis}\n\n**Verdict:** {verdict}"
 
     def analyze_timeline(self, timeline_df: pd.DataFrame):
-        """Analyzes a timeline and adds verdict/comment columns."""
+        """Analyzes a timeline using the pre-calculated planet scores."""
         verdicts = []
         comments = []
 
-        for _, row in timeline_df.iterrows():
-            ssl_sigs = self.get_significators(row['SSL'])
-            
-            # Simplified rules for timeline events
-            fav_houses = {2, 3, 6, 10, 11} # Strong hitting, victory
-            unfav_houses = {5, 8, 12} # Wickets, losses, poor performance
+        planet_scores = {planet: self.calculate_planet_score(planet) for planet in self.planets.index}
 
-            score = len(fav_houses.intersection(ssl_sigs)) - len(unfav_houses.intersection(ssl_sigs))
+        for _, row in timeline_df.iterrows():
+            ssl_short_name = row['SSL']
+            ssl_full_name = [p for p in self.planets.index if p.startswith(ssl_short_name)][0]
+            ssl_score = planet_scores.get(ssl_full_name, 0)
             
             verdict = "Neutral"
-            comment = f"SSL {row['SSL']} signifies {ssl_sigs}."
+            comment = f"SSL {ssl_short_name} has a score of {ssl_score:.2f}."
 
-            if score > 1:
-                verdict = f"Favors {self.team_a}"
-                comment += " Very strong period for runs/wickets."
-            elif score == 1:
-                verdict = f"Favors {self.team_a}"
-                comment += " Gentle support for the batting side."
-            elif score < -1:
-                verdict = f"Favors {self.team_b}"
-                comment += " Very difficult period, high chance of losses/wickets."
-            elif score == -1:
-                verdict = f"Favors {self.team_b}"
-                comment += " Some pressure on the batting side."
+            if ssl_score > 0.4:
+                verdict = f"Strongly favors {self.team_a}"
+                comment += " High scoring or wicket-taking period for Team A."
+            elif ssl_score > 0.15:
+                verdict = f"Slightly favors {self.team_a}"
+                comment += " Period of steady progress for Team A."
+            elif ssl_score < -0.4:
+                verdict = f"Strongly favors {self.team_b}"
+                comment += " Difficult period for Team A, potential for losses."
+            elif ssl_score < -0.15:
+                 verdict = f"Slightly favors {self.team_b}"
+                 comment += " Some pressure on Team A."
             
             verdicts.append(verdict)
             comments.append(comment)

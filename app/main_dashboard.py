@@ -84,17 +84,19 @@ def get_saved_matches():
 def run_analysis(utc_dt, lat, lon, duration, team_a, team_b):
     """
     Orchestrates the calls to the KP-core modules and returns the results.
-    This function no longer uses Streamlit commands directly.
     """
     try:
         # 1. Muhurta Chart
         engine = KPEngine(dt=utc_dt, lat=lat, lon=lon)
         analysis_engine = AnalysisEngine(engine, team_a, team_b)
         
-        # Get planets df with significators and muhurta analysis
+        # Get planets df with scores and muhurta analysis
         muhurta_analysis = analysis_engine.analyze_muhurta_chart()
-        planets_df_with_sigs = analysis_engine.get_all_planet_significators_df()
-        planets_df = planets_df_with_sigs.drop(columns=['sign', 'sign_lord']).rename(columns={'nl': 'NL', 'sl': 'SL', 'ssl': 'SSL'})
+        planets_df_with_scores = analysis_engine.get_all_planet_scores_df()
+        
+        # Select and rename columns for display
+        display_cols = ['longitude', 'NL', 'SL', 'SSL', 'Score']
+        planets_df = planets_df_with_scores.rename(columns={'nl': 'NL', 'sl': 'SL', 'ssl': 'SSL'})[display_cols]
 
         # Define IST timezone
         ist_tz = pytz.timezone('Asia/Kolkata')
@@ -236,7 +238,7 @@ def main():
             # 1. Muhurta Chart Analysis
             st.header(f"Muhurta Chart Analysis: {team_a} vs {team_b}")
             st.write(results['muhurta_analysis'])
-            st.table(results['planets_df'].style.format({'longitude': "{:.2f}"}))
+            st.table(results['planets_df'].style.format({'longitude': "{:.2f}", 'Score': "{:.2f}"}))
 
             # 2. Ascendant CSSL Timeline
             st.header(f"Ascendant ({team_a}) CSSL Timeline")
