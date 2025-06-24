@@ -71,6 +71,21 @@ class AnalysisEngine:
 
         return sorted(list(significators))
 
+    def get_all_planet_significators_df(self):
+        """
+        Calculates significators for all planets and adds them to the planets DataFrame.
+        """
+        significators_list = []
+        # Ensure we iterate in the same order as the DataFrame index
+        for planet_name in self.planets.index:
+            sigs = self.get_significators(planet_name)
+            # Convert list to a comma-separated string for clean display
+            significators_list.append(", ".join(map(str, sigs)))
+
+        planets_with_sigs_df = self.planets.copy()
+        planets_with_sigs_df['Significators'] = significators_list
+        return planets_with_sigs_df
+
     def analyze_muhurta_chart(self):
         """
         Provides a high-level analysis of the Muhurta chart.
