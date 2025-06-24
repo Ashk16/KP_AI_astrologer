@@ -79,43 +79,59 @@ class AnalysisEngine:
     def get_significators(self, planet_name):
         """
         Calculates significators for a single planet using the 4-step hierarchical method.
-        Returns a list of tuples: [(house, rule_number), ...].
+        This version includes robust checks to prevent crashes from invalid data.
         """
         significations = []
         planet_info = self.planets.loc[planet_name]
-        star_lord_name = planet_info['nl']
-        star_lord_full_name = [p for p in self.planets.index if p.startswith(star_lord_name)][0]
+        star_lord_short_name = planet_info['nl']
+        
+        # --- Safely resolve Star Lord's full name ---
+        star_lord_full_name = None
+        if isinstance(star_lord_short_name, str) and star_lord_short_name:
+            try:
+                star_lord_full_name = [p for p in self.planets.index if p.startswith(star_lord_short_name)][0]
+            except IndexError:
+                # This handles cases where nl is an invalid short name.
+                pass 
 
-        # Rule 1: Planet in the Star of Occupants of a House
-        for house, occupants in self.house_occupants_map.items():
-            if star_lord_full_name in occupants:
-                significations.append((house, 1))
+        # --- Rule 1: Planet in the Star of Occupants ---
+        if star_lord_full_name:
+            for house, occupants in self.house_occupants_map.items():
+                if star_lord_full_name in occupants:
+                    significations.append((house, 1))
 
-        # Rule 2: Occupants of a House
+        # --- Rule 2: Occupants of a House ---
         house_occupied = self.planet_house_map.get(planet_name)
         if house_occupied:
             significations.append((house_occupied, 2))
 
-        # Rule 3: Planet in the Star of the Lord of a House (only if house is vacant)
-        for house in self.vacant_houses:
-            house_lord_name = self.cusps.loc[house]['sign_lord']
-            if star_lord_name == house_lord_name:
-                significations.append((house, 3))
+        # --- Rule 3: Planet in the Star of the Lord of a House ---
+        if star_lord_short_name: # Check short name is valid before using
+            for house in self.vacant_houses:
+                house_lord_name = self.cusps.loc[house]['sign_lord']
+                if star_lord_short_name == house_lord_name:
+                    significations.append((house, 3))
 
-        # Rule 4: Owners of a House (only if house is vacant)
+        # --- Rule 4: Owners of a House ---
         for house in self.vacant_houses:
             house_lord_name = self.cusps.loc[house]['sign_lord']
             if planet_info.name[:2] == house_lord_name:
                 significations.append((house, 4))
         
-        # --- Rahu & Ketu Special Logic (simplified agency) ---
+        # --- Rahu & Ketu Special Logic ---
         if planet_name in ['Rahu', 'Ketu']:
             sign_lord_short = planet_info['sign_lord']
-            sign_lord_full = [p for p in self.planets.index if p.startswith(sign_lord_short)][0]
-            # Add significations of their sign lord
-            significations.extend(self.get_significators(sign_lord_full))
+            
+            # Defensive check for sign lord
+            if isinstance(sign_lord_short, str) and sign_lord_short:
+                try:
+                    sign_lord_full = [p for p in self.planets.index if p.startswith(sign_lord_short)][0]
+                    # Recursively get significators of the agent, but prevent infinite loops
+                    if sign_lord_full not in ['Rahu', 'Ketu']:
+                         significations.extend(self.get_significators(sign_lord_full))
+                except IndexError:
+                    pass
         
-        # Remove duplicate (house, rule) tuples if any
         return sorted(list(set(significations)), key=lambda x: x[0])
     
     def calculate_planet_score(self, planet_name):
