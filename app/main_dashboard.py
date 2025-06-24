@@ -8,6 +8,8 @@ import json
 from glob import glob
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
+import matplotlib.pyplot as plt
+from matplotlib.colors import to_hex
 
 # --- Path Correction ---
 # Add the root directory of the project to the Python path
@@ -29,6 +31,30 @@ from kp_core.analysis_engine import AnalysisEngine
 
 # --- Constants ---
 ARCHIVE_DIR = "match_archive"
+
+def color_planets(val, vmin, vmax):
+    """
+    Colors a score value. Green for positive, red for negative.
+    The intensity depends on the value's position between 0 and vmax/vmin.
+    """
+    if val > 0.01: # Use a small threshold to avoid coloring near-zero values
+        # Normalize positive values from 0 to 1
+        norm_val = val / vmax if vmax > 0 else 0
+        # Get a color from the Greens colormap (0 is light, 1 is dark)
+        cmap = plt.get_cmap('Greens')
+        # Start from a light green (0.2) up to a dark green (1.0)
+        color = cmap(0.2 + norm_val * 0.8)
+    elif val < -0.01:
+        # Normalize negative values from 0 to 1
+        norm_val = abs(val / vmin) if vmin < 0 else 0
+        # Get a color from the Reds colormap
+        cmap = plt.get_cmap('Reds')
+        # Start from a light red up to a dark red
+        color = cmap(0.2 + norm_val * 0.8)
+    else:
+        return '' # No color for zero or near-zero values
+    
+    return f'background-color: {to_hex(color)}'
 
 @st.cache_data
 def get_lat_lon(location_str):
@@ -238,15 +264,45 @@ def main():
             # 1. Muhurta Chart Analysis
             st.header(f"Muhurta Chart Analysis: {team_a} vs {team_b}")
             st.write(results['muhurta_analysis'])
-            st.table(results['planets_df'].style.format({'longitude': "{:.2f}", 'Score': "{:.2f}"}))
+            
+            planets_df = results['planets_df']
+            score_col = planets_df['Score']
+            vmin, vmax = score_col.min(), score_col.max()
+            
+            # Use st.dataframe to display styled tables
+            st.dataframe(
+                planets_df.style.applymap(
+                    lambda x: color_planets(x, vmin, vmax), subset=['Score']
+                ).format({'longitude': "{:.2f}", 'Score': "{:.2f}"})
+            )
 
             # 2. Ascendant CSSL Timeline
             st.header(f"Ascendant ({team_a}) CSSL Timeline")
-            st.table(results['asc_timeline_df'][['Start Time', 'End Time', 'NL', 'SL', 'SSL', 'Verdict', 'Comment']])
+            asc_timeline_df = results['asc_timeline_df']
+            score_col_asc = asc_timeline_df['Score']
+            vmin_asc, vmax_asc = score_col_asc.min(), score_col_asc.max()
+            
+            styler_asc = asc_timeline_df.style.apply(
+                # Style the 'SSL' column based on the 'Score' column
+                lambda row: [color_planets(row['Score'], vmin_asc, vmax_asc) if col == 'SSL' else '' for col in row.index],
+                axis=1
+            ).format({'Score': "{:.2f}"}).hide(columns=['Score'])
+            
+            st.dataframe(styler_asc)
             
             # 3. Moon SSL Timeline
             st.header(f"Moon SSL Timeline")
-            st.table(results['moon_timeline_df'][['Start Time', 'End Time', 'NL', 'SL', 'SSL', 'Verdict', 'Comment']])
+            moon_timeline_df = results['moon_timeline_df']
+            score_col_moon = moon_timeline_df['Score']
+            vmin_moon, vmax_moon = score_col_moon.min(), score_col_moon.max()
+            
+            styler_moon = moon_timeline_df.style.apply(
+                # Style the 'SSL' column based on the 'Score' column
+                lambda row: [color_planets(row['Score'], vmin_moon, vmax_moon) if col == 'SSL' else '' for col in row.index],
+                axis=1
+            ).format({'Score': "{:.2f}"}).hide(columns=['Score'])
+            
+            st.dataframe(styler_moon)
 
 
 if __name__ == "__main__":

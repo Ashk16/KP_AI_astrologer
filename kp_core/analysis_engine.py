@@ -172,6 +172,7 @@ class AnalysisEngine:
         """Analyzes a timeline using the pre-calculated planet scores."""
         verdicts = []
         comments = []
+        scores = []
 
         planet_scores = {planet: self.calculate_planet_score(planet) for planet in self.planets.index}
 
@@ -179,6 +180,7 @@ class AnalysisEngine:
             ssl_short_name = row['SSL']
             ssl_full_name = [p for p in self.planets.index if p.startswith(ssl_short_name)][0]
             ssl_score = planet_scores.get(ssl_full_name, 0)
+            scores.append(ssl_score)
             
             verdict = "Neutral"
             comment = f"SSL {ssl_short_name} has a score of {ssl_score:.2f}."
@@ -201,4 +203,5 @@ class AnalysisEngine:
             
         timeline_df['Verdict'] = verdicts
         timeline_df['Comment'] = comments
+        timeline_df['Score'] = scores
         return timeline_df 

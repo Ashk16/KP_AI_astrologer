@@ -2,4 +2,5 @@ streamlit
 pandas
 pyswisseph
 pytz
-geopy 
+geopy
+matplotlib 
