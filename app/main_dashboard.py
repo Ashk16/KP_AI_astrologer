@@ -10,6 +10,8 @@ from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 import matplotlib.pyplot as plt
 from matplotlib.colors import to_hex
+import matplotlib.cm as cm
+import matplotlib.colors as colors
 
 # --- Path Correction ---
 # Add the root directory of the project to the Python path
@@ -20,7 +22,7 @@ if project_root not in sys.path:
 
 # --- Actual KP Core Imports ---
 import swisseph as swe
-from kp_core.kp_engine import KPEngine
+from kp_core.kp_engine import KPEngine, PlanetNameUtils
 from kp_core.timeline_generator import TimelineGenerator
 from kp_core.analysis_engine import AnalysisEngine
 
@@ -32,29 +34,47 @@ from kp_core.analysis_engine import AnalysisEngine
 # --- Constants ---
 ARCHIVE_DIR = "match_archive"
 
-def color_planets(val, vmin, vmax):
+def color_planets(val):
     """
-    Colors a score value. Green for positive, red for negative.
-    The intensity depends on the value's position between 0 and vmax/vmin.
+    Applies subtle green/red color based on score.
+    Uses a perceptually uniform colormap with adjusted ranges for better visualization.
     """
-    if val > 0.01: # Use a small threshold to avoid coloring near-zero values
-        # Normalize positive values from 0 to 1
-        norm_val = val / vmax if vmax > 0 else 0
-        # Get a color from the Greens colormap (0 is light, 1 is dark)
-        cmap = plt.get_cmap('Greens')
-        # Start from a light green (0.2) up to a dark green (1.0)
-        color = cmap(0.2 + norm_val * 0.8)
-    elif val < -0.01:
-        # Normalize negative values from 0 to 1
-        norm_val = abs(val / vmin) if vmin < 0 else 0
-        # Get a color from the Reds colormap
-        cmap = plt.get_cmap('Reds')
-        # Start from a light red up to a dark red
-        color = cmap(0.2 + norm_val * 0.8)
-    else:
-        return '' # No color for zero or near-zero values
+    if pd.isna(val):
+        return ''
+        
+    # Using a perceptually uniform colormap 'PiYG' (Pinkish/Green)
+    cmap = cm.get_cmap('PiYG')
     
-    return f'background-color: {to_hex(color)}'
+    # Normalize the score to a reasonable range
+    # Scores beyond ±2.0 will get the maximum color intensity
+    norm = colors.Normalize(vmin=-2.0, vmax=2.0)
+    normalized_val = norm(val)
+    
+    # Create more subtle colors by adjusting the color mapping
+    if val < 0:
+        # For negative values (red shades)
+        # Map -2.0 to 0.0 to 0.35 to 0.45 (subtle reds)
+        color_val = 0.45 - (abs(normalized_val) * 0.1)
+    else:
+        # For positive values (green shades)
+        # Map 0.0 to 2.0 to 0.55 to 0.65 (subtle greens)
+        color_val = 0.55 + (normalized_val * 0.1)
+    
+    # Ensure color_val stays within bounds
+    color_val = max(0.35, min(0.65, color_val))
+    
+    rgba_color = cmap(color_val)
+    return f'background-color: {colors.to_hex(rgba_color, keep_alpha=True)}'
+
+def color_timeline_planets_by_score(planet_short_name, planet_scores):
+    """
+    Applies the exact same color logic as planets table based on actual scores.
+    """
+    if pd.isna(planet_short_name) or planet_short_name not in planet_scores:
+        return ''
+        
+    score = planet_scores[planet_short_name]
+    return color_planets(score)
 
 @st.cache_data
 def get_lat_lon(location_str):
@@ -72,34 +92,80 @@ def get_lat_lon(location_str):
         st.error(f"An error occurred during geocoding: {e}")
     return None, None
 
-def save_analysis(results, match_date):
-    """Saves the complete analysis results to a JSON file."""
-    team_a = results['team_a'].replace(" ", "-")
-    team_b = results['team_b'].replace(" ", "-")
-    date_str = match_date.strftime('%Y-%m-%d')
+def save_analysis(results):
+    """Saves the complete analysis results to a JSON file using the standardized structure."""
+    match_details = results['match_details']
+    team_a = match_details['team_a'].replace(" ", "-")
+    team_b = match_details['team_b'].replace(" ", "-")
+    date_str = match_details['datetime_utc'].date().strftime('%Y-%m-%d')
+    
     filename = f"{date_str}_{team_a}_vs_{team_b}.json"
     filepath = os.path.join(ARCHIVE_DIR, filename)
 
-    # Convert dataframes to JSON serializable format
-    data_to_save = results.copy()
-    data_to_save['planets_df'] = data_to_save['planets_df'].to_json(orient='split')
-    data_to_save['asc_timeline_df'] = data_to_save['asc_timeline_df'].to_json(orient='split')
-    data_to_save['moon_timeline_df'] = data_to_save['moon_timeline_df'].to_json(orient='split')
-    
+    # Create a deep copy to modify for serialization
+    data_to_save = {k: v for k, v in results.items() if not isinstance(v, pd.DataFrame)}
+    data_to_save['match_details'] = results['match_details'].copy()
+
+    # Convert dataframes and datetime to JSON serializable formats
+    data_to_save['planets_df'] = results['planets_df'].to_json(orient='split')
+    data_to_save['asc_timeline_df'] = results['asc_timeline_df'].to_json(orient='split')
+    data_to_save['desc_timeline_df'] = results['desc_timeline_df'].to_json(orient='split')
+    data_to_save['moon_timeline_df'] = results['moon_timeline_df'].to_json(orient='split')
+    data_to_save['match_details']['datetime_utc'] = match_details['datetime_utc'].isoformat()
+
     with open(filepath, 'w') as f:
         json.dump(data_to_save, f, indent=4)
-    return filename
+    st.success(f"Analysis saved to {filename}")
 
 def load_analysis(filename):
-    """Loads an analysis file and restores data structures."""
+    """
+    Loads an analysis file and restores data structures.
+    Includes backward compatibility for old, flawed file structures.
+    """
     filepath = os.path.join(ARCHIVE_DIR, filename)
     with open(filepath, 'r') as f:
         loaded_data = json.load(f)
 
+    # --- Backward Compatibility Check ---
+    # If 'match_details' is missing, it's an old file. Rebuild the structure.
+    if 'match_details' not in loaded_data:
+        # Reconstruct match_details from old flat keys
+        match_details = {
+            'team_a': loaded_data.get('team_a', 'Unknown'),
+            'team_b': loaded_data.get('team_b', 'Unknown'),
+            'lat': loaded_data.get('inputs', {}).get('lat', 0),
+            'lon': loaded_data.get('inputs', {}).get('lon', 0),
+            'duration_hours': loaded_data.get('inputs', {}).get('duration_hours', 0),
+            'datetime_utc': loaded_data.get('inputs', {}).get('datetime_utc_str', '1970-01-01T00:00:00')
+        }
+        loaded_data['match_details'] = match_details
+    
     # Restore dataframes from JSON
     loaded_data['planets_df'] = pd.read_json(loaded_data['planets_df'], orient='split')
     loaded_data['asc_timeline_df'] = pd.read_json(loaded_data['asc_timeline_df'], orient='split')
-    loaded_data['moon_timeline_df'] = pd.read_json(loaded_data['moon_timeline_df'], orient='split')
+    # Handle missing desc_timeline_df in very old files
+    if 'desc_timeline_df' in loaded_data:
+        loaded_data['desc_timeline_df'] = pd.read_json(loaded_data['desc_timeline_df'], orient='split')
+    else: # Or if moon_timeline_df was the old name
+         loaded_data['desc_timeline_df'] = pd.read_json(loaded_data.get('moon_timeline_df', '{}'), orient='split')
+
+    # Handle Moon timeline with backward compatibility
+    if 'moon_timeline_df' in loaded_data:
+        loaded_data['moon_timeline_df'] = pd.read_json(loaded_data['moon_timeline_df'], orient='split')
+    else:
+        # Create empty Moon timeline for backward compatibility
+        loaded_data['moon_timeline_df'] = pd.DataFrame()
+        loaded_data['moon_timeline_analysis'] = {
+            'summary': 'Moon timeline not available in this saved analysis.',
+            'favorable_planets': [],
+            'unfavorable_planets': []
+        }
+    
+    # Restore datetime object from ISO string
+    utc_dt_str = loaded_data['match_details']['datetime_utc']
+    if isinstance(utc_dt_str, str):
+        loaded_data['match_details']['datetime_utc'] = datetime.datetime.fromisoformat(utc_dt_str).replace(tzinfo=pytz.utc)
+
     return loaded_data
 
 def get_saved_matches():
@@ -107,56 +173,167 @@ def get_saved_matches():
     files = glob(os.path.join(ARCHIVE_DIR, "*.json"))
     return sorted(files, reverse=True)
 
-def run_analysis(utc_dt, lat, lon, duration, team_a, team_b):
+def get_ist_time(dt_utc):
+    return dt_utc.astimezone(pytz.timezone('Asia/Kolkata'))
+
+def display_analysis(results):
+    """Display the analysis results for a single match."""
+    if results.get("error"):
+        st.error("An error occurred during analysis:")
+        st.exception(results.get("error"))
+        st.code(results.get("traceback", "No traceback available."))
+        return # Stop execution if there was an error
+
+    # Button to save the current analysis
+    if st.button("Save Current Analysis", key=f"save_{id(results)}"):
+         save_analysis(results)
+         
+    st.header("Muhurta Chart Analysis")
+    if "muhurta_analysis" in results:
+        st.write(results["muhurta_analysis"])
+
+    st.subheader("Planetary Positions & Scores")
+    planets_df = results["planets_df"]
+    
+    # Specify column order to have Score at the end
+    column_order = [col for col in planets_df.columns if col not in ['Score', 'Significators']] + ['Significators', 'Score']
+    
+    # 1. Reorder the DataFrame columns first
+    reordered_df = planets_df.reindex(columns=column_order)
+
+    # 2. Apply styling and formatting to the reordered DataFrame
+    styler = reordered_df.style.apply(lambda x: x.map(color_planets), subset=['Score'])
+    st.dataframe(styler.format({'Score': '{:.2f}'}))
+
+    st.subheader(f"Ascendant Based Timeline ({results['match_details']['team_a']})")
+    asc_timeline_df = results["asc_timeline_df"].copy() # Use a copy to avoid modifying session state
+    
+    # Convert times to IST for display using the correct pandas method
+    asc_timeline_df['Start Time'] = pd.to_datetime(asc_timeline_df['Start Time']).dt.tz_convert('Asia/Kolkata').dt.strftime('%H:%M:%S')
+    asc_timeline_df['End Time'] = pd.to_datetime(asc_timeline_df['End Time']).dt.tz_convert('Asia/Kolkata').dt.strftime('%H:%M:%S')
+
+    # Create planet scores mapping for consistent coloring
+    planet_scores = {}
+    for planet in planets_df.index:
+        planet_short = PlanetNameUtils.to_short_name(planet)
+        planet_scores[planet_short] = planets_df.loc[planet, 'Score']
+    
+    # Create a view for display, dropping the score column but keeping Verdict and Comment
+    asc_display_df = asc_timeline_df.drop(columns=['Score'])
+    
+    # Apply coloring only to the specific planet columns using actual scores
+    styler_asc = asc_display_df.style.applymap(
+        lambda x: color_timeline_planets_by_score(x, planet_scores),
+        subset=['NL_Planet', 'SL_Planet', 'SSL_Planet']
+    )
+    st.dataframe(styler_asc)
+    st.write(results["asc_timeline_analysis"]["summary"])
+
+    st.subheader(f"Descendant Based Timeline ({results['match_details']['team_b']})")
+    desc_timeline_df = results["desc_timeline_df"].copy() # Use a copy
+
+    # Convert times to IST for display using the correct pandas method
+    desc_timeline_df['Start Time'] = pd.to_datetime(desc_timeline_df['Start Time']).dt.tz_convert('Asia/Kolkata').dt.strftime('%H:%M:%S')
+    desc_timeline_df['End Time'] = pd.to_datetime(desc_timeline_df['End Time']).dt.tz_convert('Asia/Kolkata').dt.strftime('%H:%M:%S')
+
+    # Create a view for display, dropping the score column but keeping Verdict and Comment
+    desc_display_df = desc_timeline_df.drop(columns=['Score'])
+    
+    # Apply coloring only to the specific planet columns using actual scores
+    styler_desc = desc_display_df.style.applymap(
+        lambda x: color_timeline_planets_by_score(x, planet_scores),
+        subset=['NL_Planet', 'SL_Planet', 'SSL_Planet']
+    )
+    st.dataframe(styler_desc)
+    st.write(results["desc_timeline_analysis"]["summary"])
+    
+    st.subheader("Moon SSL Timeline")
+    moon_timeline_df = results["moon_timeline_df"].copy()
+
+    # Convert times to IST for display using the correct pandas method
+    moon_timeline_df['Start Time'] = pd.to_datetime(moon_timeline_df['Start Time']).dt.tz_convert('Asia/Kolkata').dt.strftime('%H:%M:%S')
+    moon_timeline_df['End Time'] = pd.to_datetime(moon_timeline_df['End Time']).dt.tz_convert('Asia/Kolkata').dt.strftime('%H:%M:%S')
+
+    # Create a view for display, dropping the score column but keeping Verdict and Comment
+    moon_display_df = moon_timeline_df.drop(columns=['Score'])
+    
+    # Apply coloring only to the specific planet columns using actual scores
+    styler_moon = moon_display_df.style.applymap(
+        lambda x: color_timeline_planets_by_score(x, planet_scores),
+        subset=['NL_Planet', 'SL_Planet', 'SSL_Planet']
+    )
+    st.dataframe(styler_moon)
+    st.write(results["moon_timeline_analysis"]["summary"])
+    
+    st.subheader("Favorable Planets")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.write(f"**For {results['match_details']['team_a']} (Ascendant):**")
+        st.json(results['asc_timeline_analysis']['favorable_planets'])
+    with col2:
+        st.write(f"**For {results['match_details']['team_b']} (Descendant):**")
+        st.json(results['desc_timeline_analysis']['favorable_planets'])
+    with col3:
+        st.write("**For Moon SSL:**")
+        st.json(results['moon_timeline_analysis']['favorable_planets'])
+        
+    st.subheader("Unfavorable Planets")
+    col4, col5, col6 = st.columns(3)
+    with col4:
+        st.write(f"**For {results['match_details']['team_a']} (Ascendant):**")
+        st.json(results['asc_timeline_analysis']['unfavorable_planets'])
+    with col5:
+        st.write(f"**For {results['match_details']['team_b']} (Descendant):**")
+        st.json(results['desc_timeline_analysis']['unfavorable_planets'])
+    with col6:
+        st.write("**For Moon SSL:**")
+        st.json(results['moon_timeline_analysis']['unfavorable_planets'])
+
+def run_analysis(match_details):
     """
-    Orchestrates the calls to the KP-core modules and returns the results.
+    Orchestrates the KP core analysis and returns a single, consistent dictionary.
     """
     try:
-        # 1. Muhurta Chart
-        engine = KPEngine(dt=utc_dt, lat=lat, lon=lon)
-        analysis_engine = AnalysisEngine(engine, team_a, team_b)
+        engine = KPEngine(match_details['datetime_utc'], match_details['lat'], match_details['lon'])
+        analysis_engine = AnalysisEngine(engine, match_details['team_a'], match_details['team_b'])
         
-        # Get planets df with scores and muhurta analysis
         muhurta_analysis = analysis_engine.analyze_muhurta_chart()
-        planets_df_with_scores = analysis_engine.get_all_planet_scores_df()
-        
-        # Select and rename columns for display
-        display_cols = ['longitude', 'NL', 'SL', 'SSL', 'Score']
-        planets_df = planets_df_with_scores.rename(columns={'nl': 'NL', 'sl': 'SL', 'ssl': 'SSL'})[display_cols]
+        planets_df = analysis_engine.get_all_planet_details_df()
 
-        # Define IST timezone
-        ist_tz = pytz.timezone('Asia/Kolkata')
-
-        # 2. Ascendant Timeline
-        asc_gen = TimelineGenerator(utc_dt, lat, lon, swe.ASC, duration)
-        asc_timeline_df = asc_gen.generate_timeline()
-        analyzed_asc_df = analysis_engine.analyze_timeline(asc_timeline_df)
-        # Convert UTC to IST for display
-        analyzed_asc_df['Start Time'] = analyzed_asc_df['Start Time'].apply(lambda x: x.astimezone(ist_tz).strftime('%H:%M:%S'))
-        analyzed_asc_df['End Time'] = analyzed_asc_df['End Time'].apply(lambda x: x.astimezone(ist_tz).strftime('%H:%M:%S'))
+        asc_timeline_gen = TimelineGenerator(engine, 'Ascendant')
+        # Pass 'ascendant' perspective for Ascendant timeline
+        asc_timeline_df, asc_timeline_analysis = analysis_engine.analyze_timeline(
+            asc_timeline_gen.generate_timeline_df(match_details['datetime_utc'], match_details['duration_hours']),
+            perspective='ascendant'
+        )
         
-        # 3. Moon Timeline
-        moon_gen = TimelineGenerator(utc_dt, lat, lon, swe.MOON, duration)
-        moon_timeline_df = moon_gen.generate_timeline()
-        analyzed_moon_df = analysis_engine.analyze_timeline(moon_timeline_df)
-        # Convert UTC to IST for display
-        analyzed_moon_df['Start Time'] = analyzed_moon_df['Start Time'].apply(lambda x: x.astimezone(ist_tz).strftime('%H:%M:%S'))
-        analyzed_moon_df['End Time'] = analyzed_moon_df['End Time'].apply(lambda x: x.astimezone(ist_tz).strftime('%H:%M:%S'))
+        desc_timeline_gen = TimelineGenerator(engine, 'Descendant')
+        # Pass 'descendant' perspective for Descendant timeline
+        desc_timeline_df, desc_timeline_analysis = analysis_engine.analyze_timeline(
+            desc_timeline_gen.generate_timeline_df(match_details['datetime_utc'], match_details['duration_hours']),
+            perspective='descendant'
+        )
         
+        moon_timeline_gen = TimelineGenerator(engine, 'Moon')
+        # Moon timeline can use either perspective, but let's use ascendant for consistency
+        moon_timeline_df, moon_timeline_analysis = analysis_engine.analyze_timeline(
+            moon_timeline_gen.generate_timeline_df(match_details['datetime_utc'], match_details['duration_hours']),
+            perspective='ascendant'
+        )
+        
+        # Return a single, consistently structured dictionary
         return {
-            "error": None,
             "muhurta_analysis": muhurta_analysis,
             "planets_df": planets_df,
-            "asc_timeline_df": analyzed_asc_df,
-            "moon_timeline_df": analyzed_moon_df,
-            "team_a": team_a,
-            "team_b": team_b,
-            "inputs": { # Save inputs for reloading
-                "utc_dt_str": utc_dt.isoformat(),
-                "lat": lat,
-                "lon": lon,
-                "duration": duration
-            }
+            "asc_timeline_df": asc_timeline_df,
+            "desc_timeline_df": desc_timeline_df,
+            "moon_timeline_df": moon_timeline_df,
+            "asc_timeline_analysis": asc_timeline_analysis,
+            "desc_timeline_analysis": desc_timeline_analysis,
+            "moon_timeline_analysis": moon_timeline_analysis,
+            "match_details": match_details,
+            "error": None,
+            "traceback": None
         }
 
     except Exception as e:
@@ -170,9 +347,11 @@ def main():
     st.set_page_config(page_title="KP AI Astrologer", layout="wide")
     st.title("KP AI Astrologer: Cricket Match Predictor")
 
-    # Initialize session state to hold results
-    if 'analysis_results' not in st.session_state:
-        st.session_state.analysis_results = None
+    # Initialize session state to hold multiple analyses in tabs
+    if 'analyses' not in st.session_state:
+        st.session_state.analyses = []
+    if 'active_tab' not in st.session_state:
+        st.session_state.active_tab = 0
 
     # --- Input Sidebar ---
     with st.sidebar:
@@ -223,7 +402,23 @@ def main():
                 utc_dt = localized_dt.astimezone(pytz.utc)
 
                 with st.spinner("Generating astrological analysis..."):
-                    st.session_state.analysis_results = run_analysis(utc_dt, lat, lon, match_duration, team_a, team_b)
+                    new_analysis = run_analysis({
+                        'datetime_utc': utc_dt,
+                        'lat': lat,
+                        'lon': lon,
+                        'duration_hours': match_duration,
+                        'team_a': team_a,
+                        'team_b': team_b
+                    })
+                    
+                    # Add tab name to the analysis
+                    tab_name = f"{team_a} vs {team_b} - {match_date.strftime('%Y-%m-%d')}"
+                    new_analysis['tab_name'] = tab_name
+                    
+                    # Add to analyses list and set as active tab
+                    st.session_state.analyses.append(new_analysis)
+                    st.session_state.active_tab = len(st.session_state.analyses) - 1
+                    st.rerun()
             except ValueError:
                 st.error("Invalid time format. Please use HH:MM.")
         
@@ -240,70 +435,49 @@ def main():
             help="Select from the last 10 matches or start typing to search for older ones."
         )
         if st.button("Load Match") and match_to_load:
-            st.session_state.analysis_results = load_analysis(match_to_load)
-            # This will trigger a rerun, displaying the loaded results
-            st.experimental_rerun()
+            with st.spinner("Loading analysis..."):
+                loaded_analysis = load_analysis(match_to_load)
+                
+                # Add tab name to the loaded analysis
+                match_details = loaded_analysis['match_details']
+                tab_name = f"{match_details['team_a']} vs {match_details['team_b']} - {match_details['datetime_utc'].strftime('%Y-%m-%d')}"
+                loaded_analysis['tab_name'] = tab_name
+                
+                # Add to analyses list and set as active tab
+                st.session_state.analyses.append(loaded_analysis)
+                st.session_state.active_tab = len(st.session_state.analyses) - 1
+            st.rerun()
 
-    # --- Display Area (checks session state) ---
-    if st.session_state.analysis_results:
-        results = st.session_state.analysis_results
+    # --- Display Area with Multiple Tabs ---
+    if st.session_state.analyses:
+        # Create tab names with close buttons
+        tab_names = []
+        for i, analysis in enumerate(st.session_state.analyses):
+            tab_name = analysis.get('tab_name', f"Match {i+1}")
+            # Truncate long tab names
+            if len(tab_name) > 30:
+                tab_name = tab_name[:27] + "..."
+            tab_names.append(tab_name)
         
-        if results.get("error"):
-            st.error(f"An error occurred during analysis: {results['error']}")
-            st.error("Please ensure the Swiss Ephemeris path (SWEP_PATH) is set correctly as an environment variable.")
-            st.code(results['traceback'])
-        else:
-            team_a = results['team_a']
-            team_b = results['team_b']
-
-            # --- Save Button ---
-            if st.button("Save Match Analysis"):
-                saved_filename = save_analysis(results, match_date)
-                st.success(f"Analysis saved to: `{saved_filename}`")
-            
-            # 1. Muhurta Chart Analysis
-            st.header(f"Muhurta Chart Analysis: {team_a} vs {team_b}")
-            st.write(results['muhurta_analysis'])
-            
-            planets_df = results['planets_df']
-            score_col = planets_df['Score']
-            vmin, vmax = score_col.min(), score_col.max()
-            
-            # Use st.dataframe to display styled tables
-            st.dataframe(
-                planets_df.style.applymap(
-                    lambda x: color_planets(x, vmin, vmax), subset=['Score']
-                ).format({'longitude': "{:.2f}", 'Score': "{:.2f}"})
-            )
-
-            # 2. Ascendant CSSL Timeline
-            st.header(f"Ascendant ({team_a}) CSSL Timeline")
-            asc_timeline_df = results['asc_timeline_df']
-            score_col_asc = asc_timeline_df['Score']
-            vmin_asc, vmax_asc = score_col_asc.min(), score_col_asc.max()
-            
-            styler_asc = asc_timeline_df.style.apply(
-                # Style the 'SSL' column based on the 'Score' column
-                lambda row: [color_planets(row['Score'], vmin_asc, vmax_asc) if col == 'SSL' else '' for col in row.index],
-                axis=1
-            ).format({'Score': "{:.2f}"}).hide(columns=['Score'])
-            
-            st.dataframe(styler_asc)
-            
-            # 3. Moon SSL Timeline
-            st.header(f"Moon SSL Timeline")
-            moon_timeline_df = results['moon_timeline_df']
-            score_col_moon = moon_timeline_df['Score']
-            vmin_moon, vmax_moon = score_col_moon.min(), score_col_moon.max()
-            
-            styler_moon = moon_timeline_df.style.apply(
-                # Style the 'SSL' column based on the 'Score' column
-                lambda row: [color_planets(row['Score'], vmin_moon, vmax_moon) if col == 'SSL' else '' for col in row.index],
-                axis=1
-            ).format({'Score': "{:.2f}"}).hide(columns=['Score'])
-            
-            st.dataframe(styler_moon)
-
+        # Create tabs
+        tabs = st.tabs(tab_names)
+        
+        # Display each analysis in its respective tab
+        for i, (tab, analysis) in enumerate(zip(tabs, st.session_state.analyses)):
+            with tab:
+                # Add close button at the top of each tab
+                col1, col2 = st.columns([6, 1])
+                with col2:
+                    if st.button("❌ Close Tab", key=f"close_{i}", help="Close this tab"):
+                        # Remove this analysis from the list
+                        st.session_state.analyses.pop(i)
+                        # Adjust active tab if necessary
+                        if st.session_state.active_tab >= len(st.session_state.analyses):
+                            st.session_state.active_tab = max(0, len(st.session_state.analyses) - 1)
+                        st.rerun()
+                
+                # Display the analysis
+                display_analysis(analysis)
 
 if __name__ == "__main__":
     main() 

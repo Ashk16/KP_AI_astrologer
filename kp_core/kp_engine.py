@@ -8,14 +8,67 @@ import os
 PLANET_NAMES = {
     swe.SUN: 'Sun', swe.MOON: 'Moon', swe.MARS: 'Mars', swe.MERCURY: 'Mercury',
     swe.JUPITER: 'Jupiter', swe.VENUS: 'Venus', swe.SATURN: 'Saturn',
-    swe.MEAN_NODE: 'Rahu', -swe.MEAN_NODE: 'Ketu', swe.ASC: 'Asc'
+    swe.MEAN_NODE: 'Rahu', -swe.MEAN_NODE: 'Ketu'
 }
 
 # Short planet names for display
 PLANET_SHORT_NAMES = {
     'Sun': 'Su', 'Moon': 'Mo', 'Mars': 'Ma', 'Mercury': 'Me', 'Jupiter': 'Ju',
-    'Venus': 'Ve', 'Saturn': 'Sa', 'Rahu': 'Ra', 'Ketu': 'Ke', 'Ascendant': 'Asc'
+    'Venus': 'Ve', 'Saturn': 'Sa', 'Rahu': 'Ra', 'Ketu': 'Ke', 'Asc': 'Asc'
 }
+
+# Reverse mapping for standardization
+SHORT_TO_FULL_NAMES = {
+    'Su': 'Sun', 'Mo': 'Moon', 'Ma': 'Mars', 'Me': 'Mercury', 'Ju': 'Jupiter',
+    'Ve': 'Venus', 'Sa': 'Saturn', 'Ra': 'Rahu', 'Ke': 'Ketu', 'Asc': 'Asc'
+}
+
+class PlanetNameUtils:
+    """Centralized utility class for planet name standardization."""
+    
+    @staticmethod
+    def to_full_name(name: str) -> str:
+        """Convert any planet name (short or full) to standardized full name."""
+        if not name or pd.isna(name):
+            return name
+        
+        # If already full name, return as is
+        if name in PLANET_SHORT_NAMES:
+            return name
+        
+        # If short name, convert to full
+        if name in SHORT_TO_FULL_NAMES:
+            return SHORT_TO_FULL_NAMES[name]
+        
+        # If not found, return as is (might be a typo or special case)
+        return name
+    
+    @staticmethod
+    def to_short_name(name: str) -> str:
+        """Convert any planet name (short or full) to standardized short name."""
+        if not name or pd.isna(name):
+            return name
+        
+        # If already short name, return as is
+        if name in SHORT_TO_FULL_NAMES:
+            return name
+        
+        # If full name, convert to short
+        if name in PLANET_SHORT_NAMES:
+            return PLANET_SHORT_NAMES[name]
+        
+        # If not found, return as is
+        return name
+    
+    @staticmethod
+    def standardize_for_index(name: str) -> str:
+        """Standardize planet name for DataFrame index lookups (always use full names)."""
+        return PlanetNameUtils.to_full_name(name)
+    
+    @staticmethod
+    def standardize_for_display(name: str) -> str:
+        """Standardize planet name for display purposes (use short names)."""
+        return PlanetNameUtils.to_short_name(name)
 
 ZODIAC_SIGNS = [
     "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra",
@@ -198,6 +251,23 @@ class KPEngine:
         df = pd.DataFrame.from_dict(self.cusps, orient='index')
         df.index.name = 'Cusp'
         return df
+
+    def get_cusp_longitude_at_time(self, dt_utc: datetime, cusp_id: int):
+        """
+        Calculates the longitude of a specific cusp at a given time.
+        This is a dynamic calculation needed for timeline generation.
+        """
+        if not (1 <= cusp_id <= 12):
+            raise ValueError("Cusp ID must be between 1 and 12.")
+
+        jd = swe.julday(dt_utc.year, dt_utc.month, dt_utc.day, 
+                        dt_utc.hour + dt_utc.minute/60 + dt_utc.second/3600)
+        
+        # Calculate cusps for the given time, using the engine's lat/lon
+        cusps, _ = swe.houses(jd, self.lat, self.lon, b'P')
+        
+        # Cusp array is 0-indexed, so cusp 1 is at index 0
+        return cusps[cusp_id - 1]
 
 if __name__ == '__main__':
     # Example Usage for testing
