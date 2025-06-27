@@ -82,6 +82,7 @@ class AnalysisEngine:
     def get_significators(self, planet_name):
         """
         Calculates significators for a single planet using the correct 4-step KP method.
+        Now sorted by rule priority (Rule 1 first) and includes conjoint logic for Rahu/Ketu.
         """
         # Standardize planet name for index lookup
         planet_name = PlanetNameUtils.standardize_for_index(planet_name)
@@ -126,24 +127,42 @@ class AnalysisEngine:
                 if house_num not in self.house_occupants_map or len(self.house_occupants_map[house_num]) == 0:
                     significations.append((house_num, 4))
         
-        # --- Rahu & Ketu Special Logic ---
+        # --- Enhanced Rahu & Ketu Agent Logic ---
         if planet_name in ['Rahu', 'Ketu']:
-            # They act as agents for the lord of the sign they are placed in
-            sign_lord_short = planet_info['sign_lord']
+            # Get the house where Rahu/Ketu is positioned
+            rahu_ketu_house = self.planet_house_map.get(planet_name)
             
-            # Find the full name of the sign lord and get its significators
-            try:
-                sign_lord_full = PlanetNameUtils.to_full_name(sign_lord_short)
-                if sign_lord_full not in ['Rahu', 'Ketu']:  # Prevent infinite recursion
-                    agent_significations = self.get_significators(sign_lord_full)
-                    # Add agent significators but mark them as such (we can use a special rule number)
-                    for house, rule in agent_significations:
-                        significations.append((house, rule))  # Keep original rule strength
-            except (StopIteration, IndexError):
-                pass
+            if rahu_ketu_house:
+                # Get all planets in the same house as Rahu/Ketu
+                conjoint_planets = [p for p in self.house_occupants_map.get(rahu_ketu_house, []) 
+                                  if p != planet_name and p not in ['Rahu', 'Ketu']]
+                
+                # PRIORITY 1: Conjoint planets (higher importance than sign lord)
+                agent_significations = []
+                for conjoint_planet in conjoint_planets:
+                    try:
+                        conjoint_sigs = self.get_significators(conjoint_planet)
+                        agent_significations.extend(conjoint_sigs)
+                    except (KeyError, RecursionError):
+                        pass
+                
+                # PRIORITY 2: Sign lord (only if no conjoint planets or as additional agent)
+                sign_lord_short = planet_info['sign_lord']
+                try:
+                    sign_lord_full = PlanetNameUtils.to_full_name(sign_lord_short)
+                    if (sign_lord_full not in ['Rahu', 'Ketu'] and  # Prevent infinite recursion
+                        sign_lord_full not in conjoint_planets):      # Avoid duplication if sign lord is conjoint
+                        sign_lord_sigs = self.get_significators(sign_lord_full)
+                        agent_significations.extend(sign_lord_sigs)
+                except (StopIteration, IndexError, KeyError, RecursionError):
+                    pass
+                
+                # Add all agent significators (preserve original rule strength)
+                for house, rule in agent_significations:
+                    significations.append((house, rule))
         
-        # Sort by house number and then by rule number
-        return sorted(significations, key=lambda x: (x[0], x[1]))
+        # FIXED: Sort by rule priority first (Rule 1, Rule 2, etc.), then by house number
+        return sorted(significations, key=lambda x: (x[1], x[0]))
     
     def _get_day_lord(self) -> str:
         """
@@ -470,93 +489,186 @@ class AnalysisEngine:
         
         return "\n".join(analysis_parts)
 
-    def _generate_verdict_and_comment(self, ssl_planet: str, perspective: str = 'ascendant') -> tuple:
+    def _generate_verdict_and_comment(self, timeline_row: pd.Series, perspective: str = 'ascendant') -> tuple:
         """
-        Generates verdict and comment for a timeline entry based on SSL planet.
+        Generates verdict and comment using multi-layered KP analysis:
+        Star Lord promises → Sub Lord modifies → Sub-Sub Lord delivers
         
         Args:
-            ssl_planet: The SSL planet for this timeline entry
+            timeline_row: Row from timeline DataFrame with NL_Planet, SL_Planet, SSL_Planet
             perspective: Either 'ascendant' or 'descendant'
             
         Returns:
             tuple: (verdict, comment)
         """
-        if pd.isna(ssl_planet):
-            return "Neutral", "No SSL planet data available"
+        nl_planet = timeline_row.get('NL_Planet')
+        sl_planet = timeline_row.get('SL_Planet') 
+        ssl_planet = timeline_row.get('SSL_Planet')
         
-        # Keep original name for display, but standardize for processing
-        original_ssl_planet = ssl_planet
-        ssl_planet = PlanetNameUtils.standardize_for_index(ssl_planet)
-        
-        # Get SSL planet's significators and score
-        significators = self.get_significators(ssl_planet)
-        score = self.calculate_planet_score(ssl_planet, perspective)
+        # Handle missing data
+        if pd.isna(nl_planet) or pd.isna(sl_planet) or pd.isna(ssl_planet):
+            return "Neutral", "Insufficient planetary data for analysis"
         
         # Determine team names based on perspective
         team_name = self.team_a if perspective == 'ascendant' else self.team_b
         opponent_name = self.team_b if perspective == 'ascendant' else self.team_a
         
-        # Generate verdict based on score
-        if abs(score) < 0.1:
-            verdict = "Neutral"
-        elif score > 0:
-            verdict = f"Favors {team_name}"
+        # === LAYER 1: STAR LORD ANALYSIS (The Promise) ===
+        nl_standardized = PlanetNameUtils.standardize_for_index(nl_planet)
+        nl_significators = self.get_significators(nl_standardized) if nl_standardized in self.planets.index else []
+        
+        nl_victory_houses = [h for h, r in nl_significators if h in [1, 6, 10, 11]]
+        nl_defeat_houses = [h for h, r in nl_significators if h in [4, 5, 7, 8, 9, 12]]
+        
+        if len(nl_victory_houses) > len(nl_defeat_houses) and nl_victory_houses:
+            nl_promise = "VICTORY"
+            nl_promise_desc = f"promises victory (H{','.join(map(str, nl_victory_houses))})"
+        elif len(nl_defeat_houses) > len(nl_victory_houses) and nl_defeat_houses:
+            nl_promise = "DEFEAT" 
+            nl_promise_desc = f"promises challenges (H{','.join(map(str, nl_defeat_houses))})"
+        elif nl_victory_houses and nl_defeat_houses:
+            nl_promise = "MIXED"
+            nl_promise_desc = f"promises mixed results (V:{','.join(map(str, nl_victory_houses))} D:{','.join(map(str, nl_defeat_houses))})"
         else:
-            verdict = f"Favors {opponent_name}"
+            nl_promise = "NEUTRAL"
+            nl_promise_desc = "promises neutral period"
         
-        # Generate comment based on significators
-        if not significators:
-            comment = f"{original_ssl_planet} has no significant house connections"
-            return verdict, comment
+        # === LAYER 2: SUB LORD ANALYSIS (The Modifier) ===
+        sl_standardized = PlanetNameUtils.standardize_for_index(sl_planet)
+        sl_significators = self.get_significators(sl_standardized) if sl_standardized in self.planets.index else []
         
-        # Get the houses this SSL planet signifies
-        houses = [s[0] for s in significators]
-        houses_str = ", ".join(map(str, houses))
+        sl_victory_houses = [h for h, r in sl_significators if h in [1, 6, 10, 11]]
+        sl_defeat_houses = [h for h, r in sl_significators if h in [4, 5, 7, 8, 9, 12]]
         
-        # Categorize houses for cricket context
-        favorable_houses = []
-        unfavorable_houses = []
+        # Determine how Sub Lord modifies the promise
+        if nl_promise == "VICTORY":
+            if len(sl_victory_houses) > len(sl_defeat_houses):
+                sl_modification = "SUPPORTS"
+                sl_mod_desc = f"supports promise (H{','.join(map(str, sl_victory_houses))})"
+            elif len(sl_defeat_houses) > len(sl_victory_houses):
+                sl_modification = "OPPOSES"
+                sl_mod_desc = f"opposes promise (H{','.join(map(str, sl_defeat_houses))})"
+            else:
+                sl_modification = "NEUTRAL"
+                sl_mod_desc = "neutral on promise"
+        elif nl_promise == "DEFEAT":
+            if len(sl_defeat_houses) > len(sl_victory_houses):
+                sl_modification = "SUPPORTS"
+                sl_mod_desc = f"supports promise (H{','.join(map(str, sl_defeat_houses))})"
+            elif len(sl_victory_houses) > len(sl_defeat_houses):
+                sl_modification = "OPPOSES"
+                sl_mod_desc = f"opposes promise (H{','.join(map(str, sl_victory_houses))})"
+            else:
+                sl_modification = "NEUTRAL"
+                sl_mod_desc = "neutral on promise"
+        else:  # MIXED or NEUTRAL promise
+            if len(sl_victory_houses) > len(sl_defeat_houses):
+                sl_modification = "CLARIFIES_VICTORY"
+                sl_mod_desc = f"clarifies toward victory (H{','.join(map(str, sl_victory_houses))})"
+            elif len(sl_defeat_houses) > len(sl_victory_houses):
+                sl_modification = "CLARIFIES_DEFEAT"
+                sl_mod_desc = f"clarifies toward challenges (H{','.join(map(str, sl_defeat_houses))})"
+            else:
+                sl_modification = "MAINTAINS"
+                sl_mod_desc = "maintains mixed signals"
         
-        for house in houses:
-            house_weight = self._get_house_weight(house, perspective)
-            if house_weight > 0:
-                favorable_houses.append(house)
-            elif house_weight < 0:
-                unfavorable_houses.append(house)
+        # === LAYER 3: SUB-SUB LORD ANALYSIS (The Deliverer) ===
+        ssl_standardized = PlanetNameUtils.standardize_for_index(ssl_planet)
+        ssl_significators = self.get_significators(ssl_standardized) if ssl_standardized in self.planets.index else []
         
-        # Generate comment based on house significations
+        ssl_victory_houses = [h for h, r in ssl_significators if h in [1, 6, 10, 11]]
+        ssl_defeat_houses = [h for h, r in ssl_significators if h in [4, 5, 7, 8, 9, 12]]
+        
+        if len(ssl_victory_houses) > len(ssl_defeat_houses) and ssl_victory_houses:
+            ssl_delivery = "DELIVERS_VICTORY"
+            ssl_del_desc = f"delivers victory (H{','.join(map(str, ssl_victory_houses))})"
+        elif len(ssl_defeat_houses) > len(ssl_victory_houses) and ssl_defeat_houses:
+            ssl_delivery = "DELIVERS_DEFEAT"
+            ssl_del_desc = f"delivers challenges (H{','.join(map(str, ssl_defeat_houses))})"
+        elif ssl_victory_houses and ssl_defeat_houses:
+            ssl_delivery = "PARTIAL_DELIVERY"
+            ssl_del_desc = f"partial delivery (V:{','.join(map(str, ssl_victory_houses))} D:{','.join(map(str, ssl_defeat_houses))})"
+        else:
+            ssl_delivery = "NEUTRAL_DELIVERY"
+            ssl_del_desc = "neutral delivery"
+        
+        # === SYNTHESIS: COMBINE ALL LAYERS FOR FINAL VERDICT ===
+        confidence_level = "MEDIUM"
+        
+        # Determine final verdict based on layer combinations
+        if nl_promise == "VICTORY":
+            if sl_modification == "SUPPORTS" and ssl_delivery == "DELIVERS_VICTORY":
+                verdict = f"Strong Advantage {team_name}"
+                cricket_context = "Excellent period for building partnerships and dominating opponents"
+                confidence_level = "HIGH"
+            elif sl_modification == "OPPOSES" and ssl_delivery == "DELIVERS_DEFEAT":
+                verdict = f"Advantage {opponent_name}"
+                cricket_context = "Promised advantage turns into setback - wickets or pressure likely"
+                confidence_level = "HIGH"
+            elif ssl_delivery == "DELIVERS_VICTORY":
+                verdict = f"Advantage {team_name}"
+                cricket_context = "Good period despite some obstacles"
+                confidence_level = "MEDIUM"
+            elif ssl_delivery == "DELIVERS_DEFEAT":
+                verdict = f"Challenging Period {team_name}"
+                cricket_context = "Tough phase with unexpected difficulties"
+                confidence_level = "MEDIUM"
+            else:
+                verdict = "Balanced with Slight Edge"
+                cricket_context = "Mixed signals, marginal advantage varies"
+                confidence_level = "LOW"
+                
+        elif nl_promise == "DEFEAT":
+            if sl_modification == "SUPPORTS" and ssl_delivery == "DELIVERS_DEFEAT":
+                verdict = f"Strong Advantage {opponent_name}"
+                cricket_context = "Consistent pressure phase - wickets and obstacles likely"
+                confidence_level = "HIGH"
+            elif sl_modification == "OPPOSES" and ssl_delivery == "DELIVERS_VICTORY":
+                verdict = f"Advantage {team_name}"
+                cricket_context = "Unexpected turnaround - recovery from difficult start"
+                confidence_level = "HIGH"
+            elif ssl_delivery == "DELIVERS_VICTORY":
+                verdict = f"Advantage {team_name}"
+                cricket_context = "Tough start but eventual breakthrough"
+                confidence_level = "MEDIUM"
+            elif ssl_delivery == "DELIVERS_DEFEAT":
+                verdict = f"Challenging Period {team_name}"
+                cricket_context = "Difficult phase with mounting pressure"
+                confidence_level = "MEDIUM"
+            else:
+                verdict = "Balanced with Slight Edge"
+                cricket_context = "Uncertain period with variable momentum"
+                confidence_level = "LOW"
+                
+        else:  # MIXED or NEUTRAL promise
+            if ssl_delivery == "DELIVERS_VICTORY":
+                verdict = f"Advantage {team_name}"
+                cricket_context = "Uncertain start but eventual team dominance"
+                confidence_level = "MEDIUM"
+            elif ssl_delivery == "DELIVERS_DEFEAT":
+                verdict = f"Advantage {opponent_name}"
+                cricket_context = "Mixed signals resolve into opposition advantage"
+                confidence_level = "MEDIUM"
+            elif ssl_delivery == "PARTIAL_DELIVERY":
+                verdict = "Highly Unpredictable"
+                cricket_context = "Momentum shift likely - either team could break through"
+                confidence_level = "LOW"
+            else:
+                verdict = "Balanced Period"
+                cricket_context = "Evenly matched phase with gradual developments"
+                confidence_level = "LOW"
+        
+        # === GENERATE DETAILED COMMENT ===
         comment_parts = []
+        comment_parts.append(f"🌟 {nl_planet} {nl_promise_desc}")
+        comment_parts.append(f"⚖️ {sl_planet} {sl_mod_desc}")
+        comment_parts.append(f"🎯 {ssl_planet} {ssl_del_desc}")
+        comment_parts.append(f"🏏 {cricket_context}")
+        comment_parts.append(f"📊 Confidence: {confidence_level}")
         
-        if favorable_houses:
-            if 6 in favorable_houses:
-                comment_parts.append("victory over opponents")
-            if 11 in favorable_houses:
-                comment_parts.append("gains and success")
-            if 1 in favorable_houses:
-                comment_parts.append("team strength")
-            if 10 in favorable_houses:
-                comment_parts.append("good performance")
-            if 3 in favorable_houses:
-                comment_parts.append("courage and effort")
-            if 2 in favorable_houses:
-                comment_parts.append("good for run scoring")
+        detailed_comment = " | ".join(comment_parts)
         
-        if unfavorable_houses:
-            if 12 in unfavorable_houses:
-                comment_parts.append("risk of loss/self-undoing")
-            if 8 in unfavorable_houses:
-                comment_parts.append("sudden obstacles/wickets")
-            if 7 in unfavorable_houses:
-                comment_parts.append("opponent advantage")
-            if 5 in unfavorable_houses:
-                comment_parts.append("opponent's gains")
-        
-        if comment_parts:
-            comment = f"{original_ssl_planet} signifies houses {houses_str}, indicating {', '.join(comment_parts)}"
-        else:
-            comment = f"{original_ssl_planet} signifies houses {houses_str}"
-        
-        return verdict, comment
+        return verdict, detailed_comment
 
     def analyze_timeline(self, timeline_df, perspective='ascendant'):
         """
@@ -575,8 +687,8 @@ class AnalysisEngine:
         )
         
         # Add Verdict and Comment columns
-        verdict_comment_data = timeline_df['SSL_Planet'].apply(
-            lambda x: self._generate_verdict_and_comment(x, perspective)
+        verdict_comment_data = timeline_df.apply(
+            lambda row: self._generate_verdict_and_comment(row, perspective), axis=1
         )
         timeline_df['Verdict'] = [vc[0] for vc in verdict_comment_data]
         timeline_df['Comment'] = [vc[1] for vc in verdict_comment_data]

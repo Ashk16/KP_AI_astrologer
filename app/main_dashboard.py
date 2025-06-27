@@ -76,6 +76,51 @@ def color_timeline_planets_by_score(planet_short_name, planet_scores):
     score = planet_scores[planet_short_name]
     return color_planets(score)
 
+def color_verdict_cell(verdict_text, team_a_name="Team A", team_b_name="Team B"):
+    """
+    Colors verdict cells based on team advantage with different shades for strength:
+    Team A (Green shades): Light green to dark green  
+    Team B (Red shades): Light red to dark red
+    Neutral: Light gray
+    """
+    if pd.isna(verdict_text) or not verdict_text:
+        return ''
+    
+    verdict_lower = verdict_text.lower()
+    team_a_lower = team_a_name.lower()
+    team_b_lower = team_b_name.lower()
+    
+    # Strong advantage patterns
+    if 'strong advantage' in verdict_lower:
+        if team_a_lower in verdict_lower:
+            return 'background-color: #1b5e20; color: white'  # Dark green for Team A strong advantage
+        elif team_b_lower in verdict_lower:
+            return 'background-color: #b71c1c; color: white'  # Dark red for Team B strong advantage
+    
+    # Regular advantage patterns  
+    elif 'advantage' in verdict_lower and 'strong' not in verdict_lower:
+        if team_a_lower in verdict_lower:
+            return 'background-color: #388e3c; color: white'  # Medium green for Team A advantage
+        elif team_b_lower in verdict_lower:
+            return 'background-color: #d32f2f; color: white'  # Medium red for Team B advantage
+    
+    # Challenging periods (Light red/orange for challenges)
+    elif 'challenging period' in verdict_lower:
+        return 'background-color: #ff8a65; color: white'  # Light orange for challenging periods
+    
+    # Balanced/Neutral periods (Light gray)
+    elif any(pattern in verdict_lower for pattern in ['balanced', 'neutral', 'unpredictable']):
+        return 'background-color: #f5f5f5; color: #333'  # Light gray for balanced
+    
+    # Additional patterns to catch other advantage indicators
+    elif any(keyword in verdict_lower for keyword in ['favors', 'supports', 'dominance']):
+        if team_a_lower in verdict_lower:
+            return 'background-color: #66bb6a; color: white'  # Light green for Team A favor
+        elif team_b_lower in verdict_lower:
+            return 'background-color: #ef5350; color: white'  # Light red for Team B favor
+    
+    return ''  # No styling for unrecognized patterns
+
 @st.cache_data
 def get_lat_lon(location_str):
     """Gets latitude and longitude from a location string using geopy."""
@@ -221,10 +266,13 @@ def display_analysis(results):
     # Create a view for display, dropping the score column but keeping Verdict and Comment
     asc_display_df = asc_timeline_df.drop(columns=['Score'])
     
-    # Apply coloring only to the specific planet columns using actual scores
+    # Apply coloring to planet columns and verdict column
     styler_asc = asc_display_df.style.applymap(
         lambda x: color_timeline_planets_by_score(x, planet_scores),
         subset=['NL_Planet', 'SL_Planet', 'SSL_Planet']
+    ).applymap(
+        lambda x: color_verdict_cell(x, results['match_details']['team_a'], results['match_details']['team_b']),
+        subset=['Verdict']
     )
     st.dataframe(styler_asc)
     st.write(results["asc_timeline_analysis"]["summary"])
@@ -239,10 +287,13 @@ def display_analysis(results):
     # Create a view for display, dropping the score column but keeping Verdict and Comment
     desc_display_df = desc_timeline_df.drop(columns=['Score'])
     
-    # Apply coloring only to the specific planet columns using actual scores
+    # Apply coloring to planet columns and verdict column
     styler_desc = desc_display_df.style.applymap(
         lambda x: color_timeline_planets_by_score(x, planet_scores),
         subset=['NL_Planet', 'SL_Planet', 'SSL_Planet']
+    ).applymap(
+        lambda x: color_verdict_cell(x, results['match_details']['team_a'], results['match_details']['team_b']),
+        subset=['Verdict']
     )
     st.dataframe(styler_desc)
     st.write(results["desc_timeline_analysis"]["summary"])
@@ -257,10 +308,13 @@ def display_analysis(results):
     # Create a view for display, dropping the score column but keeping Verdict and Comment
     moon_display_df = moon_timeline_df.drop(columns=['Score'])
     
-    # Apply coloring only to the specific planet columns using actual scores
+    # Apply coloring to planet columns and verdict column
     styler_moon = moon_display_df.style.applymap(
         lambda x: color_timeline_planets_by_score(x, planet_scores),
         subset=['NL_Planet', 'SL_Planet', 'SSL_Planet']
+    ).applymap(
+        lambda x: color_verdict_cell(x, results['match_details']['team_a'], results['match_details']['team_b']),
+        subset=['Verdict']
     )
     st.dataframe(styler_moon)
     st.write(results["moon_timeline_analysis"]["summary"])
