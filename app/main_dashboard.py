@@ -145,6 +145,10 @@ def save_analysis(results):
     date_str = match_details['datetime_utc'].date().strftime('%Y-%m-%d')
     
     filename = f"{date_str}_{team_a}_vs_{team_b}.json"
+    
+    # Ensure the archive directory exists
+    os.makedirs(ARCHIVE_DIR, exist_ok=True)
+    
     filepath = os.path.join(ARCHIVE_DIR, filename)
 
     # Create a deep copy to modify for serialization
@@ -215,6 +219,8 @@ def load_analysis(filename):
 
 def get_saved_matches():
     """Returns a sorted list of saved match files."""
+    # Ensure the archive directory exists before trying to list files
+    os.makedirs(ARCHIVE_DIR, exist_ok=True)
     files = glob(os.path.join(ARCHIVE_DIR, "*.json"))
     return sorted(files, reverse=True)
 
