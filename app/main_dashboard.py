@@ -104,12 +104,19 @@ def color_verdict_cell(verdict_text, team_a_name="Team A", team_b_name="Team B")
         elif team_b_lower in verdict_lower:
             return 'background-color: #d32f2f; color: white'  # Medium red for Team B advantage
     
+    # Favor patterns (common in KP analysis)
+    elif 'favor' in verdict_lower:
+        if team_a_lower in verdict_lower:
+            return 'background-color: #66bb6a; color: white'  # Light green for Team A favor
+        elif team_b_lower in verdict_lower:
+            return 'background-color: #ef5350; color: white'  # Light red for Team B favor
+    
     # Challenging periods (Light red/orange for challenges)
     elif 'challenging period' in verdict_lower:
         return 'background-color: #ff8a65; color: white'  # Light orange for challenging periods
     
     # Balanced/Neutral periods (Light gray)
-    elif any(pattern in verdict_lower for pattern in ['balanced', 'neutral', 'unpredictable']):
+    elif any(pattern in verdict_lower for pattern in ['balanced', 'neutral', 'unpredictable', 'balanced period']):
         return 'background-color: #f5f5f5; color: #333'  # Light gray for balanced
     
     # Additional patterns to catch other advantage indicators
@@ -231,7 +238,7 @@ def display_analysis(results):
     """Display the analysis results for a single match."""
     if results.get("error"):
         st.error("An error occurred during analysis:")
-        st.exception(results.get("error"))
+        st.exception(results.get("traceback", "No traceback available."))
         st.code(results.get("traceback", "No traceback available."))
         return # Stop execution if there was an error
 
@@ -256,7 +263,8 @@ def display_analysis(results):
     styler = reordered_df.style.apply(lambda x: x.map(color_planets), subset=['Score'])
     st.dataframe(styler.format({'Score': '{:.2f}'}))
 
-    st.subheader(f"Ascendant Based Timeline ({results['match_details']['team_a']})")
+    st.subheader(f"Ascendant Based Timeline (Asc) - Star Lord + Sub Lord Level")
+    st.markdown('<p class="timeline-description">Aggregated timeline showing periods at Star Lord and Sub Lord level for practical match analysis. Each period represents longer, more actionable time segments.</p>', unsafe_allow_html=True)
     asc_timeline_df = results["asc_timeline_df"].copy() # Use a copy to avoid modifying session state
     
     # Convert times to IST for display using the correct pandas method
@@ -272,18 +280,24 @@ def display_analysis(results):
     # Create a view for display, dropping the score column but keeping Verdict and Comment
     asc_display_df = asc_timeline_df.drop(columns=['Score'])
     
-    # Apply coloring to planet columns and verdict column
+    # Apply coloring to planet columns and verdict column  
+    # Check if SSL_Planet column exists (for granular timelines) or not (for aggregated timelines)
+    planet_columns = ['NL_Planet', 'SL_Planet']
+    if 'SSL_Planet' in asc_display_df.columns:
+        planet_columns.append('SSL_Planet')
+    
     styler_asc = asc_display_df.style.applymap(
         lambda x: color_timeline_planets_by_score(x, planet_scores),
-        subset=['NL_Planet', 'SL_Planet', 'SSL_Planet']
+        subset=planet_columns
     ).applymap(
-        lambda x: color_verdict_cell(x, results['match_details']['team_a'], results['match_details']['team_b']),
+        lambda x: color_verdict_cell(x, "Asc", "Desc"),
         subset=['Verdict']
     )
-    st.dataframe(styler_asc)
+    st.dataframe(styler_asc, use_container_width=True, height=400)
     st.write(results["asc_timeline_analysis"]["summary"])
 
-    st.subheader(f"Descendant Based Timeline ({results['match_details']['team_b']})")
+    st.subheader(f"Descendant Based Timeline (Desc) - Star Lord + Sub Lord Level")
+    st.markdown('<p class="timeline-description">Aggregated timeline showing periods at Star Lord and Sub Lord level for practical match analysis. Each period represents longer, more actionable time segments.</p>', unsafe_allow_html=True)
     desc_timeline_df = results["desc_timeline_df"].copy() # Use a copy
 
     # Convert times to IST for display using the correct pandas method
@@ -294,17 +308,23 @@ def display_analysis(results):
     desc_display_df = desc_timeline_df.drop(columns=['Score'])
     
     # Apply coloring to planet columns and verdict column
+    # Check if SSL_Planet column exists (for granular timelines) or not (for aggregated timelines)
+    planet_columns_desc = ['NL_Planet', 'SL_Planet']
+    if 'SSL_Planet' in desc_display_df.columns:
+        planet_columns_desc.append('SSL_Planet')
+    
     styler_desc = desc_display_df.style.applymap(
         lambda x: color_timeline_planets_by_score(x, planet_scores),
-        subset=['NL_Planet', 'SL_Planet', 'SSL_Planet']
+        subset=planet_columns_desc
     ).applymap(
-        lambda x: color_verdict_cell(x, results['match_details']['team_a'], results['match_details']['team_b']),
+        lambda x: color_verdict_cell(x, "Asc", "Desc"),
         subset=['Verdict']
     )
-    st.dataframe(styler_desc)
+    st.dataframe(styler_desc, use_container_width=True, height=400)
     st.write(results["desc_timeline_analysis"]["summary"])
     
-    st.subheader("Moon SSL Timeline")
+    st.subheader("Moon SSL Timeline - Full Granular Detail")
+    st.markdown('<p class="timeline-description">Detailed timeline showing all Sub-Sub Lord periods for precise timing analysis. Useful for identifying exact moments of significant events.</p>', unsafe_allow_html=True)
     moon_timeline_df = results["moon_timeline_df"].copy()
 
     # Convert times to IST for display using the correct pandas method
@@ -319,19 +339,19 @@ def display_analysis(results):
         lambda x: color_timeline_planets_by_score(x, planet_scores),
         subset=['NL_Planet', 'SL_Planet', 'SSL_Planet']
     ).applymap(
-        lambda x: color_verdict_cell(x, results['match_details']['team_a'], results['match_details']['team_b']),
+        lambda x: color_verdict_cell(x, "Asc", "Desc"),
         subset=['Verdict']
     )
-    st.dataframe(styler_moon)
+    st.dataframe(styler_moon, use_container_width=True, height=400)
     st.write(results["moon_timeline_analysis"]["summary"])
     
     st.subheader("Favorable Planets")
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.write(f"**For {results['match_details']['team_a']} (Ascendant):**")
+        st.write(f"**For Asc (Ascendant):**")
         st.json(results['asc_timeline_analysis']['favorable_planets'])
     with col2:
-        st.write(f"**For {results['match_details']['team_b']} (Descendant):**")
+        st.write(f"**For Desc (Descendant):**")
         st.json(results['desc_timeline_analysis']['favorable_planets'])
     with col3:
         st.write("**For Moon SSL:**")
@@ -340,10 +360,10 @@ def display_analysis(results):
     st.subheader("Unfavorable Planets")
     col4, col5, col6 = st.columns(3)
     with col4:
-        st.write(f"**For {results['match_details']['team_a']} (Ascendant):**")
+        st.write(f"**For Asc (Ascendant):**")
         st.json(results['asc_timeline_analysis']['unfavorable_planets'])
     with col5:
-        st.write(f"**For {results['match_details']['team_b']} (Descendant):**")
+        st.write(f"**For Desc (Descendant):**")
         st.json(results['desc_timeline_analysis']['unfavorable_planets'])
     with col6:
         st.write("**For Moon SSL:**")
@@ -361,25 +381,19 @@ def run_analysis(match_details):
         planets_df = analysis_engine.get_all_planet_details_df()
 
         asc_timeline_gen = TimelineGenerator(engine, 'Ascendant')
-        # Pass 'ascendant' perspective for Ascendant timeline
-        asc_timeline_df, asc_timeline_analysis = analysis_engine.analyze_timeline(
-            asc_timeline_gen.generate_timeline_df(match_details['datetime_utc'], match_details['duration_hours']),
-            perspective='ascendant'
-        )
+        # Use aggregated timeline for Ascendant (Star Lord + Sub Lord level)
+        asc_timeline_df = asc_timeline_gen.generate_aggregated_timeline_df(match_details['datetime_utc'], match_details['duration_hours'])
+        asc_timeline_df, asc_timeline_analysis = analysis_engine.analyze_aggregated_timeline(asc_timeline_df, 'ascendant')
         
         desc_timeline_gen = TimelineGenerator(engine, 'Descendant')
-        # Pass 'descendant' perspective for Descendant timeline
-        desc_timeline_df, desc_timeline_analysis = analysis_engine.analyze_timeline(
-            desc_timeline_gen.generate_timeline_df(match_details['datetime_utc'], match_details['duration_hours']),
-            perspective='descendant'
-        )
+        # Use aggregated timeline for Descendant (Star Lord + Sub Lord level)  
+        desc_timeline_df = desc_timeline_gen.generate_aggregated_timeline_df(match_details['datetime_utc'], match_details['duration_hours'])
+        desc_timeline_df, desc_timeline_analysis = analysis_engine.analyze_aggregated_timeline(desc_timeline_df, 'descendant')
         
         moon_timeline_gen = TimelineGenerator(engine, 'Moon')
-        # Moon timeline can use either perspective, but let's use ascendant for consistency
-        moon_timeline_df, moon_timeline_analysis = analysis_engine.analyze_timeline(
-            moon_timeline_gen.generate_timeline_df(match_details['datetime_utc'], match_details['duration_hours']),
-            perspective='ascendant'
-        )
+        # Use granular timeline for Moon (full SSL level)
+        moon_timeline_df = moon_timeline_gen.generate_timeline_df(match_details['datetime_utc'], match_details['duration_hours'])
+        moon_timeline_df, moon_timeline_analysis = analysis_engine.analyze_timeline(moon_timeline_df, 'ascendant')
         
         # Return a single, consistently structured dictionary
         return {
@@ -406,6 +420,70 @@ def run_analysis(match_details):
 def main():
     st.set_page_config(page_title="KP AI Astrologer", layout="wide")
     st.title("KP AI Astrologer: Cricket Match Predictor")
+    
+    # Custom CSS for better dataframe display
+    st.markdown("""
+    <style>
+    /* Simple and clean approach for dataframe display */
+    .stDataFrame div[data-testid="stDataFrame"] {
+        width: 100% !important;
+    }
+    
+    /* Style for better text wrapping in cells */
+    .stDataFrame div[data-testid="stDataFrame"] table {
+        font-size: 12px;
+        width: 100% !important;
+    }
+    
+    /* Timeline table specific styling */
+    .stDataFrame div[data-testid="stDataFrame"] td {
+        white-space: normal !important;
+        word-wrap: break-word !important;
+        padding: 8px !important;
+        vertical-align: top !important;
+        max-width: none !important;
+    }
+    
+    /* Header styling */
+    .stDataFrame div[data-testid="stDataFrame"] th {
+        background-color: #f0f2f6 !important;
+        font-weight: bold !important;
+        text-align: center !important;
+        padding: 10px 8px !important;
+        border-bottom: 2px solid #ddd !important;
+        white-space: normal !important;
+    }
+    
+    /* Planet columns styling */
+    .stDataFrame div[data-testid="stDataFrame"] td:nth-child(3),
+    .stDataFrame div[data-testid="stDataFrame"] td:nth-child(4),
+    .stDataFrame div[data-testid="stDataFrame"] td:nth-child(5) {
+        text-align: center !important;
+        font-weight: bold !important;
+    }
+    
+    /* Time columns styling */
+    .stDataFrame div[data-testid="stDataFrame"] td:nth-child(1),
+    .stDataFrame div[data-testid="stDataFrame"] td:nth-child(2) {
+        text-align: center !important;
+        font-family: monospace !important;
+    }
+    
+    /* Verdict column styling */
+    .stDataFrame div[data-testid="stDataFrame"] td:nth-last-child(2) {
+        text-align: center !important;
+        font-weight: bold !important;
+        white-space: normal !important;
+    }
+    
+    /* Timeline section styling */
+    .timeline-description {
+        font-style: italic;
+        color: #666;
+        margin-bottom: 10px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
     # Initialize session state to hold multiple analyses in tabs
     if 'analyses' not in st.session_state:

@@ -187,7 +187,7 @@ class AnalysisEngine:
     def _get_house_weight(self, house_num: int, perspective: str = 'ascendant') -> float:
         """
         Gets the weight for a house based on the perspective (ascendant or descendant).
-        For descendant perspective, the weights are reversed (e.g., house 1 becomes house 7).
+        For descendant perspective, victory/defeat meanings are reversed.
         
         Args:
             house_num: The house number (1-12)
@@ -196,13 +196,16 @@ class AnalysisEngine:
         Returns:
             float: The weight for the house from the given perspective
         """
+        base_weight = HOUSE_WEIGHTS.get(house_num, 0)
+        
         if perspective.lower() == 'descendant':
-            # For descendant perspective, we need to:
-            # 1. Map the house to its opposite house (e.g., 1->7, 2->8, etc.)
-            # 2. Reverse the sign of the weight
-            opposite_house = (house_num + 6) if house_num <= 6 else (house_num - 6)
-            return -HOUSE_WEIGHTS.get(opposite_house, 0)
-        return HOUSE_WEIGHTS.get(house_num, 0)
+            # For descendant perspective, simply reverse the sign of the weight
+            # What's good for ascendant becomes bad for descendant, and vice versa
+            # H8 (defeat for ascendant) becomes victory for descendant = +0.9
+            # H6 (victory for ascendant) becomes defeat for descendant = -1.0
+            return -base_weight
+        
+        return base_weight
 
     def calculate_planet_score(self, planet_name: str, perspective: str = 'ascendant') -> float:
         """
@@ -258,93 +261,193 @@ class AnalysisEngine:
 
     def analyze_muhurta_chart(self):
         """
-        Enhanced KP Muhurta Chart Analysis with CSSL scores and match competitiveness analysis.
+        Authentic KP Muhurta Chart Analysis following traditional methodology:
+        1. Star Lord of 1st Cusp (Primary Indicator)
+        2. Sub Lord of 1st Cusp (Modification Factor)
+        3. Star Lord of 6th Cusp (Victory Indicator)
+        4. Sub Lord of 6th Cusp (Victory Modification)
+        5. Sub-Sub Lords for final confirmation
+        6. Ruling Planets support
         """
         analysis_parts = []
         
         # --- Quick Team Setup ---
-        analysis_parts.append(f"🏏 **{self.team_a}** (Ascendant) vs **{self.team_b}** (Descendant)")
+        analysis_parts.append(f"🏏 **Asc** (Ascendant) vs **Desc** (Descendant)")
         analysis_parts.append("")
         
-        # --- CSSL 1 Analysis (Most Critical) ---
-        cssl_1 = self.cusps.loc[1]['ssl']
-        cssl_1_full = PlanetNameUtils.to_full_name(cssl_1)
-        cssl_1_sigs = self.get_significators(cssl_1_full) if cssl_1_full in self.planets.index else []
+        # --- STAR LORD OF 1ST CUSP (Primary Indicator) ---
+        cusp_1_star_lord = self.cusps.loc[1]['nl']
+        c1sl_full = PlanetNameUtils.to_full_name(cusp_1_star_lord)
+        c1sl_sigs = self.get_significators(c1sl_full) if c1sl_full in self.planets.index else []
+        c1sl_score = self.calculate_planet_score(c1sl_full, 'ascendant') if c1sl_full in self.planets.index else 0.0
         
-        # Calculate CSSL 1 numerical score
-        cssl_1_score = self.calculate_planet_score(cssl_1_full, 'ascendant') if cssl_1_full in self.planets.index else 0.0
+        analysis_parts.append("**🌟 STAR LORD OF 1ST CUSP (Primary Indicator):**")
+        analysis_parts.append(f"• Planet: **{cusp_1_star_lord}** | Score: **{c1sl_score:+.2f}**")
         
-        analysis_parts.append("**📊 CSSL 1 (Primary Indicator):**")
-        analysis_parts.append(f"• Planet: **{cssl_1}** | Score: **{cssl_1_score:+.2f}**")
-        
-        if cssl_1_sigs:
-            victory_houses = [h for h, r in cssl_1_sigs if h in [1, 6, 10, 11]]
-            defeat_houses = [h for h, r in cssl_1_sigs if h in [4, 5, 7, 8, 9, 12]]
+        if c1sl_sigs:
+            victory_houses = [h for h, r in c1sl_sigs if h in [1, 6, 10, 11]]
+            defeat_houses = [h for h, r in c1sl_sigs if h in [4, 5, 7, 8, 9, 12]]
             
             sig_summary = []
-            for house, rule in cssl_1_sigs:
+            for house, rule in c1sl_sigs:
                 sig_summary.append(f"H{house}(R{rule})")
             
             analysis_parts.append(f"• Houses: {', '.join(sig_summary)}")
             analysis_parts.append(f"• Victory Houses: {victory_houses} | Defeat Houses: {defeat_houses}")
             
-            # Enhanced verdict based on both house count and numerical score
-            if cssl_1_score > 0.3:
-                cssl_1_verdict = f"✅ **Strong Favor {self.team_a}**"
-            elif cssl_1_score > 0:
-                cssl_1_verdict = f"✅ **Favors {self.team_a}**"
-            elif cssl_1_score < -0.3:
-                cssl_1_verdict = f"❌ **Strong Favor {self.team_b}**"
-            elif cssl_1_score < 0:
-                cssl_1_verdict = f"❌ **Favors {self.team_b}**"
+            if c1sl_score > 0.3:
+                c1sl_verdict = f"✅ **Strong Favor Asc**"
+            elif c1sl_score > 0:
+                c1sl_verdict = f"✅ **Favors Asc**"
+            elif c1sl_score < -0.3:
+                c1sl_verdict = f"❌ **Strong Favor Desc**"
+            elif c1sl_score < 0:
+                c1sl_verdict = f"❌ **Favors Desc**"
             else:
-                cssl_1_verdict = "⚖️ **Close Contest**"
+                c1sl_verdict = "⚖️ **Close Contest**"
             
-            analysis_parts.append(f"• Result: {cssl_1_verdict}")
+            analysis_parts.append(f"• Result: {c1sl_verdict}")
         else:
             analysis_parts.append("• Result: ⚪ **Neutral**")
-            cssl_1_verdict = "NEUTRAL"
+            c1sl_verdict = "NEUTRAL"
         
         analysis_parts.append("")
         
-        # --- CSSL 6 Analysis ---
-        cssl_6 = self.cusps.loc[6]['ssl']
-        cssl_6_full = PlanetNameUtils.to_full_name(cssl_6)
-        cssl_6_sigs = self.get_significators(cssl_6_full) if cssl_6_full in self.planets.index else []
+        # --- SUB LORD OF 1ST CUSP (Modification Factor) ---
+        cusp_1_sub_lord = self.cusps.loc[1]['sl']
+        c1subl_full = PlanetNameUtils.to_full_name(cusp_1_sub_lord)
+        c1subl_sigs = self.get_significators(c1subl_full) if c1subl_full in self.planets.index else []
+        c1subl_score = self.calculate_planet_score(c1subl_full, 'ascendant') if c1subl_full in self.planets.index else 0.0
         
-        # Calculate CSSL 6 numerical score
-        cssl_6_score = self.calculate_planet_score(cssl_6_full, 'ascendant') if cssl_6_full in self.planets.index else 0.0
+        analysis_parts.append("**⚖️ SUB LORD OF 1ST CUSP (Modification Factor):**")
+        analysis_parts.append(f"• Planet: **{cusp_1_sub_lord}** | Score: **{c1subl_score:+.2f}**")
         
-        analysis_parts.append("**🎯 CSSL 6 (Victory Confirmation):**")
-        analysis_parts.append(f"• Planet: **{cssl_6}** | Score: **{cssl_6_score:+.2f}**")
-        
-        if cssl_6_sigs:
-            victory_houses = [h for h, r in cssl_6_sigs if h in [1, 6, 10, 11]]
-            defeat_houses = [h for h, r in cssl_6_sigs if h in [4, 5, 7, 8, 9, 12]]
+        if c1subl_sigs:
+            victory_houses = [h for h, r in c1subl_sigs if h in [1, 6, 10, 11]]
+            defeat_houses = [h for h, r in c1subl_sigs if h in [4, 5, 7, 8, 9, 12]]
             
             sig_summary = []
-            for house, rule in cssl_6_sigs:
+            for house, rule in c1subl_sigs:
                 sig_summary.append(f"H{house}(R{rule})")
             
             analysis_parts.append(f"• Houses: {', '.join(sig_summary)}")
             
-            # Enhanced verdict based on both house count and numerical score
-            if cssl_6_score > 0.3:
-                cssl_6_verdict = f"✅ **Strong Confirm {self.team_a}**"
-            elif cssl_6_score > 0:
-                cssl_6_verdict = f"✅ **Confirms {self.team_a}**"
-            elif cssl_6_score < -0.3:
-                cssl_6_verdict = f"❌ **Strong Confirm {self.team_b}**"
-            elif cssl_6_score < 0:
-                cssl_6_verdict = f"❌ **Confirms {self.team_b}**"
+            if c1subl_score > 0.3:
+                c1subl_verdict = f"✅ **Strongly Supports Asc**"
+            elif c1subl_score > 0:
+                c1subl_verdict = f"✅ **Supports Asc**"
+            elif c1subl_score < -0.3:
+                c1subl_verdict = f"❌ **Strongly Opposes Asc**"
+            elif c1subl_score < 0:
+                c1subl_verdict = f"❌ **Opposes Asc**"
             else:
-                cssl_6_verdict = "⚖️ **Mixed**"
+                c1subl_verdict = "⚖️ **Neutral Modification**"
             
-            analysis_parts.append(f"• Result: {cssl_6_verdict}")
+            analysis_parts.append(f"• Result: {c1subl_verdict}")
         else:
             analysis_parts.append("• Result: ⚪ **Neutral**")
-            cssl_6_verdict = "NEUTRAL"
+            c1subl_verdict = "NEUTRAL"
         
+        analysis_parts.append("")
+        
+        # --- STAR LORD OF 6TH CUSP (Victory Indicator) ---
+        cusp_6_star_lord = self.cusps.loc[6]['nl']
+        c6sl_full = PlanetNameUtils.to_full_name(cusp_6_star_lord)
+        c6sl_sigs = self.get_significators(c6sl_full) if c6sl_full in self.planets.index else []
+        c6sl_score = self.calculate_planet_score(c6sl_full, 'ascendant') if c6sl_full in self.planets.index else 0.0
+        
+        analysis_parts.append("**🎯 STAR LORD OF 6TH CUSP (Victory Indicator):**")
+        analysis_parts.append(f"• Planet: **{cusp_6_star_lord}** | Score: **{c6sl_score:+.2f}**")
+        
+        if c6sl_sigs:
+            victory_houses = [h for h, r in c6sl_sigs if h in [1, 6, 10, 11]]
+            defeat_houses = [h for h, r in c6sl_sigs if h in [4, 5, 7, 8, 9, 12]]
+            
+            sig_summary = []
+            for house, rule in c6sl_sigs:
+                sig_summary.append(f"H{house}(R{rule})")
+            
+            analysis_parts.append(f"• Houses: {', '.join(sig_summary)}")
+            
+            if c6sl_score > 0.3:
+                c6sl_verdict = f"✅ **Strong Victory Asc**"
+            elif c6sl_score > 0:
+                c6sl_verdict = f"✅ **Victory Asc**"
+            elif c6sl_score < -0.3:
+                c6sl_verdict = f"❌ **Strong Victory Desc**"
+            elif c6sl_score < 0:
+                c6sl_verdict = f"❌ **Victory Desc**"
+            else:
+                c6sl_verdict = "⚖️ **Competitive Victory**"
+            
+            analysis_parts.append(f"• Result: {c6sl_verdict}")
+        else:
+            analysis_parts.append("• Result: ⚪ **Neutral**")
+            c6sl_verdict = "NEUTRAL"
+        
+        analysis_parts.append("")
+        
+        # --- SUB LORD OF 6TH CUSP (Victory Modification) ---
+        cusp_6_sub_lord = self.cusps.loc[6]['sl']
+        c6subl_full = PlanetNameUtils.to_full_name(cusp_6_sub_lord)
+        c6subl_sigs = self.get_significators(c6subl_full) if c6subl_full in self.planets.index else []
+        c6subl_score = self.calculate_planet_score(c6subl_full, 'ascendant') if c6subl_full in self.planets.index else 0.0
+        
+        analysis_parts.append("**🏹 SUB LORD OF 6TH CUSP (Victory Modification):**")
+        analysis_parts.append(f"• Planet: **{cusp_6_sub_lord}** | Score: **{c6subl_score:+.2f}**")
+        
+        if c6subl_sigs:
+            victory_houses = [h for h, r in c6subl_sigs if h in [1, 6, 10, 11]]
+            defeat_houses = [h for h, r in c6subl_sigs if h in [4, 5, 7, 8, 9, 12]]
+            
+            sig_summary = []
+            for house, rule in c6subl_sigs:
+                sig_summary.append(f"H{house}(R{rule})")
+            
+            analysis_parts.append(f"• Houses: {', '.join(sig_summary)}")
+            
+            if c6subl_score > 0.3:
+                c6subl_verdict = f"✅ **Strongly Confirms Asc**"
+            elif c6subl_score > 0:
+                c6subl_verdict = f"✅ **Confirms Asc**"
+            elif c6subl_score < -0.3:
+                c6subl_verdict = f"❌ **Strongly Denies Asc**"
+            elif c6subl_score < 0:
+                c6subl_verdict = f"❌ **Denies Asc**"
+            else:
+                c6subl_verdict = "⚖️ **Mixed Signals**"
+            
+            analysis_parts.append(f"• Result: {c6subl_verdict}")
+        else:
+            analysis_parts.append("• Result: ⚪ **Neutral**")
+            c6subl_verdict = "NEUTRAL"
+        
+        analysis_parts.append("")
+        
+        # --- SUB-SUB LORDS (Final Confirmation) ---
+        cssl_1 = self.cusps.loc[1]['ssl']
+        cssl_1_full = PlanetNameUtils.to_full_name(cssl_1)
+        cssl_1_sigs = self.get_significators(cssl_1_full) if cssl_1_full in self.planets.index else []
+        cssl_1_score = self.calculate_planet_score(cssl_1_full, 'ascendant') if cssl_1_full in self.planets.index else 0.0
+        
+        cssl_6 = self.cusps.loc[6]['ssl']
+        cssl_6_full = PlanetNameUtils.to_full_name(cssl_6)
+        cssl_6_sigs = self.get_significators(cssl_6_full) if cssl_6_full in self.planets.index else []
+        cssl_6_score = self.calculate_planet_score(cssl_6_full, 'ascendant') if cssl_6_full in self.planets.index else 0.0
+        
+        analysis_parts.append("**📊 SUB-SUB LORDS (Final Confirmation):**")
+        analysis_parts.append(f"• CSSL 1: **{cssl_1}** (Score: {cssl_1_score:+.2f}) | CSSL 6: **{cssl_6}** (Score: {cssl_6_score:+.2f})")
+        
+        # Combined CSSL verdict
+        avg_cssl_score = (cssl_1_score + cssl_6_score) / 2
+        if avg_cssl_score > 0.25:
+            cssl_verdict = f"✅ **Final Confirmation Asc**"
+        elif avg_cssl_score < -0.25:
+            cssl_verdict = f"❌ **Final Confirmation Desc**"
+        else:
+            cssl_verdict = "⚖️ **Mixed Final Signals**"
+        
+        analysis_parts.append(f"• Combined Result: {cssl_verdict}")
         analysis_parts.append("")
         
         # --- Ruling Planets Analysis ---
@@ -375,12 +478,12 @@ class AnalysisEngine:
                     elif len(rp_defeat_houses) > len(rp_victory_houses):
                         rp_team_b_count += 1
         
-        analysis_parts.append(f"• Support: {self.team_a}({rp_team_a_count}) vs {self.team_b}({rp_team_b_count})")
+        analysis_parts.append(f"• Support: Asc({rp_team_a_count}) vs Desc({rp_team_b_count})")
         
         if rp_team_a_count > rp_team_b_count:
-            rp_verdict = f"✅ **Support {self.team_a}**"
+            rp_verdict = f"✅ **Support Asc**"
         elif rp_team_b_count > rp_team_a_count:
-            rp_verdict = f"❌ **Support {self.team_b}**"
+            rp_verdict = f"❌ **Support Desc**"
         else:
             rp_verdict = "⚖️ **Mixed Support**"
         
@@ -390,21 +493,22 @@ class AnalysisEngine:
         # --- Match Competitiveness Analysis ---
         analysis_parts.append("**⚖️ MATCH COMPETITIVENESS:**")
         
-        # Calculate total CSSL score difference
-        cssl_score_diff = abs(cssl_1_score - cssl_6_score)
-        avg_cssl_score = abs((cssl_1_score + cssl_6_score) / 2)
+        # Calculate comprehensive score difference
+        all_scores = [c1sl_score, c1subl_score, c6sl_score, c6subl_score, cssl_1_score, cssl_6_score]
+        avg_all_scores = sum([abs(s) for s in all_scores]) / len(all_scores)
+        score_variance = max(all_scores) - min(all_scores)
         
-        analysis_parts.append(f"• CSSL 1 Score: **{cssl_1_score:+.2f}** | CSSL 6 Score: **{cssl_6_score:+.2f}**")
-        analysis_parts.append(f"• Average Score: **{avg_cssl_score:.2f}** | Score Difference: **{cssl_score_diff:.2f}**")
+        analysis_parts.append(f"• Average Indicator Strength: **{avg_all_scores:.2f}**")
+        analysis_parts.append(f"• Score Variance: **{score_variance:.2f}**")
         
         # Determine match competitiveness
-        if avg_cssl_score > 0.6:
+        if avg_all_scores > 0.6:
             competitiveness = "🔥 **ONE-SIDED MATCH**"
             competitiveness_desc = "Clear dominance indicated"
-        elif avg_cssl_score > 0.3:
+        elif avg_all_scores > 0.3:
             competitiveness = "⚡ **MODERATE ADVANTAGE**"
             competitiveness_desc = "One team has clear edge"
-        elif avg_cssl_score > 0.15:
+        elif avg_all_scores > 0.15:
             competitiveness = "🎯 **CLOSE CONTEST**"
             competitiveness_desc = "Fairly balanced match"
         else:
@@ -415,79 +519,212 @@ class AnalysisEngine:
         analysis_parts.append(f"• Description: {competitiveness_desc}")
         analysis_parts.append("")
         
-        # --- Final Prediction ---
-        analysis_parts.append("**🏆 FINAL PREDICTION:**")
+        # --- AUTHENTIC KP SYNTHESIS ---
+        analysis_parts.append("**🏆 AUTHENTIC KP SYNTHESIS:**")
         
-        team_a_scores = 0
-        team_b_scores = 0
-        total_weight = 0
+        team_a_weights = 0
+        team_b_weights = 0
+        total_weights = 0
         
-        # Count indicators with weighted scoring
-        if self.team_a in cssl_1_verdict:
-            team_a_scores += 2  # CSSL 1 gets double weight
-            total_weight += 2
-        elif self.team_b in cssl_1_verdict:
-            team_b_scores += 2
-            total_weight += 2
-        else:
-            total_weight += 2
-            
-        if self.team_a in cssl_6_verdict:
-            team_a_scores += 1.5  # CSSL 6 gets 1.5x weight
-            total_weight += 1.5
-        elif self.team_b in cssl_6_verdict:
-            team_b_scores += 1.5
-            total_weight += 1.5
-        else:
-            total_weight += 1.5
-            
-        if self.team_a in rp_verdict:
-            team_a_scores += 1  # Ruling planets get normal weight
-            total_weight += 1
-        elif self.team_b in rp_verdict:
-            team_b_scores += 1
-            total_weight += 1
-        else:
-            total_weight += 1
+        # Star Lord of 1st Cusp (Highest Priority - 3x weight)
+        if "Asc" in c1sl_verdict:
+            team_a_weights += 3
+        elif "Desc" in c1sl_verdict:
+            team_b_weights += 3
+        total_weights += 3
         
-        # Calculate weighted percentages
-        team_a_percentage = (team_a_scores / total_weight) * 100 if total_weight > 0 else 0
-        team_b_percentage = (team_b_scores / total_weight) * 100 if total_weight > 0 else 0
+        # Sub Lord of 1st Cusp (High Priority - 2x weight)
+        if "Asc" in c1subl_verdict:
+            team_a_weights += 2
+        elif "Desc" in c1subl_verdict:
+            team_b_weights += 2
+        total_weights += 2
         
-        analysis_parts.append(f"• Weighted Score: {self.team_a}({team_a_scores:.1f}) vs {self.team_b}({team_b_scores:.1f})")
-        analysis_parts.append(f"• Win Probability: {self.team_a}({team_a_percentage:.0f}%) vs {self.team_b}({team_b_percentage:.0f}%)")
+        # Star Lord of 6th Cusp (High Priority - 2x weight)
+        if "Asc" in c6sl_verdict:
+            team_a_weights += 2
+        elif "Desc" in c6sl_verdict:
+            team_b_weights += 2
+        total_weights += 2
         
-        # Enhanced final verdict
-        score_difference = abs(team_a_scores - team_b_scores)
+        # Sub Lord of 6th Cusp (Medium Priority - 1.5x weight)
+        if "Asc" in c6subl_verdict:
+            team_a_weights += 1.5
+        elif "Desc" in c6subl_verdict:
+            team_b_weights += 1.5
+        total_weights += 1.5
         
-        if team_a_scores > team_b_scores:
-            if score_difference >= 2:
-                final_verdict = f"🏆 **{self.team_a} STRONGLY FAVORED**"
+        # CSSL Combined (Medium Priority - 1.5x weight)
+        if "Asc" in cssl_verdict:
+            team_a_weights += 1.5
+        elif "Desc" in cssl_verdict:
+            team_b_weights += 1.5
+        total_weights += 1.5
+        
+        # Ruling Planets (Lower Priority - 1x weight)
+        if "Asc" in rp_verdict:
+            team_a_weights += 1
+        elif "Desc" in rp_verdict:
+            team_b_weights += 1
+        total_weights += 1
+        
+        # Calculate authentic KP percentages
+        team_a_percentage = (team_a_weights / total_weights) * 100 if total_weights > 0 else 0
+        team_b_percentage = (team_b_weights / total_weights) * 100 if total_weights > 0 else 0
+        
+        analysis_parts.append(f"• Weighted Score: Asc({team_a_weights:.1f}) vs Desc({team_b_weights:.1f})")
+        analysis_parts.append(f"• Win Probability: Asc({team_a_percentage:.0f}%) vs Desc({team_b_percentage:.0f}%)")
+        
+        # Enhanced final verdict with confidence
+        weight_difference = abs(team_a_weights - team_b_weights)
+        
+        if team_a_weights > team_b_weights:
+            if weight_difference >= 4:
+                final_verdict = f"🏆 **Asc DECISIVELY FAVORED**"
                 confidence = "Very High"
-            elif score_difference >= 1:
-                final_verdict = f"🏆 **{self.team_a} PREDICTED TO WIN**"
+            elif weight_difference >= 2:
+                final_verdict = f"🏆 **Asc STRONGLY FAVORED**"
                 confidence = "High"
-            else:
-                final_verdict = f"🏆 **{self.team_a} SLIGHT EDGE**"
+            elif weight_difference >= 1:
+                final_verdict = f"🏆 **Asc FAVORED**"
                 confidence = "Medium"
-        elif team_b_scores > team_a_scores:
-            if score_difference >= 2:
-                final_verdict = f"🏆 **{self.team_b} STRONGLY FAVORED**"
+            else:
+                final_verdict = f"🏆 **Asc SLIGHT EDGE**"
+                confidence = "Low"
+        elif team_b_weights > team_a_weights:
+            if weight_difference >= 4:
+                final_verdict = f"🏆 **Desc DECISIVELY FAVORED**"
                 confidence = "Very High"
-            elif score_difference >= 1:
-                final_verdict = f"🏆 **{self.team_b} PREDICTED TO WIN**"
+            elif weight_difference >= 2:
+                final_verdict = f"🏆 **Desc STRONGLY FAVORED**"
                 confidence = "High"
-            else:
-                final_verdict = f"🏆 **{self.team_b} SLIGHT EDGE**"
+            elif weight_difference >= 1:
+                final_verdict = f"🏆 **Desc FAVORED**"
                 confidence = "Medium"
+            else:
+                final_verdict = f"🏆 **Desc SLIGHT EDGE**"
+                confidence = "Low"
         else:
-            final_verdict = "⚖️ **EXTREMELY CLOSE MATCH**"
-            confidence = "Low"
+            final_verdict = "⚖️ **PERFECTLY BALANCED MATCH**"
+            confidence = "Uncertain"
         
         analysis_parts.append(f"• Confidence: **{confidence}**")
         analysis_parts.append(f"• {final_verdict}")
         
         return "\n".join(analysis_parts)
+
+    def _generate_nl_sl_verdict_and_comment(self, timeline_row: pd.Series, perspective: str = 'ascendant') -> tuple:
+        """
+        Generates verdict and comment using only NL (Star Lord) and SL (Sub Lord) analysis:
+        Star Lord promises → Sub Lord modifies → Combined verdict
+        
+        This method is used for aggregated timelines where SSL is not considered.
+        
+        Args:
+            timeline_row: Row from timeline DataFrame with NL_Planet, SL_Planet (no SSL_Planet)
+            perspective: Either 'ascendant' or 'descendant'
+            
+        Returns:
+            tuple: (verdict, comment, combined_score)
+        """
+        nl_planet = timeline_row.get('NL_Planet')
+        sl_planet = timeline_row.get('SL_Planet')
+        
+        # Handle missing data
+        if pd.isna(nl_planet) or pd.isna(sl_planet):
+            return "Neutral", "Insufficient planetary data for analysis", 0.0
+        
+        # Determine team names based on perspective
+        team_name = "Asc" if perspective == 'ascendant' else "Desc"
+        opponent_name = "Desc" if perspective == 'ascendant' else "Asc"
+        
+        # === LAYER 1: STAR LORD ANALYSIS (The Promise) ===
+        nl_standardized = PlanetNameUtils.standardize_for_index(nl_planet)
+        nl_score = self.calculate_planet_score(nl_standardized, perspective) if nl_standardized in self.planets.index else 0.0
+        nl_significators = self.get_significators(nl_standardized) if nl_standardized in self.planets.index else []
+        
+        nl_victory_houses = [h for h, r in nl_significators if h in [1, 6, 10, 11]]
+        nl_defeat_houses = [h for h, r in nl_significators if h in [4, 5, 7, 8, 9, 12]]
+        
+        if len(nl_victory_houses) > len(nl_defeat_houses) and nl_victory_houses:
+            nl_promise = "VICTORY"
+            nl_promise_desc = f"promises victory (V:{','.join(map(str, nl_victory_houses))})"
+        elif len(nl_defeat_houses) > len(nl_victory_houses) and nl_defeat_houses:
+            nl_promise = "DEFEAT" 
+            nl_promise_desc = f"promises challenges (D:{','.join(map(str, nl_defeat_houses))})"
+        elif nl_victory_houses and nl_defeat_houses:
+            nl_promise = "MIXED"
+            nl_promise_desc = f"mixed signals (V:{','.join(map(str, nl_victory_houses))} D:{','.join(map(str, nl_defeat_houses))})"
+        else:
+            nl_promise = "NEUTRAL"
+            nl_promise_desc = "neutral period"
+        
+        # === LAYER 2: SUB LORD ANALYSIS (The Modifier) ===
+        sl_standardized = PlanetNameUtils.standardize_for_index(sl_planet)
+        sl_score = self.calculate_planet_score(sl_standardized, perspective) if sl_standardized in self.planets.index else 0.0
+        sl_significators = self.get_significators(sl_standardized) if sl_standardized in self.planets.index else []
+        
+        sl_victory_houses = [h for h, r in sl_significators if h in [1, 6, 10, 11]]
+        sl_defeat_houses = [h for h, r in sl_significators if h in [4, 5, 7, 8, 9, 12]]
+        
+        if len(sl_victory_houses) > len(sl_defeat_houses) and sl_victory_houses:
+            sl_modification = "SUPPORTS"
+            sl_mod_desc = f"supports victory (V:{','.join(map(str, sl_victory_houses))})"
+        elif len(sl_defeat_houses) > len(sl_victory_houses) and sl_defeat_houses:
+            sl_modification = "OPPOSES" 
+            sl_mod_desc = f"supports challenges (D:{','.join(map(str, sl_defeat_houses))})"
+        elif sl_victory_houses and sl_defeat_houses:
+            sl_modification = "MIXED"
+            sl_mod_desc = f"mixed modification (V:{','.join(map(str, sl_victory_houses))} D:{','.join(map(str, sl_defeat_houses))})"
+        else:
+            sl_modification = "NEUTRAL"
+            sl_mod_desc = "neutral modification"
+        
+        # === COMBINED NL + SL SCORE CALCULATION ===
+        # In KP, Star Lord has more weight than Sub Lord
+        # Star Lord: 60% weight, Sub Lord: 40% weight
+        combined_score = (nl_score * 0.6) + (sl_score * 0.4)
+        
+        # === GENERATE VERDICT BASED ON COMBINED SCORE ===
+        if combined_score >= 0.25:
+            verdict = f"Strong Advantage {team_name}"
+            cricket_context = "Excellent period for building partnerships and dominating opponents"
+            confidence_level = "HIGH"
+        elif combined_score >= 0.12:
+            verdict = f"Advantage {team_name}"
+            cricket_context = "Good period for consolidation and steady progress"
+            confidence_level = "MEDIUM"
+        elif combined_score > 0.05:
+            verdict = f"Favor {team_name}"
+            cricket_context = "Marginal advantage - gradual progress expected"
+            confidence_level = "LOW"
+        elif combined_score <= -0.25:
+            verdict = f"Strong Advantage {opponent_name}"
+            cricket_context = "Challenging period - wickets or pressure likely"
+            confidence_level = "HIGH"
+        elif combined_score <= -0.12:
+            verdict = f"Advantage {opponent_name}"
+            cricket_context = "Opposition builds pressure and momentum"
+            confidence_level = "MEDIUM"
+        elif combined_score < -0.05:
+            verdict = f"Favor {opponent_name}"
+            cricket_context = "Slight opposition edge - careful play needed"
+            confidence_level = "LOW"
+        else:
+            verdict = "Balanced Period"
+            cricket_context = "Evenly matched phase with gradual developments"
+            confidence_level = "LOW"
+        
+        # === GENERATE DETAILED COMMENT ===
+        comment_parts = []
+        comment_parts.append(f"🌟 {nl_planet} {nl_promise_desc}")
+        comment_parts.append(f"⚖️ {sl_planet} {sl_mod_desc}")
+        comment_parts.append(f"🏏 {cricket_context}")
+        comment_parts.append(f"📊 NL:{nl_score:+.2f} SL:{sl_score:+.2f} Combined:{combined_score:+.3f} | {confidence_level}")
+        
+        detailed_comment = " | ".join(comment_parts)
+        
+        return verdict, detailed_comment, combined_score
 
     def _generate_verdict_and_comment(self, timeline_row: pd.Series, perspective: str = 'ascendant') -> tuple:
         """
@@ -509,9 +746,12 @@ class AnalysisEngine:
         if pd.isna(nl_planet) or pd.isna(sl_planet) or pd.isna(ssl_planet):
             return "Neutral", "Insufficient planetary data for analysis"
         
+        # Calculate the actual score for this period
+        ssl_score = self.calculate_planet_score(ssl_planet, perspective)
+        
         # Determine team names based on perspective
-        team_name = self.team_a if perspective == 'ascendant' else self.team_b
-        opponent_name = self.team_b if perspective == 'ascendant' else self.team_a
+        team_name = "Asc" if perspective == 'ascendant' else "Desc"
+        opponent_name = "Desc" if perspective == 'ascendant' else "Asc"
         
         # === LAYER 1: STAR LORD ANALYSIS (The Promise) ===
         nl_standardized = PlanetNameUtils.standardize_for_index(nl_planet)
@@ -522,10 +762,10 @@ class AnalysisEngine:
         
         if len(nl_victory_houses) > len(nl_defeat_houses) and nl_victory_houses:
             nl_promise = "VICTORY"
-            nl_promise_desc = f"promises victory (H{','.join(map(str, nl_victory_houses))})"
+            nl_promise_desc = f"promises victory (V:{','.join(map(str, nl_victory_houses))} D:{','.join(map(str, nl_defeat_houses))})"
         elif len(nl_defeat_houses) > len(nl_victory_houses) and nl_defeat_houses:
             nl_promise = "DEFEAT" 
-            nl_promise_desc = f"promises challenges (H{','.join(map(str, nl_defeat_houses))})"
+            nl_promise_desc = f"promises challenges (V:{','.join(map(str, nl_victory_houses))} D:{','.join(map(str, nl_defeat_houses))})"
         elif nl_victory_houses and nl_defeat_houses:
             nl_promise = "MIXED"
             nl_promise_desc = f"promises mixed results (V:{','.join(map(str, nl_victory_houses))} D:{','.join(map(str, nl_defeat_houses))})"
@@ -540,37 +780,16 @@ class AnalysisEngine:
         sl_victory_houses = [h for h, r in sl_significators if h in [1, 6, 10, 11]]
         sl_defeat_houses = [h for h, r in sl_significators if h in [4, 5, 7, 8, 9, 12]]
         
-        # Determine how Sub Lord modifies the promise
-        if nl_promise == "VICTORY":
-            if len(sl_victory_houses) > len(sl_defeat_houses):
-                sl_modification = "SUPPORTS"
-                sl_mod_desc = f"supports promise (H{','.join(map(str, sl_victory_houses))})"
-            elif len(sl_defeat_houses) > len(sl_victory_houses):
-                sl_modification = "OPPOSES"
-                sl_mod_desc = f"opposes promise (H{','.join(map(str, sl_defeat_houses))})"
-            else:
-                sl_modification = "NEUTRAL"
-                sl_mod_desc = "neutral on promise"
-        elif nl_promise == "DEFEAT":
-            if len(sl_defeat_houses) > len(sl_victory_houses):
-                sl_modification = "SUPPORTS"
-                sl_mod_desc = f"supports promise (H{','.join(map(str, sl_defeat_houses))})"
-            elif len(sl_victory_houses) > len(sl_defeat_houses):
-                sl_modification = "OPPOSES"
-                sl_mod_desc = f"opposes promise (H{','.join(map(str, sl_victory_houses))})"
-            else:
-                sl_modification = "NEUTRAL"
-                sl_mod_desc = "neutral on promise"
-        else:  # MIXED or NEUTRAL promise
-            if len(sl_victory_houses) > len(sl_defeat_houses):
-                sl_modification = "CLARIFIES_VICTORY"
-                sl_mod_desc = f"clarifies toward victory (H{','.join(map(str, sl_victory_houses))})"
-            elif len(sl_defeat_houses) > len(sl_victory_houses):
-                sl_modification = "CLARIFIES_DEFEAT"
-                sl_mod_desc = f"clarifies toward challenges (H{','.join(map(str, sl_defeat_houses))})"
-            else:
-                sl_modification = "MAINTAINS"
-                sl_mod_desc = "maintains mixed signals"
+        # Determine how Sub Lord modifies the promise (simplified)
+        if len(sl_victory_houses) > len(sl_defeat_houses):
+            sl_modification = "SUPPORTS"
+            sl_mod_desc = f"supports victory (H{','.join(map(str, sl_victory_houses))})"
+        elif len(sl_defeat_houses) > len(sl_victory_houses):
+            sl_modification = "OPPOSES" 
+            sl_mod_desc = f"supports challenges (H{','.join(map(str, sl_defeat_houses))})"
+        else:
+            sl_modification = "NEUTRAL"
+            sl_mod_desc = "maintains balance"
         
         # === LAYER 3: SUB-SUB LORD ANALYSIS (The Deliverer) ===
         ssl_standardized = PlanetNameUtils.standardize_for_index(ssl_planet)
@@ -592,71 +811,37 @@ class AnalysisEngine:
             ssl_delivery = "NEUTRAL_DELIVERY"
             ssl_del_desc = "neutral delivery"
         
-        # === SYNTHESIS: COMBINE ALL LAYERS FOR FINAL VERDICT ===
-        confidence_level = "MEDIUM"
+        # === SIMPLIFIED VERDICT BASED ON ACTUAL SCORE ===
+        # Trust the scoring system more than complex layer combinations
         
-        # Determine final verdict based on layer combinations
-        if nl_promise == "VICTORY":
-            if sl_modification == "SUPPORTS" and ssl_delivery == "DELIVERS_VICTORY":
-                verdict = f"Strong Advantage {team_name}"
-                cricket_context = "Excellent period for building partnerships and dominating opponents"
-                confidence_level = "HIGH"
-            elif sl_modification == "OPPOSES" and ssl_delivery == "DELIVERS_DEFEAT":
-                verdict = f"Advantage {opponent_name}"
-                cricket_context = "Promised advantage turns into setback - wickets or pressure likely"
-                confidence_level = "HIGH"
-            elif ssl_delivery == "DELIVERS_VICTORY":
-                verdict = f"Advantage {team_name}"
-                cricket_context = "Good period despite some obstacles"
-                confidence_level = "MEDIUM"
-            elif ssl_delivery == "DELIVERS_DEFEAT":
-                verdict = f"Challenging Period {team_name}"
-                cricket_context = "Tough phase with unexpected difficulties"
-                confidence_level = "MEDIUM"
-            else:
-                verdict = "Balanced with Slight Edge"
-                cricket_context = "Mixed signals, marginal advantage varies"
-                confidence_level = "LOW"
-                
-        elif nl_promise == "DEFEAT":
-            if sl_modification == "SUPPORTS" and ssl_delivery == "DELIVERS_DEFEAT":
-                verdict = f"Strong Advantage {opponent_name}"
-                cricket_context = "Consistent pressure phase - wickets and obstacles likely"
-                confidence_level = "HIGH"
-            elif sl_modification == "OPPOSES" and ssl_delivery == "DELIVERS_VICTORY":
-                verdict = f"Advantage {team_name}"
-                cricket_context = "Unexpected turnaround - recovery from difficult start"
-                confidence_level = "HIGH"
-            elif ssl_delivery == "DELIVERS_VICTORY":
-                verdict = f"Advantage {team_name}"
-                cricket_context = "Tough start but eventual breakthrough"
-                confidence_level = "MEDIUM"
-            elif ssl_delivery == "DELIVERS_DEFEAT":
-                verdict = f"Challenging Period {team_name}"
-                cricket_context = "Difficult phase with mounting pressure"
-                confidence_level = "MEDIUM"
-            else:
-                verdict = "Balanced with Slight Edge"
-                cricket_context = "Uncertain period with variable momentum"
-                confidence_level = "LOW"
-                
-        else:  # MIXED or NEUTRAL promise
-            if ssl_delivery == "DELIVERS_VICTORY":
-                verdict = f"Advantage {team_name}"
-                cricket_context = "Uncertain start but eventual team dominance"
-                confidence_level = "MEDIUM"
-            elif ssl_delivery == "DELIVERS_DEFEAT":
-                verdict = f"Advantage {opponent_name}"
-                cricket_context = "Mixed signals resolve into opposition advantage"
-                confidence_level = "MEDIUM"
-            elif ssl_delivery == "PARTIAL_DELIVERY":
-                verdict = "Highly Unpredictable"
-                cricket_context = "Momentum shift likely - either team could break through"
-                confidence_level = "LOW"
-            else:
-                verdict = "Balanced Period"
-                cricket_context = "Evenly matched phase with gradual developments"
-                confidence_level = "LOW"
+        if ssl_score >= 0.3:
+            verdict = f"Strong Advantage {team_name}"
+            cricket_context = "Excellent period for building partnerships and dominating opponents"
+            confidence_level = "HIGH"
+        elif ssl_score >= 0.15:
+            verdict = f"Advantage {team_name}"
+            cricket_context = "Good period for consolidation and steady progress"
+            confidence_level = "MEDIUM"
+        elif ssl_score > 0:
+            verdict = f"Favor {team_name}"
+            cricket_context = "Marginal advantage - gradual progress expected"
+            confidence_level = "LOW"
+        elif ssl_score <= -0.3:
+            verdict = f"Strong Advantage {opponent_name}"
+            cricket_context = "Challenging period - wickets or pressure likely"
+            confidence_level = "HIGH"
+        elif ssl_score <= -0.15:
+            verdict = f"Advantage {opponent_name}"
+            cricket_context = "Opposition builds pressure and momentum"
+            confidence_level = "MEDIUM"
+        elif ssl_score < 0:
+            verdict = f"Favor {opponent_name}"
+            cricket_context = "Slight opposition edge - careful play needed"
+            confidence_level = "LOW"
+        else:
+            verdict = "Balanced Period"
+            cricket_context = "Evenly matched phase with gradual developments"
+            confidence_level = "LOW"
         
         # === GENERATE DETAILED COMMENT ===
         comment_parts = []
@@ -664,7 +849,7 @@ class AnalysisEngine:
         comment_parts.append(f"⚖️ {sl_planet} {sl_mod_desc}")
         comment_parts.append(f"🎯 {ssl_planet} {ssl_del_desc}")
         comment_parts.append(f"🏏 {cricket_context}")
-        comment_parts.append(f"📊 Confidence: {confidence_level}")
+        comment_parts.append(f"📊 Score: {ssl_score:+.3f} | Confidence: {confidence_level}")
         
         detailed_comment = " | ".join(comment_parts)
         
@@ -713,15 +898,73 @@ class AnalysisEngine:
                 unfavorable_planets.append(planet)
         
         # Generate analysis summary with team-specific context
-        team_name = self.team_a if perspective == 'ascendant' else self.team_b
+        team_name = "Asc" if perspective == 'ascendant' else "Desc"
         
         if abs(avg_score) < 0.1:
             summary = f"The average score for this timeline is {avg_score:.2f}. The timeline appears balanced, suggesting a tightly contested match."
         elif avg_score > 0:
             summary = f"The average score for this timeline is {avg_score:.2f}. This indicates a general advantage for {team_name}."
         else:
-            opponent_name = self.team_b if perspective == 'ascendant' else self.team_a
+            opponent_name = "Desc" if perspective == 'ascendant' else "Asc"
             summary = f"The average score for this timeline is {avg_score:.2f}. This indicates a general advantage for {opponent_name}."
+        
+        analysis = {
+            "summary": summary,
+            "favorable_planets": sorted(favorable_planets),
+            "unfavorable_planets": sorted(unfavorable_planets)
+        }
+        
+        return timeline_df, analysis
+
+    def analyze_aggregated_timeline(self, timeline_df, perspective='ascendant'):
+        """
+        Analyzes an aggregated timeline DataFrame using only NL and SL (no SSL).
+        
+        Args:
+            timeline_df: DataFrame with timeline data (NL_Planet, SL_Planet only)
+            perspective: Either 'ascendant' or 'descendant'
+            
+        Returns:
+            tuple: (scored_timeline_df, analysis_dict)
+        """
+        # Add score column based on combined NL + SL analysis
+        verdict_comment_score_data = timeline_df.apply(
+            lambda row: self._generate_nl_sl_verdict_and_comment(row, perspective), axis=1
+        )
+        
+        timeline_df['Verdict'] = [vcs[0] for vcs in verdict_comment_score_data]
+        timeline_df['Comment'] = [vcs[1] for vcs in verdict_comment_score_data]
+        timeline_df['Score'] = [vcs[2] for vcs in verdict_comment_score_data]
+        
+        # Calculate average score
+        avg_score = timeline_df['Score'].mean()
+        
+        # Identify favorable and unfavorable planets from NL and SL columns only
+        favorable_planets = []
+        unfavorable_planets = []
+        
+        # Get unique planets from NL and SL columns only (no SSL)
+        planet_columns = ['NL_Planet', 'SL_Planet']
+        unique_planets = pd.unique(timeline_df[planet_columns].values.ravel())
+        unique_planets = [p for p in unique_planets if pd.notna(p)]
+        
+        for planet in unique_planets:
+            score = self.calculate_planet_score(planet, perspective)
+            if score > 0.05:
+                favorable_planets.append(planet)
+            elif score < -0.05:
+                unfavorable_planets.append(planet)
+        
+        # Generate analysis summary with team-specific context
+        team_name = "Asc" if perspective == 'ascendant' else "Desc"
+        
+        if abs(avg_score) < 0.08:
+            summary = f"The aggregated NL+SL timeline shows an average score of {avg_score:.3f}. The timeline appears balanced at Star Lord and Sub Lord level, suggesting a tightly contested match."
+        elif avg_score > 0:
+            summary = f"The aggregated NL+SL timeline shows an average score of {avg_score:.3f}. This indicates a general advantage for {team_name} based on Star Lord and Sub Lord combinations."
+        else:
+            opponent_name = "Desc" if perspective == 'ascendant' else "Asc"
+            summary = f"The aggregated NL+SL timeline shows an average score of {avg_score:.3f}. This indicates a general advantage for {opponent_name} based on Star Lord and Sub Lord combinations."
         
         analysis = {
             "summary": summary,
