@@ -509,26 +509,102 @@ def display_analysis(results):
                     engine = KPEngine(match_details['datetime_utc'], match_details['lat'], match_details['lon'])
                     analysis_engine = AnalysisEngine(engine, match_details['team_a'], match_details['team_b'])
                     
-                    # Generate analysis with the selected method
-                    muhurta_analysis = analysis_engine.analyze_muhurta_chart(scoring_method=method_key)
+                    # Generate enhanced analysis with the selected method
+                    enhanced_muhurta_analysis = analysis_engine.analyze_muhurta_chart(scoring_method=method_key)
                     
-                    # Apply team name replacements if they exist
+                    # Apply team name replacements to the analysis text
                     team_mapping = display_results.get('team_mapping', {})
                     if team_mapping.get('ascendant_team') and team_mapping.get('descendant_team'):
-                        muhurta_analysis = apply_team_name_replacements(
-                            muhurta_analysis, 
+                        enhanced_muhurta_analysis['analysis'] = apply_team_name_replacements(
+                            enhanced_muhurta_analysis['analysis'], 
                             team_mapping['ascendant_team'], 
                             team_mapping['descendant_team']
                         )
                     
-                    cache[method_key] = muhurta_analysis
+                    cache[method_key] = enhanced_muhurta_analysis
                     
                 except Exception as e:
                     st.error(f"Error generating {scoring_method} analysis: {str(e)}")
-                    cache[method_key] = display_results["muhurta_analysis"]  # Fallback to existing
+                    # Fallback to existing analysis if available
+                    fallback_text = display_results.get("muhurta_analysis", "Analysis not available")
+                    cache[method_key] = {'analysis': fallback_text, 'verdict': 'Unknown', 'confidence': 'Low'}
         
-        # Display the cached analysis
-        st.write(cache[method_key])
+        # Get the cached analysis
+        cached_analysis = cache[method_key]
+        
+        # Display the main analysis text
+        if isinstance(cached_analysis, dict) and 'analysis' in cached_analysis:
+            st.write(cached_analysis['analysis'])
+            
+            # Display enhanced summary information
+            st.subheader("📊 Enhanced KP Analysis Summary")
+            
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                st.metric(
+                    "Final Verdict",
+                    cached_analysis.get('verdict', 'Unknown'),
+                    help="Overall prediction based on enhanced KP analysis"
+                )
+            
+            with col2:
+                st.metric(
+                    "Confidence Level",
+                    cached_analysis.get('confidence', 'Unknown'),
+                    help="Reliability of the prediction"
+                )
+            
+            with col3:
+                asc_prob = cached_analysis.get('asc_probability', 50)
+                desc_prob = cached_analysis.get('desc_probability', 50)
+                st.metric(
+                    "Win Probability",
+                    f"Asc: {asc_prob:.1f}% | Desc: {desc_prob:.1f}%",
+                    help="Probability breakdown for both teams"
+                )
+            
+            # Display cusp sub lord analysis if available
+            if 'cusp_analysis' in cached_analysis:
+                with st.expander("🏆 Authentic KP Cusp Sub Lord Analysis Details", expanded=False):
+                    cusp_analysis = cached_analysis['cusp_analysis']
+                    
+                    # Key Decisor Information
+                    key_decisor = cusp_analysis['summary']['key_decisor']
+                    st.write(f"**🎯 Key Decisor (11th Cusp):** {key_decisor['sub_lord']} - {key_decisor['impact']}")
+                    st.write(f"*{key_decisor['reasoning']}*")
+                    
+                    # Supporting and Opposing Cusps
+                    col_support, col_oppose = st.columns(2)
+                    
+                    with col_support:
+                        st.write("**✅ Supporting Cusps:**")
+                        for cusp in cusp_analysis['summary']['supportive_cusps'][:3]:
+                            st.write(f"• H{cusp['cusp']}: {cusp['sub_lord']} (Strength: {cusp['strength']:.2f})")
+                    
+                    with col_oppose:
+                        st.write("**❌ Opposing Cusps:**")
+                        for cusp in cusp_analysis['summary']['opposing_cusps'][:3]:
+                            st.write(f"• H{cusp['cusp']}: {cusp['sub_lord']} (Strength: {cusp['strength']:.2f})")
+                    
+                    # Final Verdict Details
+                    final_verdict = cusp_analysis['final_verdict']
+                    st.write("**🏅 Cusp Analysis Verdict:**")
+                    st.write(f"• Primary Decision: **{final_verdict['primary_verdict']}**")
+                    st.write(f"• Overall Assessment: **{final_verdict['overall_verdict']}**")
+                    st.write(f"• Final Score: **{final_verdict['final_score']:+.2f}**")
+                    st.write(f"• Confidence: **{cusp_analysis['confidence_level']}**")
+            
+            # Display method agreement/disagreement if available
+            if isinstance(cached_analysis, dict) and 'methods_agree' in cached_analysis:
+                if cached_analysis['methods_agree']:
+                    st.success("✅ **Traditional and Cusp Analysis Methods Agree** - High reliability prediction")
+                else:
+                    st.warning("⚠️ **Traditional and Cusp Analysis Methods Disagree** - Cusp analysis given higher weight")
+        
+        else:
+            # Fallback for older format
+            st.write(cached_analysis)
         
         # Add a small note about the difference
         if scoring_method == "Proportional":

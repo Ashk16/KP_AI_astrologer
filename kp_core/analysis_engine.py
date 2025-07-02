@@ -39,6 +39,24 @@ HOUSE_WEIGHTS = {
     2: 0.2,   # Resources, runs (helpful but secondary)
 }
 
+# === ENHANCED KP CUSP SUB LORD ANALYSIS ===
+# Cusp importance weights for authentic KP methodology
+CUSP_IMPORTANCE_WEIGHTS = {
+    11: 1.0,  # Most critical - Fulfillment of desires/event outcome
+    1: 0.8,   # Team/self strength and overall well-being  
+    6: 0.8,   # Victory over opponents/competition
+    7: 0.6,   # Opponent strength (reverse analysis)
+    10: 0.5,  # Success, achievements, recognition
+    4: 0.3,   # End of activity, change of field
+    8: 0.3,   # Obstacles, sudden events
+    12: 0.3,  # Losses, expenditure
+}
+
+# Victory and defeat house classifications for cusp analysis
+VICTORY_HOUSES = [1, 6, 10, 11]
+DEFEAT_HOUSES = [4, 5, 7, 8, 9, 12]
+NEUTRAL_HOUSES = [2, 3]
+
 
 class AnalysisEngine:
     """
@@ -561,13 +579,18 @@ class AnalysisEngine:
 
     def analyze_muhurta_chart(self, scoring_method='proportional'):
         """
-        Authentic KP Muhurta Chart Analysis following traditional methodology:
+        Enhanced KP Muhurta Chart Analysis with Authentic Cusp Sub Lord Integration:
+        
+        TRADITIONAL LAYERS:
         1. Star Lord of 1st Cusp (Primary Indicator)
         2. Sub Lord of 1st Cusp (Modification Factor)
         3. Star Lord of 6th Cusp (Victory Indicator)
         4. Sub Lord of 6th Cusp (Victory Modification)
-        5. Sub-Sub Lords for final confirmation
+        5. Sub-Sub Lords for confirmation
         6. Ruling Planets support
+        
+        ENHANCED AUTHENTIC KP LAYER:
+        7. Cusp Sub Lord Analysis (Ultimate Deciding Factor)
         
         Args:
             scoring_method: 'proportional' or 'binary'
@@ -575,7 +598,11 @@ class AnalysisEngine:
         analysis_parts = []
         
         # --- Quick Team Setup ---
-        analysis_parts.append(f"🏏 **Asc** (Ascendant) vs **Desc** (Descendant)")
+        analysis_parts.append(f"🏏 **Enhanced KP Analysis** - Asc vs Desc")
+        analysis_parts.append("")
+        
+        # --- TRADITIONAL KP ANALYSIS (Existing System) ---
+        analysis_parts.append("## 📊 **TRADITIONAL KP ANALYSIS**")
         analysis_parts.append("")
         
         # --- STAR LORD OF 1ST CUSP (Primary Indicator) ---
@@ -739,253 +766,307 @@ class AnalysisEngine:
         cssl_6_score = self.calculate_planet_score(cssl_6_full, 'ascendant') if cssl_6_full in self.planets.index else 0.0
         
         analysis_parts.append("**📊 SUB-SUB LORDS (Final Confirmation):**")
-        analysis_parts.append(f"• CSSL 1: **{cssl_1}** (Score: {cssl_1_score:+.2f}) | CSSL 6: **{cssl_6}** (Score: {cssl_6_score:+.2f})")
+        analysis_parts.append(f"• 1st Cusp Sub-Sub Lord: **{cssl_1}** | Score: **{cssl_1_score:+.2f}**")
+        analysis_parts.append(f"• 6th Cusp Sub-Sub Lord: **{cssl_6}** | Score: **{cssl_6_score:+.2f}**")
         
-        # Combined CSSL verdict
         avg_cssl_score = (cssl_1_score + cssl_6_score) / 2
-        if avg_cssl_score > 0.25:
-            cssl_verdict = f"✅ **Final Confirmation Asc**"
-        elif avg_cssl_score < -0.25:
-            cssl_verdict = f"❌ **Final Confirmation Desc**"
-        else:
-            cssl_verdict = "⚖️ **Mixed Final Signals**"
         
-        analysis_parts.append(f"• Combined Result: {cssl_verdict}")
+        if avg_cssl_score > 0.2:
+            cssl_verdict = "✅ **Confirmation Asc**"
+        elif avg_cssl_score < -0.2:
+            cssl_verdict = "❌ **Confirmation Desc**"
+        else:
+            cssl_verdict = "⚖️ **Mixed Confirmation**"
+        
+        analysis_parts.append(f"• Combined Result: {cssl_verdict} (Avg: {avg_cssl_score:+.2f})")
         analysis_parts.append("")
         
-        # --- Ruling Planets Analysis ---
-        asc_sign_lord = self.cusps.loc[1]['sign_lord']
+        # --- RULING PLANETS ---
+        analysis_parts.append("**🔮 RULING PLANETS:**")
+        
         asc_star_lord = self.cusps.loc[1]['nl']
-        moon_sign_lord = self.planets.loc['Moon']['sign_lord'] if 'Moon' in self.planets.index else None
-        moon_star_lord = self.planets.loc['Moon']['nl'] if 'Moon' in self.planets.index else None
+        asc_sign_lord = self.cusps.loc[1]['sign_lord']
+        moon_star_lord = self.planets.get('Moon', {}).get('nl', 'Unknown')
+        moon_sign_lord = self.planets.get('Moon', {}).get('sign_lord', 'Unknown')
         day_lord = self._get_day_lord()
         
-        ruling_planets = list(set([rp for rp in [asc_sign_lord, asc_star_lord, moon_sign_lord, moon_star_lord, day_lord] if rp is not None]))
+        ruling_planets = [asc_star_lord, asc_sign_lord, moon_star_lord, moon_sign_lord, day_lord]
+        rp_counts = {planet: ruling_planets.count(planet) for planet in set(ruling_planets)}
         
-        analysis_parts.append("**🌟 Ruling Planets:**")
-        analysis_parts.append(f"• Planets: {', '.join(ruling_planets)}")
+        analysis_parts.append(f"• Ascendant Star Lord: **{asc_star_lord}**")
+        analysis_parts.append(f"• Ascendant Sign Lord: **{asc_sign_lord}**")
+        analysis_parts.append(f"• Moon Star Lord: **{moon_star_lord}**")
+        analysis_parts.append(f"• Moon Sign Lord: **{moon_sign_lord}**")
+        analysis_parts.append(f"• Day Lord: **{day_lord}**")
         
+        # Calculate RP team scores
         rp_team_a_count = 0
         rp_team_b_count = 0
         
-        for rp in ruling_planets:
-            rp_full = PlanetNameUtils.to_full_name(rp)
-            if rp_full in self.planets.index:
-                rp_sigs = self.get_significators(rp_full)
-                if rp_sigs:
-                    rp_victory_houses = [h for h, r in rp_sigs if h in [1, 6, 10, 11]]
-                    rp_defeat_houses = [h for h, r in rp_sigs if h in [4, 5, 7, 8, 9, 12]]
-                    
-                    if len(rp_victory_houses) > len(rp_defeat_houses):
-                        rp_team_a_count += 1
-                    elif len(rp_defeat_houses) > len(rp_victory_houses):
-                        rp_team_b_count += 1
-        
-        analysis_parts.append(f"• Support: Asc({rp_team_a_count}) vs Desc({rp_team_b_count})")
+        for planet, count in rp_counts.items():
+            planet_full = PlanetNameUtils.to_full_name(planet)
+            if planet_full in self.planets.index:
+                planet_score = self.calculate_planet_score(planet_full, 'ascendant')
+                if planet_score > 0:
+                    rp_team_a_count += count
+                elif planet_score < 0:
+                    rp_team_b_count += count
         
         if rp_team_a_count > rp_team_b_count:
-            rp_verdict = f"✅ **Support Asc**"
+            rp_verdict = "✅ **Support Asc**"
         elif rp_team_b_count > rp_team_a_count:
-            rp_verdict = f"❌ **Support Desc**"
+            rp_verdict = "❌ **Support Desc**"
         else:
-            rp_verdict = "⚖️ **Mixed Support**"
+            rp_verdict = "⚖️ **Neutral Support**"
         
-        analysis_parts.append(f"• Result: {rp_verdict}")
+        analysis_parts.append(f"• Result: {rp_verdict} (Asc:{rp_team_a_count} vs Desc:{rp_team_b_count})")
         analysis_parts.append("")
         
-        # --- Match Competitiveness Analysis ---
-        analysis_parts.append("**⚖️ MATCH COMPETITIVENESS:**")
-        
-        # Calculate comprehensive score difference
-        all_scores = [c1sl_score, c1subl_score, c6sl_score, c6subl_score, cssl_1_score, cssl_6_score]
-        avg_all_scores = sum([abs(s) for s in all_scores]) / len(all_scores)
-        score_variance = max(all_scores) - min(all_scores)
-        
-        analysis_parts.append(f"• Average Indicator Strength: **{avg_all_scores:.2f}**")
-        analysis_parts.append(f"• Score Variance: **{score_variance:.2f}**")
-        
-        # Determine match competitiveness
-        if avg_all_scores > 0.6:
-            competitiveness = "🔥 **ONE-SIDED MATCH**"
-            competitiveness_desc = "Clear dominance indicated"
-        elif avg_all_scores > 0.3:
-            competitiveness = "⚡ **MODERATE ADVANTAGE**"
-            competitiveness_desc = "One team has clear edge"
-        elif avg_all_scores > 0.15:
-            competitiveness = "🎯 **CLOSE CONTEST**"
-            competitiveness_desc = "Fairly balanced match"
-        else:
-            competitiveness = "🎲 **VERY CLOSE MATCH**"
-            competitiveness_desc = "Extremely tight contest"
-        
-        analysis_parts.append(f"• Type: {competitiveness}")
-        analysis_parts.append(f"• Description: {competitiveness_desc}")
+        # === NEW: AUTHENTIC KP CUSP SUB LORD ANALYSIS ===
+        analysis_parts.append("## 🏆 **AUTHENTIC KP CUSP SUB LORD ANALYSIS**")
+        analysis_parts.append("*The Ultimate Deciding Factor in Classical KP*")
         analysis_parts.append("")
         
-        # --- SCORING METHOD SELECTION ---
+        cusp_analysis = self.analyze_cusp_sub_lords('ascendant')
+        
+        # Key Decisor (11th Cusp)
+        key_decisor = cusp_analysis['summary']['key_decisor']
+        analysis_parts.append(f"**🎯 KEY DECISOR - {key_decisor['name']}:**")
+        analysis_parts.append(f"• Sub Lord: **{key_decisor['sub_lord']}**")
+        analysis_parts.append(f"• Impact: **{key_decisor['impact']}**")
+        analysis_parts.append(f"• Reasoning: {key_decisor['reasoning']}")
+        analysis_parts.append("")
+        
+        # Supporting and Opposing Cusps
+        supporting_cusps = cusp_analysis['summary']['supportive_cusps']
+        opposing_cusps = cusp_analysis['summary']['opposing_cusps']
+        
+        if supporting_cusps:
+            analysis_parts.append("**✅ SUPPORTING CUSPS (Favor Ascendant):**")
+            for cusp in supporting_cusps[:3]:  # Top 3
+                cusp_name = self._get_cusp_name(cusp['cusp'])
+                analysis_parts.append(f"• H{cusp['cusp']} ({cusp_name}): Sub Lord **{cusp['sub_lord']}** (Strength: {cusp['strength']:.2f})")
+            analysis_parts.append("")
+        
+        if opposing_cusps:
+            analysis_parts.append("**❌ OPPOSING CUSPS (Favor Descendant):**")
+            for cusp in opposing_cusps[:3]:  # Top 3
+                cusp_name = self._get_cusp_name(cusp['cusp'])
+                analysis_parts.append(f"• H{cusp['cusp']} ({cusp_name}): Sub Lord **{cusp['sub_lord']}** (Strength: {cusp['strength']:.2f})")
+            analysis_parts.append("")
+        
+        # Cusp Analysis Verdict
+        final_verdict = cusp_analysis['final_verdict']
+        analysis_parts.append("**🏅 CUSP SUB LORD VERDICT:**")
+        analysis_parts.append(f"• Primary Decision: **{final_verdict['primary_verdict']}**")
+        analysis_parts.append(f"• Overall Assessment: **{final_verdict['overall_verdict']}**")
+        analysis_parts.append(f"• Confidence Level: **{cusp_analysis['confidence_level']}**")
+        analysis_parts.append(f"• Final Score: **{final_verdict['final_score']:+.2f}**")
+        analysis_parts.append(f"• Key Reason: {final_verdict['primary_reason']}")
+        analysis_parts.append("")
+        
+        # === ENHANCED SYNTHESIS ===
+        analysis_parts.append("## ⚖️ **ENHANCED WEIGHTED SYNTHESIS**")
+        analysis_parts.append("*Integrating Traditional + Authentic KP Methods*")
+        analysis_parts.append("")
+        
         if scoring_method == 'proportional':
-            synthesis_result = self._calculate_proportional_synthesis(
-                c1sl_score, c1subl_score, c6sl_score, c6subl_score, avg_cssl_score,
-                rp_team_a_count, rp_team_b_count, analysis_parts
-            )
-        else:  # binary method
-            synthesis_result = self._calculate_binary_synthesis(
-                c1sl_verdict, c1subl_verdict, c6sl_verdict, c6subl_verdict, cssl_verdict,
-                rp_verdict, analysis_parts
-            )
+            final_analysis = self._calculate_enhanced_proportional_synthesis(
+                c1sl_score, c1subl_score, c6sl_score, c6subl_score, avg_cssl_score, 
+                rp_team_a_count, rp_team_b_count, cusp_analysis, analysis_parts)
+        else:
+            final_analysis = self._calculate_enhanced_binary_synthesis(
+                c1sl_verdict, c1subl_verdict, c6sl_verdict, c6subl_verdict, cssl_verdict, 
+                rp_verdict, cusp_analysis, analysis_parts)
         
-        return synthesis_result
-    
-    def _calculate_proportional_synthesis(self, c1sl_score, c1subl_score, c6sl_score, c6subl_score, avg_cssl_score, rp_team_a_count, rp_team_b_count, analysis_parts):
-        """Calculate proportional weighted synthesis."""
-        analysis_parts.append("**🏆 PROPORTIONAL WEIGHTED SYNTHESIS:**")
+        analysis_parts.append("")
+        analysis_parts.append("---")
+        analysis_parts.append("")
         
-        # === SCORE-PROPORTIONAL WEIGHTED SYSTEM ===
-        # Instead of binary weights, use actual score magnitudes with base weights
+        return {
+            'analysis': '\n'.join(analysis_parts),
+            'verdict': final_analysis['verdict'],
+            'confidence': final_analysis['confidence'],
+            'asc_probability': final_analysis['asc_probability'],
+            'desc_probability': final_analysis['desc_probability'],
+            'cusp_analysis': cusp_analysis,
+            'traditional_scores': {
+                'c1sl_score': c1sl_score,
+                'c1subl_score': c1subl_score,
+                'c6sl_score': c6sl_score,
+                'c6subl_score': c6subl_score,
+                'avg_cssl_score': avg_cssl_score
+            }
+        }
+
+    def _calculate_enhanced_proportional_synthesis(self, c1sl_score, c1subl_score, c6sl_score, c6subl_score, avg_cssl_score, rp_team_a_count, rp_team_b_count, cusp_analysis, analysis_parts):
+        """Enhanced proportional synthesis integrating cusp sub lord analysis."""
+        analysis_parts.append("**🏆 ENHANCED PROPORTIONAL SYNTHESIS:**")
         
-        base_weights = {
-            'c1sl': 3.0,    # Star Lord of 1st Cusp (Highest Priority)
-            'c1subl': 2.0,  # Sub Lord of 1st Cusp (High Priority)  
-            'c6sl': 2.0,    # Star Lord of 6th Cusp (High Priority)
-            'c6subl': 1.5,  # Sub Lord of 6th Cusp (Medium Priority)
-            'cssl': 1.5,    # Combined Sub-Sub Lords (Medium Priority)
-            'rp': 1.0       # Ruling Planets (Lower Priority)
+        # === TRADITIONAL SCORING WEIGHTS ===
+        traditional_weights = {
+            'c1sl': 2.5,    # Star Lord of 1st Cusp
+            'c1subl': 1.5,  # Sub Lord of 1st Cusp  
+            'c6sl': 2.0,    # Star Lord of 6th Cusp
+            'c6subl': 1.0,  # Sub Lord of 6th Cusp
+            'cssl': 1.0,    # Combined Sub-Sub Lords
+            'rp': 0.5       # Ruling Planets
         }
         
-        # Calculate proportional weights based on actual scores
-        team_a_weights = 0
-        team_b_weights = 0
-        total_possible_weights = sum(base_weights.values())
+        # === CUSP SUB LORD WEIGHTS (ENHANCED) ===
+        cusp_weights = {
+            'cusp_analysis': 4.0  # Highest weight for authentic KP method
+        }
         
-        # Star Lord of 1st Cusp - Proportional to score magnitude
+        traditional_score = 0
+        traditional_total_weight = 0
+        
+        # Calculate traditional score with proportional weights
         c1sl_magnitude = abs(c1sl_score)
-        c1sl_weight = base_weights['c1sl'] * min(1.0, c1sl_magnitude)  # Cap at base weight
+        c1sl_weight = traditional_weights['c1sl'] * min(1.0, c1sl_magnitude)
         if c1sl_score > 0:
-            team_a_weights += c1sl_weight
+            traditional_score += c1sl_weight
         elif c1sl_score < 0:
-            team_b_weights += c1sl_weight
+            traditional_score -= c1sl_weight
+        traditional_total_weight += c1sl_weight
         
-        # Sub Lord of 1st Cusp - Proportional to score magnitude  
         c1subl_magnitude = abs(c1subl_score)
-        c1subl_weight = base_weights['c1subl'] * min(1.0, c1subl_magnitude)
+        c1subl_weight = traditional_weights['c1subl'] * min(1.0, c1subl_magnitude)
         if c1subl_score > 0:
-            team_a_weights += c1subl_weight
+            traditional_score += c1subl_weight
         elif c1subl_score < 0:
-            team_b_weights += c1subl_weight
+            traditional_score -= c1subl_weight
+        traditional_total_weight += c1subl_weight
         
-        # Star Lord of 6th Cusp - Proportional to score magnitude
-        c6sl_magnitude = abs(c6sl_score) 
-        c6sl_weight = base_weights['c6sl'] * min(1.0, c6sl_magnitude)
+        c6sl_magnitude = abs(c6sl_score)
+        c6sl_weight = traditional_weights['c6sl'] * min(1.0, c6sl_magnitude)
         if c6sl_score > 0:
-            team_a_weights += c6sl_weight
+            traditional_score += c6sl_weight
         elif c6sl_score < 0:
-            team_b_weights += c6sl_weight
+            traditional_score -= c6sl_weight
+        traditional_total_weight += c6sl_weight
         
-        # Sub Lord of 6th Cusp - Proportional to score magnitude
         c6subl_magnitude = abs(c6subl_score)
-        c6subl_weight = base_weights['c6subl'] * min(1.0, c6subl_magnitude)
+        c6subl_weight = traditional_weights['c6subl'] * min(1.0, c6subl_magnitude)
         if c6subl_score > 0:
-            team_a_weights += c6subl_weight
+            traditional_score += c6subl_weight
         elif c6subl_score < 0:
-            team_b_weights += c6subl_weight
+            traditional_score -= c6subl_weight
+        traditional_total_weight += c6subl_weight
         
-        # Combined Sub-Sub Lords - Proportional to average score magnitude
         cssl_magnitude = abs(avg_cssl_score)
-        cssl_weight = base_weights['cssl'] * min(1.0, cssl_magnitude)
+        cssl_weight = traditional_weights['cssl'] * min(1.0, cssl_magnitude)
         if avg_cssl_score > 0:
-            team_a_weights += cssl_weight
+            traditional_score += cssl_weight
         elif avg_cssl_score < 0:
-            team_b_weights += cssl_weight
+            traditional_score -= cssl_weight
+        traditional_total_weight += cssl_weight
         
-        # Ruling Planets - Binary for now (can be improved with individual planet scores)
-        rp_weight = base_weights['rp']
+        # Ruling Planets
+        rp_weight = traditional_weights['rp']
         if rp_team_a_count > rp_team_b_count:
-            team_a_weights += rp_weight
+            traditional_score += rp_weight
         elif rp_team_b_count > rp_team_a_count:
-            team_b_weights += rp_weight
+            traditional_score -= rp_weight
+        traditional_total_weight += rp_weight
         
-        # Calculate percentages based on actual weights received
-        total_weights_assigned = team_a_weights + team_b_weights
+        # Normalize traditional score
+        traditional_normalized = traditional_score / traditional_total_weight if traditional_total_weight > 0 else 0
         
-        if total_weights_assigned > 0:
-            team_a_percentage = (team_a_weights / total_weights_assigned) * 100
-            team_b_percentage = (team_b_weights / total_weights_assigned) * 100
+        # === CUSP SUB LORD ANALYSIS SCORING ===
+        cusp_final_score = cusp_analysis['final_verdict']['final_score']
+        cusp_weight = cusp_weights['cusp_analysis'] * min(1.0, abs(cusp_final_score))
+        
+        # === COMBINED SCORING ===
+        combined_score = (traditional_normalized * sum(traditional_weights.values()) + 
+                         cusp_final_score * cusp_weight)
+        total_possible_weight = sum(traditional_weights.values()) + cusp_weight
+        
+        final_score = combined_score / total_possible_weight if total_possible_weight > 0 else 0
+        
+        # Calculate final probabilities
+        if final_score > 0:
+            # Ascendant favored
+            asc_advantage = min(abs(final_score) * 100, 40)  # Cap at 40% advantage
+            asc_probability = 50 + asc_advantage
+            desc_probability = 50 - asc_advantage
         else:
-            team_a_percentage = 50.0
-            team_b_percentage = 50.0
+            # Descendant favored
+            desc_advantage = min(abs(final_score) * 100, 40)  # Cap at 40% advantage
+            desc_probability = 50 + desc_advantage
+            asc_probability = 50 - desc_advantage
         
-        analysis_parts.append(f"• Proportional Weights: Asc({team_a_weights:.2f}) vs Desc({team_b_weights:.2f})")
-        analysis_parts.append(f"• Win Probability: Asc({team_a_percentage:.1f}%) vs Desc({team_b_percentage:.1f}%)")
-        
-        # Enhanced final verdict with confidence based on weight difference AND total strength
-        weight_difference = abs(team_a_weights - team_b_weights)
-        total_strength = team_a_weights + team_b_weights
-        
-        # Adjust confidence based on both difference and total strength
-        if total_strength >= 7.0:  # Strong overall indications
-            strength_modifier = "Strong"
-        elif total_strength >= 4.0:  # Moderate overall indications
-            strength_modifier = "Moderate" 
-        else:  # Weak overall indications
-            strength_modifier = "Weak"
-        
-        if team_a_weights > team_b_weights:
-            if weight_difference >= 3.0:
-                final_verdict = f"🏆 **Asc DECISIVELY FAVORED**"
-                confidence = f"Very High ({strength_modifier} Signals)"
-            elif weight_difference >= 1.5:
-                final_verdict = f"🏆 **Asc STRONGLY FAVORED**"
-                confidence = f"High ({strength_modifier} Signals)"
-            elif weight_difference >= 0.5:
-                final_verdict = f"🏆 **Asc FAVORED**"
-                confidence = f"Medium ({strength_modifier} Signals)"
-            else:
-                final_verdict = f"🏆 **Asc SLIGHT EDGE**"
-                confidence = f"Low ({strength_modifier} Signals)"
-        elif team_b_weights > team_a_weights:
-            if weight_difference >= 3.0:
-                final_verdict = f"🏆 **Desc DECISIVELY FAVORED**"
-                confidence = f"Very High ({strength_modifier} Signals)"
-            elif weight_difference >= 1.5:
-                final_verdict = f"🏆 **Desc STRONGLY FAVORED**"
-                confidence = f"High ({strength_modifier} Signals)"
-            elif weight_difference >= 0.5:
-                final_verdict = f"🏆 **Desc FAVORED**"
-                confidence = f"Medium ({strength_modifier} Signals)"
-            else:
-                final_verdict = f"🏆 **Desc SLIGHT EDGE**"
-                confidence = f"Low ({strength_modifier} Signals)"
+        # Determine confidence and verdict
+        if abs(final_score) > 0.4:
+            confidence = "Very High"
+            verdict = "STRONG_ASCENDANT" if final_score > 0 else "STRONG_DESCENDANT"
+        elif abs(final_score) > 0.2:
+            confidence = "High"
+            verdict = "MODERATE_ASCENDANT" if final_score > 0 else "MODERATE_DESCENDANT"
+        elif abs(final_score) > 0.1:
+            confidence = "Medium"
+            verdict = "SLIGHT_ASCENDANT" if final_score > 0 else "SLIGHT_DESCENDANT"
         else:
-            final_verdict = "⚖️ **PERFECTLY BALANCED MATCH**"
-            confidence = f"Uncertain ({strength_modifier} Signals)"
+            confidence = "Low"
+            verdict = "VERY_CLOSE"
         
-        analysis_parts.append(f"• Total Signal Strength: **{total_strength:.2f}** out of **{total_possible_weights:.1f}**")
-        analysis_parts.append(f"• Confidence: **{confidence}**")
-        analysis_parts.append(f"• {final_verdict}")
+        # Enhanced analysis output
+        analysis_parts.append(f"• **Traditional KP Score**: {traditional_normalized:+.3f} (Weight: {sum(traditional_weights.values()):.1f})")
+        analysis_parts.append(f"• **Cusp Sub Lord Score**: {cusp_final_score:+.3f} (Weight: {cusp_weight:.1f})")
+        analysis_parts.append(f"• **Combined Final Score**: {final_score:+.3f}")
+        analysis_parts.append("")
+        analysis_parts.append(f"• **Win Probability**: Asc({asc_probability:.1f}%) vs Desc({desc_probability:.1f}%)")
+        analysis_parts.append(f"• **Verdict**: {verdict}")
+        analysis_parts.append(f"• **Confidence**: {confidence}")
         
-        return "\n".join(analysis_parts)
+        # Key insight based on method agreement
+        cusp_verdict = cusp_analysis['final_verdict']['primary_verdict']
+        traditional_favors_asc = traditional_normalized > 0
+        cusp_favors_asc = 'ASCENDANT' in cusp_verdict
+        
+        if traditional_favors_asc == cusp_favors_asc:
+            agreement = "✅ **METHODS AGREE** - High reliability"
+        else:
+            agreement = "⚠️ **METHODS DISAGREE** - Cusp analysis decisive"
+        
+        analysis_parts.append(f"• **Method Agreement**: {agreement}")
+        
+        return {
+            'verdict': verdict,
+            'confidence': confidence,
+            'asc_probability': asc_probability,
+            'desc_probability': desc_probability,
+            'final_score': final_score,
+            'traditional_score': traditional_normalized,
+            'cusp_score': cusp_final_score,
+            'methods_agree': traditional_favors_asc == cusp_favors_asc
+        }
     
-    def _calculate_binary_synthesis(self, c1sl_verdict, c1subl_verdict, c6sl_verdict, c6subl_verdict, cssl_verdict, rp_verdict, analysis_parts):
-        """Calculate binary weighted synthesis."""
-        analysis_parts.append("**🏆 BINARY WEIGHTED SYNTHESIS:**")
+    def _calculate_enhanced_binary_synthesis(self, c1sl_verdict, c1subl_verdict, c6sl_verdict, c6subl_verdict, cssl_verdict, rp_verdict, cusp_analysis, analysis_parts):
+        """Enhanced binary synthesis integrating cusp sub lord analysis."""
+        analysis_parts.append("**🏆 ENHANCED BINARY SYNTHESIS:**")
         
-        # === TRADITIONAL BINARY SYSTEM ===
-        # Each factor gets fixed points based on verdict
-        
-        weights = {
-            'c1sl': 3,      # Star Lord of 1st Cusp (Highest Priority)
-            'c1subl': 2,    # Sub Lord of 1st Cusp (High Priority)  
-            'c6sl': 2,      # Star Lord of 6th Cusp (High Priority)
-            'c6subl': 1.5,  # Sub Lord of 6th Cusp (Medium Priority)
-            'cssl': 1.5,    # Combined Sub-Sub Lords (Medium Priority)
-            'rp': 1         # Ruling Planets (Lower Priority)
+        # === TRADITIONAL BINARY WEIGHTS ===
+        traditional_weights = {
+            'c1sl': 2.5,    # Star Lord of 1st Cusp
+            'c1subl': 1.5,  # Sub Lord of 1st Cusp  
+            'c6sl': 2.0,    # Star Lord of 6th Cusp
+            'c6subl': 1.0,  # Sub Lord of 6th Cusp
+            'cssl': 1.0,    # Combined Sub-Sub Lords
+            'rp': 0.5       # Ruling Planets
         }
         
-        team_a_points = 0
-        team_b_points = 0
-        total_possible_points = sum(weights.values())
+        # === CUSP SUB LORD WEIGHTS ===
+        cusp_weights = {
+            'cusp_primary': 4.0,  # Primary cusp verdict (11th house)
+            'cusp_overall': 2.0   # Overall cusp analysis
+        }
         
-        # Analyze each verdict and assign points
+        traditional_asc_points = 0
+        traditional_desc_points = 0
+        traditional_total_points = sum(traditional_weights.values())
+        
+        # Analyze traditional verdicts
         verdicts = {
             'c1sl': c1sl_verdict,
             'c1subl': c1subl_verdict,
@@ -996,62 +1077,95 @@ class AnalysisEngine:
         }
         
         for factor, verdict in verdicts.items():
-            if 'Asc' in verdict or 'Supports Asc' in verdict or 'Confirms Asc' in verdict or 'Victory Asc' in verdict or 'Support Asc' in verdict or 'Confirmation Asc' in verdict:
-                team_a_points += weights[factor]
-            elif 'Desc' in verdict or 'Opposes Asc' in verdict or 'Denies Asc' in verdict or 'Victory Desc' in verdict or 'Support Desc' in verdict or 'Confirmation Desc' in verdict:
-                team_b_points += weights[factor]
-            # Neutral verdicts get no points
+            if any(keyword in verdict for keyword in ['Asc', 'Support Asc', 'Confirmation Asc', 'Victory Asc']):
+                traditional_asc_points += traditional_weights[factor]
+            elif any(keyword in verdict for keyword in ['Desc', 'Support Desc', 'Confirmation Desc', 'Victory Desc']):
+                traditional_desc_points += traditional_weights[factor]
+        
+        # === CUSP SUB LORD ANALYSIS ===
+        cusp_final_verdict = cusp_analysis['final_verdict']
+        cusp_primary_verdict = cusp_final_verdict['primary_verdict']
+        cusp_overall_verdict = cusp_final_verdict['overall_verdict']
+        
+        cusp_asc_points = 0
+        cusp_desc_points = 0
+        cusp_total_points = sum(cusp_weights.values())
+        
+        # Primary cusp verdict (most important)
+        if 'ASCENDANT' in cusp_primary_verdict:
+            cusp_asc_points += cusp_weights['cusp_primary']
+        elif 'DESCENDANT' in cusp_primary_verdict:
+            cusp_desc_points += cusp_weights['cusp_primary']
+        
+        # Overall cusp verdict
+        if 'ASCENDANT' in cusp_overall_verdict:
+            cusp_asc_points += cusp_weights['cusp_overall']
+        elif 'DESCENDANT' in cusp_overall_verdict:
+            cusp_desc_points += cusp_weights['cusp_overall']
+        
+        # === COMBINED BINARY ANALYSIS ===
+        total_asc_points = traditional_asc_points + cusp_asc_points
+        total_desc_points = traditional_desc_points + cusp_desc_points
+        total_possible_points = traditional_total_points + cusp_total_points
         
         # Calculate percentages
-        total_points_assigned = team_a_points + team_b_points
-        if total_points_assigned > 0:
-            team_a_percentage = (team_a_points / total_points_assigned) * 100
-            team_b_percentage = (team_b_points / total_points_assigned) * 100
+        total_assigned_points = total_asc_points + total_desc_points
+        if total_assigned_points > 0:
+            asc_percentage = (total_asc_points / total_assigned_points) * 100
+            desc_percentage = (total_desc_points / total_assigned_points) * 100
         else:
-            team_a_percentage = 50.0
-            team_b_percentage = 50.0
+            asc_percentage = 50.0
+            desc_percentage = 50.0
         
-        analysis_parts.append(f"• Binary Points: Asc({team_a_points}) vs Desc({team_b_points})")
-        analysis_parts.append(f"• Win Probability: Asc({team_a_percentage:.1f}%) vs Desc({team_b_percentage:.1f}%)")
+        # Determine verdict and confidence
+        point_difference = abs(total_asc_points - total_desc_points)
         
-        # Final verdict based on point difference
-        point_difference = abs(team_a_points - team_b_points)
-        
-        if team_a_points > team_b_points:
-            if point_difference >= 5:
-                final_verdict = f"🏆 **Asc DECISIVELY FAVORED**"
-                confidence = "Very High"
-            elif point_difference >= 3:
-                final_verdict = f"🏆 **Asc STRONGLY FAVORED**"
-                confidence = "High"
-            elif point_difference >= 1:
-                final_verdict = f"🏆 **Asc FAVORED**"
-                confidence = "Medium"
-            else:
-                final_verdict = f"🏆 **Asc SLIGHT EDGE**"
-                confidence = "Low"
-        elif team_b_points > team_a_points:
-            if point_difference >= 5:
-                final_verdict = f"🏆 **Desc DECISIVELY FAVORED**"
-                confidence = "Very High"
-            elif point_difference >= 3:
-                final_verdict = f"🏆 **Desc STRONGLY FAVORED**"
-                confidence = "High"
-            elif point_difference >= 1:
-                final_verdict = f"🏆 **Desc FAVORED**"
-                confidence = "Medium"
-            else:
-                final_verdict = f"🏆 **Desc SLIGHT EDGE**"
-                confidence = "Low"
+        if point_difference >= 4.0:
+            confidence = "Very High"
+            verdict = "STRONG_ASCENDANT" if total_asc_points > total_desc_points else "STRONG_DESCENDANT"
+        elif point_difference >= 2.0:
+            confidence = "High"
+            verdict = "MODERATE_ASCENDANT" if total_asc_points > total_desc_points else "MODERATE_DESCENDANT"
+        elif point_difference >= 1.0:
+            confidence = "Medium"
+            verdict = "SLIGHT_ASCENDANT" if total_asc_points > total_desc_points else "SLIGHT_DESCENDANT"
         else:
-            final_verdict = "⚖️ **PERFECTLY BALANCED MATCH**"
-            confidence = "Uncertain"
+            confidence = "Low"
+            verdict = "VERY_CLOSE"
         
-        analysis_parts.append(f"• Total Points Used: **{total_points_assigned}** out of **{total_possible_points}**")
-        analysis_parts.append(f"• Confidence: **{confidence}**")
-        analysis_parts.append(f"• {final_verdict}")
+        # Analysis output
+        analysis_parts.append(f"• **Traditional Points**: Asc({traditional_asc_points:.1f}) vs Desc({traditional_desc_points:.1f})")
+        analysis_parts.append(f"• **Cusp Sub Lord Points**: Asc({cusp_asc_points:.1f}) vs Desc({cusp_desc_points:.1f})")
+        analysis_parts.append(f"• **Total Points**: Asc({total_asc_points:.1f}) vs Desc({total_desc_points:.1f})")
+        analysis_parts.append("")
+        analysis_parts.append(f"• **Win Probability**: Asc({asc_percentage:.1f}%) vs Desc({desc_percentage:.1f}%)")
+        analysis_parts.append(f"• **Verdict**: {verdict}")
+        analysis_parts.append(f"• **Confidence**: {confidence}")
         
-        return "\n".join(analysis_parts)
+        # Method agreement check
+        traditional_favors_asc = traditional_asc_points > traditional_desc_points
+        cusp_favors_asc = cusp_asc_points > cusp_desc_points
+        
+        if traditional_favors_asc == cusp_favors_asc:
+            agreement = "✅ **METHODS AGREE** - High reliability"
+        else:
+            agreement = "⚠️ **METHODS DISAGREE** - Cusp analysis weighted higher"
+        
+        analysis_parts.append(f"• **Method Agreement**: {agreement}")
+        
+        return {
+            'verdict': verdict,
+            'confidence': confidence,
+            'asc_probability': asc_percentage,
+            'desc_probability': desc_percentage,
+            'total_asc_points': total_asc_points,
+            'total_desc_points': total_desc_points,
+            'traditional_asc_points': traditional_asc_points,
+            'traditional_desc_points': traditional_desc_points,
+            'cusp_asc_points': cusp_asc_points,
+            'cusp_desc_points': cusp_desc_points,
+            'methods_agree': traditional_favors_asc == cusp_favors_asc
+        }
 
     def _generate_nl_sl_verdict_and_comment(self, timeline_row: pd.Series, perspective: str = 'ascendant') -> tuple:
         """
@@ -1753,5 +1867,283 @@ class AnalysisEngine:
             return max(-1.0, min(1.0, normalized_harmony))
         
         return 0.0
+
+    def analyze_cusp_sub_lords(self, perspective: str = 'ascendant') -> dict:
+        """
+        Authentic KP Cusp Sub Lord Analysis - The Ultimate Deciding Factor.
+        
+        This method implements classical KP methodology where cusp sub lords
+        are the final arbiters of event outcomes, especially the 11th cusp sub lord
+        which determines fulfillment of desires.
+        
+        Args:
+            perspective: Either 'ascendant' or 'descendant'
+            
+        Returns:
+            dict: Comprehensive cusp sub lord analysis with final verdict
+        """
+        analysis = {
+            'cusp_analyses': {},
+            'summary': {},
+            'final_verdict': {},
+            'confidence_level': 'Medium'
+        }
+        
+        # Priority cusps for competition analysis (cricket matches)
+        priority_cusps = [11, 1, 6, 7, 10, 4, 8, 12]
+        
+        total_weighted_score = 0
+        total_possible_weight = 0
+        detailed_breakdown = []
+        
+        for cusp_num in priority_cusps:
+            cusp_info = self.cusps.loc[cusp_num]
+            cusp_analysis = self._analyze_single_cusp_sub_lord(cusp_num, cusp_info, perspective)
+            
+            analysis['cusp_analyses'][cusp_num] = cusp_analysis
+            
+            # Calculate weighted contribution
+            cusp_weight = CUSP_IMPORTANCE_WEIGHTS.get(cusp_num, 0.1)
+            weighted_contribution = cusp_analysis['impact_score'] * cusp_weight
+            
+            total_weighted_score += weighted_contribution
+            total_possible_weight += cusp_weight
+            
+            detailed_breakdown.append({
+                'cusp': cusp_num,
+                'sub_lord': cusp_analysis['sub_lord'],
+                'impact': cusp_analysis['impact_direction'],
+                'strength': cusp_analysis['impact_magnitude'],
+                'weight': cusp_weight,
+                'contribution': weighted_contribution
+            })
+        
+        # Calculate final weighted average
+        final_cusp_score = total_weighted_score / total_possible_weight if total_possible_weight > 0 else 0
+        
+        # Generate summary
+        analysis['summary'] = {
+            'total_weighted_score': final_cusp_score,
+            'key_decisor': self._identify_key_decisor(analysis['cusp_analyses']),
+            'supportive_cusps': self._identify_supportive_cusps(analysis['cusp_analyses'], perspective),
+            'opposing_cusps': self._identify_opposing_cusps(analysis['cusp_analyses'], perspective),
+            'detailed_breakdown': detailed_breakdown
+        }
+        
+        # Generate final verdict based on cusp sub lord analysis
+        analysis['final_verdict'] = self._generate_cusp_verdict(final_cusp_score, analysis['cusp_analyses'], perspective)
+        
+        # Determine confidence level
+        analysis['confidence_level'] = self._calculate_cusp_confidence(analysis['cusp_analyses'])
+        
+        return analysis
+
+    def _analyze_single_cusp_sub_lord(self, cusp_num: int, cusp_info: dict, perspective: str) -> dict:
+        """
+        Analyzes a single cusp's sub lord to determine its impact on the event.
+        
+        Args:
+            cusp_num: Cusp number (1-12)
+            cusp_info: Cusp details from cusps DataFrame
+            perspective: 'ascendant' or 'descendant'
+            
+        Returns:
+            dict: Analysis of the cusp sub lord's impact
+        """
+        sub_lord_short = cusp_info['sl']
+        sub_lord_full = PlanetNameUtils.to_full_name(sub_lord_short)
+        
+        analysis = {
+            'cusp_number': cusp_num,
+            'cusp_name': self._get_cusp_name(cusp_num),
+            'sub_lord': sub_lord_short,
+            'sub_lord_full': sub_lord_full,
+            'significators': [],
+            'impact_direction': 'NEUTRAL',
+            'impact_magnitude': 0.0,
+            'impact_score': 0.0,
+            'reasoning': ''
+        }
+        
+        if sub_lord_full not in self.planets.index:
+            analysis['reasoning'] = f"Sub lord {sub_lord_short} not found in planetary data"
+            return analysis
+        
+        # Get sub lord's significators
+        significators = self.get_significators(sub_lord_full)
+        analysis['significators'] = significators
+        
+        if not significators:
+            analysis['reasoning'] = f"Sub lord {sub_lord_short} has no significators"
+            return analysis
+        
+        # Classify significators into victory/defeat/neutral houses
+        victory_sigs = [h for h, r in significators if h in VICTORY_HOUSES]
+        defeat_sigs = [h for h, r in significators if h in DEFEAT_HOUSES]
+        neutral_sigs = [h for h, r in significators if h in NEUTRAL_HOUSES]
+        
+        # Calculate impact based on house significators
+        victory_strength = len(victory_sigs) * 1.0
+        defeat_strength = len(defeat_sigs) * 1.0
+        neutral_strength = len(neutral_sigs) * 0.2
+        
+        # Special weighting for rule strength (Rule 1 is strongest)
+        weighted_victory = sum([1.0 if r == 1 else 0.8 if r == 2 else 0.5 if r == 3 else 0.3 
+                               for h, r in significators if h in VICTORY_HOUSES])
+        weighted_defeat = sum([1.0 if r == 1 else 0.8 if r == 2 else 0.5 if r == 3 else 0.3 
+                              for h, r in significators if h in DEFEAT_HOUSES])
+        
+        # Determine impact direction and magnitude
+        net_impact = weighted_victory - weighted_defeat
+        
+        if net_impact > 0:
+            analysis['impact_direction'] = 'FAVORS_ASCENDANT' if perspective == 'ascendant' else 'FAVORS_DESCENDANT'
+            analysis['impact_magnitude'] = min(net_impact / 3.0, 1.0)  # Normalize to max 1.0
+            analysis['impact_score'] = analysis['impact_magnitude']
+        elif net_impact < 0:
+            analysis['impact_direction'] = 'FAVORS_DESCENDANT' if perspective == 'ascendant' else 'FAVORS_ASCENDANT'
+            analysis['impact_magnitude'] = min(abs(net_impact) / 3.0, 1.0)
+            analysis['impact_score'] = -analysis['impact_magnitude']
+        else:
+            analysis['impact_direction'] = 'NEUTRAL'
+            analysis['impact_magnitude'] = 0.0
+            analysis['impact_score'] = 0.0
+        
+        # Generate reasoning
+        analysis['reasoning'] = self._generate_cusp_reasoning(cusp_num, sub_lord_short, 
+                                                            victory_sigs, defeat_sigs, 
+                                                            analysis['impact_direction'])
+        
+        return analysis
+
+    def _get_cusp_name(self, cusp_num: int) -> str:
+        """Returns descriptive name for cusp number."""
+        cusp_names = {
+            1: "Ascendant/Self", 2: "Wealth/Resources", 3: "Courage/Effort", 
+            4: "Endings/Comfort", 5: "Speculation/Intelligence", 6: "Victory/Competition",
+            7: "Opponents/Partnership", 8: "Obstacles/Transformation", 9: "Fortune/Higher Knowledge",
+            10: "Success/Achievement", 11: "Gains/Fulfillment", 12: "Losses/Expenditure"
+        }
+        return cusp_names.get(cusp_num, f"House {cusp_num}")
+
+    def _generate_cusp_reasoning(self, cusp_num: int, sub_lord: str, victory_houses: list, 
+                               defeat_houses: list, impact_direction: str) -> str:
+        """Generates human-readable reasoning for cusp analysis."""
+        cusp_name = self._get_cusp_name(cusp_num)
+        
+        if impact_direction == 'FAVORS_ASCENDANT':
+            return f"{cusp_name} sub lord {sub_lord} signifies victory houses {victory_houses}, supporting ascendant team"
+        elif impact_direction == 'FAVORS_DESCENDANT':
+            return f"{cusp_name} sub lord {sub_lord} signifies defeat houses {defeat_houses}, supporting descendant team"
+        else:
+            return f"{cusp_name} sub lord {sub_lord} shows mixed or neutral signals"
+
+    def _identify_key_decisor(self, cusp_analyses: dict) -> dict:
+        """Identifies the most decisive cusp (usually 11th house)."""
+        # 11th cusp is always the key decisor in KP
+        eleventh_analysis = cusp_analyses.get(11, {})
+        return {
+            'cusp': 11,
+            'name': 'Eleventh House (Fulfillment of Desires)',
+            'sub_lord': eleventh_analysis.get('sub_lord', 'Unknown'),
+            'impact': eleventh_analysis.get('impact_direction', 'NEUTRAL'),
+            'reasoning': 'The 11th cusp sub lord is the ultimate deciding factor in KP for event outcomes'
+        }
+
+    def _identify_supportive_cusps(self, cusp_analyses: dict, perspective: str) -> list:
+        """Identifies cusps supporting the given perspective."""
+        target_direction = 'FAVORS_ASCENDANT' if perspective == 'ascendant' else 'FAVORS_DESCENDANT'
+        
+        supportive = []
+        for cusp_num, analysis in cusp_analyses.items():
+            if analysis.get('impact_direction') == target_direction:
+                supportive.append({
+                    'cusp': cusp_num,
+                    'sub_lord': analysis.get('sub_lord'),
+                    'strength': analysis.get('impact_magnitude', 0)
+                })
+        
+        return sorted(supportive, key=lambda x: x['strength'], reverse=True)
+
+    def _identify_opposing_cusps(self, cusp_analyses: dict, perspective: str) -> list:
+        """Identifies cusps opposing the given perspective."""
+        opposing_direction = 'FAVORS_DESCENDANT' if perspective == 'ascendant' else 'FAVORS_ASCENDANT'
+        
+        opposing = []
+        for cusp_num, analysis in cusp_analyses.items():
+            if analysis.get('impact_direction') == opposing_direction:
+                opposing.append({
+                    'cusp': cusp_num,
+                    'sub_lord': analysis.get('sub_lord'),
+                    'strength': analysis.get('impact_magnitude', 0)
+                })
+        
+        return sorted(opposing, key=lambda x: x['strength'], reverse=True)
+
+    def _generate_cusp_verdict(self, final_score: float, cusp_analyses: dict, perspective: str) -> dict:
+        """Generates final verdict based on cusp sub lord analysis."""
+        # Get 11th cusp analysis (most important)
+        eleventh_cusp = cusp_analyses.get(11, {})
+        eleventh_impact = eleventh_cusp.get('impact_direction', 'NEUTRAL')
+        
+        # Primary verdict based on 11th cusp
+        if eleventh_impact == 'FAVORS_ASCENDANT':
+            primary_verdict = "ASCENDANT_FAVORED"
+            primary_reason = "11th cusp sub lord (fulfillment) supports ascendant team"
+        elif eleventh_impact == 'FAVORS_DESCENDANT':
+            primary_verdict = "DESCENDANT_FAVORED"
+            primary_reason = "11th cusp sub lord (fulfillment) supports descendant team"
+        else:
+            primary_verdict = "COMPETITIVE"
+            primary_reason = "11th cusp sub lord shows neutral or mixed signals"
+        
+        # Modify based on overall cusp score
+        if final_score > 0.3:
+            overall_verdict = "STRONG_ASCENDANT"
+            confidence = "High"
+        elif final_score > 0.1:
+            overall_verdict = "MODERATE_ASCENDANT"
+            confidence = "Medium"
+        elif final_score < -0.3:
+            overall_verdict = "STRONG_DESCENDANT"
+            confidence = "High"
+        elif final_score < -0.1:
+            overall_verdict = "MODERATE_DESCENDANT"
+            confidence = "Medium"
+        else:
+            overall_verdict = "CLOSE_CONTEST"
+            confidence = "Low"
+        
+        return {
+            'primary_verdict': primary_verdict,
+            'overall_verdict': overall_verdict,
+            'final_score': final_score,
+            'confidence': confidence,
+            'primary_reason': primary_reason,
+            'eleventh_cusp_impact': eleventh_impact
+        }
+
+    def _calculate_cusp_confidence(self, cusp_analyses: dict) -> str:
+        """Calculates confidence level based on cusp analysis consistency."""
+        # Get 11th cusp strength (most important)
+        eleventh_strength = cusp_analyses.get(11, {}).get('impact_magnitude', 0)
+        
+        # Count supporting vs opposing cusps
+        ascendant_favoring = sum(1 for analysis in cusp_analyses.values() 
+                               if analysis.get('impact_direction') == 'FAVORS_ASCENDANT')
+        descendant_favoring = sum(1 for analysis in cusp_analyses.values() 
+                                if analysis.get('impact_direction') == 'FAVORS_DESCENDANT')
+        
+        # High confidence if 11th cusp is strong and other cusps align
+        if eleventh_strength > 0.7:
+            return "Very High"
+        elif eleventh_strength > 0.5:
+            return "High" 
+        elif eleventh_strength > 0.3:
+            return "Medium"
+        elif abs(ascendant_favoring - descendant_favoring) > 2:
+            return "Medium"
+        else:
+            return "Low"
 
  
