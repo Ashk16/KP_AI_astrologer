@@ -1,6 +1,8 @@
-streamlit
-pandas
-pyswisseph
-pytz
-geopy
-matplotlib 
+streamlit>=1.28.0
+pandas>=1.5.0
+pyswisseph>=2.10.0
+pytz>=2023.3
+geopy>=2.3.0
+matplotlib>=3.7.0
+plotly>=5.15.0
+numpy>=1.24.0 

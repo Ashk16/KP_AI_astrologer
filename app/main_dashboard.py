@@ -26,13 +26,167 @@ from kp_core.kp_engine import KPEngine, PlanetNameUtils
 from kp_core.timeline_generator import TimelineGenerator
 from kp_core.analysis_engine import AnalysisEngine
 
-# Placeholder for future imports from kp_core
-# from kp_core.kp_engine import ...
-# from kp_core.timeline_generator import ...
-# from kp_core.analysis_engine import ...
+
 
 # --- Constants ---
 ARCHIVE_DIR = "match_archive"
+
+def apply_team_name_replacements(text, asc_team_name, desc_team_name):
+    """
+    Intelligently replaces generic team references with actual team names while preserving technical terms.
+    
+    Args:
+        text: Text to process
+        asc_team_name: Name of ascendant team
+        desc_team_name: Name of descendant team
+        
+    Returns:
+        str: Text with team names replaced
+    """
+    if not text or not asc_team_name or not desc_team_name:
+        return text
+    
+    # Convert to string if not already
+    text = str(text)
+    
+    # Define all replacement patterns - order matters for specificity
+    replacements = [
+        # Header replacements (most specific first)
+        (f"🏏 **Asc** (Ascendant) vs **Desc** (Descendant)", f"🏏 **{asc_team_name}** (Ascendant) vs **{desc_team_name}** (Descendant)"),
+        (f"🏏 Asc (Ascendant) vs Desc (Descendant)", f"🏏 {asc_team_name} (Ascendant) vs {desc_team_name} (Descendant)"),
+        
+        # Verdict patterns with various formatting
+        ("Strong Advantage Asc", f"Strong Advantage {asc_team_name}"),
+        ("Strong Advantage Desc", f"Strong Advantage {desc_team_name}"),
+        ("Advantage Asc", f"Advantage {asc_team_name}"),
+        ("Advantage Desc", f"Advantage {desc_team_name}"),
+        ("Balanced (Slight Asc)", f"Balanced (Slight {asc_team_name})"),
+        ("Balanced (Slight Desc)", f"Balanced (Slight {desc_team_name})"),
+        ("Favor Asc", f"Favor {asc_team_name}"),
+        ("Favor Desc", f"Favor {desc_team_name}"),
+        
+        # Analysis verdicts with markdown formatting
+        ("✅ **Strong Favor Asc**", f"✅ **Strong Favor {asc_team_name}**"),
+        ("✅ **Strong Favor Desc**", f"✅ **Strong Favor {desc_team_name}**"),
+        ("✅ **Favors Asc**", f"✅ **Favors {asc_team_name}**"),
+        ("✅ **Favors Desc**", f"✅ **Favors {desc_team_name}**"),
+        ("✅ **Supports Asc**", f"✅ **Supports {asc_team_name}**"),
+        ("✅ **Supports Desc**", f"✅ **Supports {desc_team_name}**"),
+        ("✅ **Strongly Supports Asc**", f"✅ **Strongly Supports {asc_team_name}**"),
+        ("✅ **Strongly Supports Desc**", f"✅ **Strongly Supports {desc_team_name}**"),
+        
+        ("❌ **Strong Favor Asc**", f"❌ **Strong Favor {asc_team_name}**"),
+        ("❌ **Strong Favor Desc**", f"❌ **Strong Favor {desc_team_name}**"),
+        ("❌ **Favors Asc**", f"❌ **Favors {asc_team_name}**"),
+        ("❌ **Favors Desc**", f"❌ **Favors {desc_team_name}**"),
+        ("❌ **Opposes Asc**", f"❌ **Opposes {asc_team_name}**"),
+        ("❌ **Opposes Desc**", f"❌ **Opposes {desc_team_name}**"),
+        ("❌ **Strongly Opposes Asc**", f"❌ **Strongly Opposes {asc_team_name}**"),
+        ("❌ **Strongly Opposes Desc**", f"❌ **Strongly Opposes {desc_team_name}**"),
+        
+        # Victory and confirmation patterns
+        ("✅ **Strong Victory Asc**", f"✅ **Strong Victory {asc_team_name}**"),
+        ("✅ **Strong Victory Desc**", f"✅ **Strong Victory {desc_team_name}**"),
+        ("✅ **Victory Asc**", f"✅ **Victory {asc_team_name}**"),
+        ("✅ **Victory Desc**", f"✅ **Victory {desc_team_name}**"),
+        ("✅ **Final Confirmation Asc**", f"✅ **Final Confirmation {asc_team_name}**"),
+        ("✅ **Final Confirmation Desc**", f"✅ **Final Confirmation {desc_team_name}**"),
+        ("✅ **Confirms Asc**", f"✅ **Confirms {asc_team_name}**"),
+        ("✅ **Confirms Desc**", f"✅ **Confirms {desc_team_name}**"),
+        ("✅ **Strongly Confirms Asc**", f"✅ **Strongly Confirms {asc_team_name}**"),
+        ("✅ **Strongly Confirms Desc**", f"✅ **Strongly Confirms {desc_team_name}**"),
+        
+        ("❌ **Strong Victory Asc**", f"❌ **Strong Victory {asc_team_name}**"),
+        ("❌ **Strong Victory Desc**", f"❌ **Strong Victory {desc_team_name}**"),
+        ("❌ **Victory Asc**", f"❌ **Victory {asc_team_name}**"),
+        ("❌ **Victory Desc**", f"❌ **Victory {desc_team_name}**"),
+        ("❌ **Final Confirmation Asc**", f"❌ **Final Confirmation {asc_team_name}**"),
+        ("❌ **Final Confirmation Desc**", f"❌ **Final Confirmation {desc_team_name}**"),
+        ("❌ **Denies Asc**", f"❌ **Denies {asc_team_name}**"),
+        ("❌ **Denies Desc**", f"❌ **Denies {desc_team_name}**"),
+        ("❌ **Strongly Denies Asc**", f"❌ **Strongly Denies {asc_team_name}**"),
+        ("❌ **Strongly Denies Desc**", f"❌ **Strongly Denies {desc_team_name}**"),
+        
+        # Summary sentence patterns
+        ("indicates a general advantage for Asc", f"indicates a general advantage for {asc_team_name}"),
+        ("indicates a general advantage for Desc", f"indicates a general advantage for {desc_team_name}"),
+        ("This indicates a general advantage for Asc", f"This indicates a general advantage for {asc_team_name}"),
+        ("This indicates a general advantage for Desc", f"This indicates a general advantage for {desc_team_name}"),
+        ("Support: Asc", f"Support: {asc_team_name}"),
+        ("Support: Desc", f"Support: {desc_team_name}"),
+        ("✅ **Support Asc**", f"✅ **Support {asc_team_name}**"),
+        ("✅ **Support Desc**", f"✅ **Support {desc_team_name}**"),
+        ("❌ **Support Asc**", f"❌ **Support {asc_team_name}**"),
+        ("❌ **Support Desc**", f"❌ **Support {desc_team_name}**"),
+        
+        # Win probability patterns
+        ("Win Probability: Asc", f"Win Probability: {asc_team_name}"),
+        ("Win Probability: Desc", f"Win Probability: {desc_team_name}"),
+        ("Weighted Score: Asc", f"Weighted Score: {asc_team_name}"),
+        ("Weighted Score: Desc", f"Weighted Score: {desc_team_name}"),
+    ]
+    
+    # Apply all replacements
+    for old_pattern, new_pattern in replacements:
+        text = text.replace(old_pattern, new_pattern)
+    
+    return text
+
+def apply_team_replacements_to_results(results, asc_team_name, desc_team_name):
+    """
+    Apply team name replacements to all relevant parts of the results dictionary.
+    
+    Args:
+        results: Analysis results dictionary
+        asc_team_name: Name of ascendant team  
+        desc_team_name: Name of descendant team
+        
+    Returns:
+        dict: Updated results with team names replaced
+    """
+    if not asc_team_name or not desc_team_name:
+        return results
+    
+    # Create a copy to avoid modifying the original
+    updated_results = results.copy()
+    
+    # Replace in muhurta analysis text
+    if 'muhurta_analysis' in updated_results:
+        updated_results['muhurta_analysis'] = apply_team_name_replacements(
+            updated_results['muhurta_analysis'], asc_team_name, desc_team_name
+        )
+    
+    # Replace in timeline analyses
+    for timeline_key in ['asc_timeline_analysis', 'desc_timeline_analysis', 'moon_timeline_analysis']:
+        if timeline_key in updated_results and 'summary' in updated_results[timeline_key]:
+            updated_results[timeline_key]['summary'] = apply_team_name_replacements(
+                updated_results[timeline_key]['summary'], asc_team_name, desc_team_name
+            )
+    
+    # Replace in timeline DataFrames - Verdict and Comment columns
+    for df_key in ['asc_timeline_df', 'desc_timeline_df', 'moon_timeline_df']:
+        if df_key in updated_results:
+            df = updated_results[df_key].copy()
+            
+            if 'Verdict' in df.columns:
+                df['Verdict'] = df['Verdict'].apply(
+                    lambda x: apply_team_name_replacements(x, asc_team_name, desc_team_name)
+                )
+            
+            if 'Comment' in df.columns:
+                df['Comment'] = df['Comment'].apply(
+                    lambda x: apply_team_name_replacements(x, asc_team_name, desc_team_name)
+                )
+            
+            updated_results[df_key] = df
+    
+    # Store team mapping in results for future reference
+    updated_results['team_mapping'] = {
+        'ascendant_team': asc_team_name,
+        'descendant_team': desc_team_name
+    }
+    
+    return updated_results
 
 def color_planets(val):
     """
@@ -78,10 +232,16 @@ def color_timeline_planets_by_score(planet_short_name, planet_scores):
 
 def color_verdict_cell(verdict_text, team_a_name="Team A", team_b_name="Team B"):
     """
-    Colors verdict cells based on team advantage with different shades for strength:
-    Team A (Green shades): Light green to dark green  
-    Team B (Red shades): Light red to dark red
-    Neutral: Light gray
+    Applies color coding to verdict cells with normal colors and transparency levels:
+    
+    - Strong Advantage: Normal red/green (no transparency)
+    - Advantage: 50% transparency  
+    - Balanced: 80% transparency (color based on score sign)
+    
+    Args:
+        verdict_text: The verdict text to color
+        team_a_name: Name of Team A (Ascendant)
+        team_b_name: Name of Team B (Descendant)
     """
     if pd.isna(verdict_text) or not verdict_text:
         return ''
@@ -90,41 +250,41 @@ def color_verdict_cell(verdict_text, team_a_name="Team A", team_b_name="Team B")
     team_a_lower = team_a_name.lower()
     team_b_lower = team_b_name.lower()
     
-    # Strong advantage patterns
-    if 'strong advantage' in verdict_lower:
+    # === STRONG ADVANTAGE (Normal colors, no transparency) ===
+    if "strong advantage" in verdict_lower:
         if team_a_lower in verdict_lower:
-            return 'background-color: #1b5e20; color: white'  # Dark green for Team A strong advantage
+            return 'background-color: #008000; color: white; font-weight: bold'  # Normal green
         elif team_b_lower in verdict_lower:
-            return 'background-color: #b71c1c; color: white'  # Dark red for Team B strong advantage
+            return 'background-color: #ff0000; color: white; font-weight: bold'  # Normal red
     
-    # Regular advantage patterns  
-    elif 'advantage' in verdict_lower and 'strong' not in verdict_lower:
+    # === ADVANTAGE (50% transparency) ===
+    elif "advantage" in verdict_lower and "strong" not in verdict_lower:
         if team_a_lower in verdict_lower:
-            return 'background-color: #388e3c; color: white'  # Medium green for Team A advantage
+            return 'background-color: rgba(0, 128, 0, 0.5); color: #004000; font-weight: 500'  # Green 50% transparency
         elif team_b_lower in verdict_lower:
-            return 'background-color: #d32f2f; color: white'  # Medium red for Team B advantage
+            return 'background-color: rgba(255, 0, 0, 0.5); color: #800000; font-weight: 500'  # Red 50% transparency
     
-    # Favor patterns (common in KP analysis)
-    elif 'favor' in verdict_lower:
+    # === BALANCED PERIODS (80% transparency, color based on sign) ===
+    elif "balanced" in verdict_lower:
         if team_a_lower in verdict_lower:
-            return 'background-color: #66bb6a; color: white'  # Light green for Team A favor
+            return 'background-color: rgba(0, 128, 0, 0.2); color: #006000; font-weight: 400'  # Green 80% transparency
         elif team_b_lower in verdict_lower:
-            return 'background-color: #ef5350; color: white'  # Light red for Team B favor
+            return 'background-color: rgba(255, 0, 0, 0.2); color: #800000; font-weight: 400'  # Red 80% transparency
+        else:
+            # Pure balanced period
+            return 'background-color: #e0e0e0; color: #333; font-weight: 400'  # Light gray for neutral
     
-    # Challenging periods (Light red/orange for challenges)
+    # === SPECIAL CASES ===
+    # Challenging periods (Orange)
     elif 'challenging period' in verdict_lower:
-        return 'background-color: #ff8a65; color: white'  # Light orange for challenging periods
+        return 'background-color: #ff7043; color: white; font-weight: 400'  # Orange for challenges
     
-    # Balanced/Neutral periods (Light gray)
-    elif any(pattern in verdict_lower for pattern in ['balanced', 'neutral', 'unpredictable', 'balanced period']):
-        return 'background-color: #f5f5f5; color: #333'  # Light gray for balanced
-    
-    # Additional patterns to catch other advantage indicators
-    elif any(keyword in verdict_lower for keyword in ['favors', 'supports', 'dominance']):
-        if team_a_lower in verdict_lower:
-            return 'background-color: #66bb6a; color: white'  # Light green for Team A favor
-        elif team_b_lower in verdict_lower:
-            return 'background-color: #ef5350; color: white'  # Light red for Team B favor
+    # === FALLBACK PATTERNS ===
+    # Catch any remaining team-specific patterns with lightest shades (80% transparency)
+    elif team_a_lower in verdict_lower:
+        return 'background-color: rgba(0, 128, 0, 0.2); color: #006000; font-weight: 400'  # Green 80% transparency
+    elif team_b_lower in verdict_lower:
+        return 'background-color: rgba(255, 0, 0, 0.2); color: #800000; font-weight: 400'  # Red 80% transparency
     
     return ''  # No styling for unrecognized patterns
 
@@ -168,6 +328,10 @@ def save_analysis(results):
     data_to_save['desc_timeline_df'] = results['desc_timeline_df'].to_json(orient='split')
     data_to_save['moon_timeline_df'] = results['moon_timeline_df'].to_json(orient='split')
     data_to_save['match_details']['datetime_utc'] = match_details['datetime_utc'].isoformat()
+    
+    # Preserve team mapping if present
+    if 'team_mapping' in results:
+        data_to_save['team_mapping'] = results['team_mapping']
 
     with open(filepath, 'w') as f:
         json.dump(data_to_save, f, indent=4)
@@ -199,29 +363,18 @@ def load_analysis(filename):
     # Restore dataframes from JSON
     loaded_data['planets_df'] = pd.read_json(loaded_data['planets_df'], orient='split')
     loaded_data['asc_timeline_df'] = pd.read_json(loaded_data['asc_timeline_df'], orient='split')
-    # Handle missing desc_timeline_df in very old files
-    if 'desc_timeline_df' in loaded_data:
-        loaded_data['desc_timeline_df'] = pd.read_json(loaded_data['desc_timeline_df'], orient='split')
-    else: # Or if moon_timeline_df was the old name
-         loaded_data['desc_timeline_df'] = pd.read_json(loaded_data.get('moon_timeline_df', '{}'), orient='split')
-
-    # Handle Moon timeline with backward compatibility
-    if 'moon_timeline_df' in loaded_data:
-        loaded_data['moon_timeline_df'] = pd.read_json(loaded_data['moon_timeline_df'], orient='split')
-    else:
-        # Create empty Moon timeline for backward compatibility
-        loaded_data['moon_timeline_df'] = pd.DataFrame()
-        loaded_data['moon_timeline_analysis'] = {
-            'summary': 'Moon timeline not available in this saved analysis.',
-            'favorable_planets': [],
-            'unfavorable_planets': []
-        }
+    loaded_data['desc_timeline_df'] = pd.read_json(loaded_data['desc_timeline_df'], orient='split')
+    loaded_data['moon_timeline_df'] = pd.read_json(loaded_data['moon_timeline_df'], orient='split')
     
-    # Restore datetime object from ISO string
-    utc_dt_str = loaded_data['match_details']['datetime_utc']
-    if isinstance(utc_dt_str, str):
-        loaded_data['match_details']['datetime_utc'] = datetime.datetime.fromisoformat(utc_dt_str).replace(tzinfo=pytz.utc)
-
+    # Restore datetime
+    loaded_data['match_details']['datetime_utc'] = datetime.datetime.fromisoformat(
+        loaded_data['match_details']['datetime_utc']
+    )
+    
+    # Restore team mapping if present (for newer saved files)
+    if 'team_mapping' not in loaded_data:
+        loaded_data['team_mapping'] = {}
+    
     return loaded_data
 
 def get_saved_matches():
@@ -242,16 +395,119 @@ def display_analysis(results):
         st.code(results.get("traceback", "No traceback available."))
         return # Stop execution if there was an error
 
-    # Button to save the current analysis
+    # Team Name Replacement UI
+    st.subheader("🏏 Team Assignment")
+    st.markdown("*Assign actual team names to Ascendant and Descendant positions based on match observation*")
+    
+    # Get existing team mapping if available
+    existing_mapping = results.get('team_mapping', {})
+    default_asc = existing_mapping.get('ascendant_team', '')
+    default_desc = existing_mapping.get('descendant_team', '')
+    
+    col1, col2, col3 = st.columns([2, 2, 1])
+    
+    with col1:
+        asc_team_input = st.text_input(
+            "Ascendant Team",
+            value=default_asc,
+            placeholder="e.g., Mumbai Indians",
+            help="Team performing like Ascendant position",
+            key=f"asc_team_{id(results)}"
+        )
+    
+    with col2:
+        desc_team_input = st.text_input(
+            "Descendant Team", 
+            value=default_desc,
+            placeholder="e.g., Chennai Super Kings",
+            help="Team performing like Descendant position",
+            key=f"desc_team_{id(results)}"
+        )
+    
+    with col3:
+        st.markdown("<br>", unsafe_allow_html=True)  # Spacing
+        apply_teams = st.button(
+            "Apply Team Names",
+            help="Replace generic 'Asc/Desc' with actual team names",
+            key=f"apply_teams_{id(results)}"
+        )
+    
+    # Apply team name replacements if requested
+    display_results = results
+    if apply_teams and asc_team_input.strip() and desc_team_input.strip():
+        display_results = apply_team_replacements_to_results(results, asc_team_input.strip(), desc_team_input.strip())
+        st.success(f"✅ Analysis updated with team names: **{asc_team_input}** (Ascendant) vs **{desc_team_input}** (Descendant)")
+    elif apply_teams:
+        st.warning("⚠️ Please enter both team names to apply replacements")
+    
+    # Button to save the current analysis (with team names if applied)
     if st.button("Save Current Analysis", key=f"save_{id(results)}"):
-         save_analysis(results)
+         save_analysis(display_results)
          
-    st.header("Muhurta Chart Analysis")
-    if "muhurta_analysis" in results:
-        st.write(results["muhurta_analysis"])
+    # Muhurta Chart Analysis with toggle for scoring methods
+    col_header, col_toggle = st.columns([3, 1])
+    
+    with col_header:
+        st.header("Muhurta Chart Analysis")
+    
+    with col_toggle:
+        st.markdown("<br>", unsafe_allow_html=True)  # Spacing
+        scoring_method = st.radio(
+            "Scoring Method:",
+            options=["Proportional", "Binary"],
+            horizontal=True,
+            key=f"muhurta_method_{id(results)}",
+            help="Toggle between proportional (score-based) and binary (verdict-based) synthesis methods"
+        )
+    
+    # Display analysis based on selected method
+    if "muhurta_analysis" in display_results:
+        method_key = scoring_method.lower()
+        
+        # Check if we need to regenerate analysis with different method
+        if not hasattr(st.session_state, f'muhurta_cache_{id(results)}'):
+            st.session_state[f'muhurta_cache_{id(results)}'] = {}
+        
+        cache = st.session_state[f'muhurta_cache_{id(results)}']
+        
+        if method_key not in cache:
+            # Generate analysis for the selected method
+            with st.spinner(f"Generating {scoring_method} analysis..."):
+                try:
+                    # Get the analysis engine from session state or recreate
+                    match_details = display_results['match_details']
+                    engine = KPEngine(match_details['datetime_utc'], match_details['lat'], match_details['lon'])
+                    analysis_engine = AnalysisEngine(engine, match_details['team_a'], match_details['team_b'])
+                    
+                    # Generate analysis with the selected method
+                    muhurta_analysis = analysis_engine.analyze_muhurta_chart(scoring_method=method_key)
+                    
+                    # Apply team name replacements if they exist
+                    team_mapping = display_results.get('team_mapping', {})
+                    if team_mapping.get('ascendant_team') and team_mapping.get('descendant_team'):
+                        muhurta_analysis = apply_team_name_replacements(
+                            muhurta_analysis, 
+                            team_mapping['ascendant_team'], 
+                            team_mapping['descendant_team']
+                        )
+                    
+                    cache[method_key] = muhurta_analysis
+                    
+                except Exception as e:
+                    st.error(f"Error generating {scoring_method} analysis: {str(e)}")
+                    cache[method_key] = display_results["muhurta_analysis"]  # Fallback to existing
+        
+        # Display the cached analysis
+        st.write(cache[method_key])
+        
+        # Add a small note about the difference
+        if scoring_method == "Proportional":
+            st.info("💡 **Proportional Method**: Uses actual score magnitudes to weight each factor, providing nuanced probability calculations.")
+        else:
+            st.info("💡 **Binary Method**: Uses traditional fixed points based on verdict categories, following classical approach.")
 
     st.subheader("Planetary Positions & Scores")
-    planets_df = results["planets_df"]
+    planets_df = display_results["planets_df"]
     
     # Specify column order to have Score at the end
     column_order = [col for col in planets_df.columns if col not in ['Score', 'Significators']] + ['Significators', 'Score']
@@ -263,9 +519,14 @@ def display_analysis(results):
     styler = reordered_df.style.apply(lambda x: x.map(color_planets), subset=['Score'])
     st.dataframe(styler.format({'Score': '{:.2f}'}))
 
+    # Get team names for verdict coloring (use replaced names if available)
+    team_mapping = display_results.get('team_mapping', {})
+    team_a_name = team_mapping.get('ascendant_team', 'Asc')
+    team_b_name = team_mapping.get('descendant_team', 'Desc')
+
     st.subheader(f"Ascendant Based Timeline (Asc) - Star Lord + Sub Lord Level")
     st.markdown('<p class="timeline-description">Aggregated timeline showing periods at Star Lord and Sub Lord level for practical match analysis. Each period represents longer, more actionable time segments.</p>', unsafe_allow_html=True)
-    asc_timeline_df = results["asc_timeline_df"].copy() # Use a copy to avoid modifying session state
+    asc_timeline_df = display_results["asc_timeline_df"].copy() # Use a copy to avoid modifying session state
     
     # Convert times to IST for display using the correct pandas method
     asc_timeline_df['Start Time'] = pd.to_datetime(asc_timeline_df['Start Time']).dt.tz_convert('Asia/Kolkata').dt.strftime('%H:%M:%S')
@@ -290,15 +551,15 @@ def display_analysis(results):
         lambda x: color_timeline_planets_by_score(x, planet_scores),
         subset=planet_columns
     ).applymap(
-        lambda x: color_verdict_cell(x, "Asc", "Desc"),
+        lambda x: color_verdict_cell(x, team_a_name, team_b_name),
         subset=['Verdict']
     )
     st.dataframe(styler_asc, use_container_width=True, height=400)
-    st.write(results["asc_timeline_analysis"]["summary"])
+    st.write(display_results["asc_timeline_analysis"]["summary"])
 
     st.subheader(f"Descendant Based Timeline (Desc) - Star Lord + Sub Lord Level")
     st.markdown('<p class="timeline-description">Aggregated timeline showing periods at Star Lord and Sub Lord level for practical match analysis. Each period represents longer, more actionable time segments.</p>', unsafe_allow_html=True)
-    desc_timeline_df = results["desc_timeline_df"].copy() # Use a copy
+    desc_timeline_df = display_results["desc_timeline_df"].copy() # Use a copy
 
     # Convert times to IST for display using the correct pandas method
     desc_timeline_df['Start Time'] = pd.to_datetime(desc_timeline_df['Start Time']).dt.tz_convert('Asia/Kolkata').dt.strftime('%H:%M:%S')
@@ -317,15 +578,15 @@ def display_analysis(results):
         lambda x: color_timeline_planets_by_score(x, planet_scores),
         subset=planet_columns_desc
     ).applymap(
-        lambda x: color_verdict_cell(x, "Asc", "Desc"),
+        lambda x: color_verdict_cell(x, team_a_name, team_b_name),
         subset=['Verdict']
     )
     st.dataframe(styler_desc, use_container_width=True, height=400)
-    st.write(results["desc_timeline_analysis"]["summary"])
+    st.write(display_results["desc_timeline_analysis"]["summary"])
     
     st.subheader("Moon SSL Timeline - Full Granular Detail")
     st.markdown('<p class="timeline-description">Detailed timeline showing all Sub-Sub Lord periods for precise timing analysis. Useful for identifying exact moments of significant events.</p>', unsafe_allow_html=True)
-    moon_timeline_df = results["moon_timeline_df"].copy()
+    moon_timeline_df = display_results["moon_timeline_df"].copy()
 
     # Convert times to IST for display using the correct pandas method
     moon_timeline_df['Start Time'] = pd.to_datetime(moon_timeline_df['Start Time']).dt.tz_convert('Asia/Kolkata').dt.strftime('%H:%M:%S')
@@ -339,35 +600,35 @@ def display_analysis(results):
         lambda x: color_timeline_planets_by_score(x, planet_scores),
         subset=['NL_Planet', 'SL_Planet', 'SSL_Planet']
     ).applymap(
-        lambda x: color_verdict_cell(x, "Asc", "Desc"),
+        lambda x: color_verdict_cell(x, team_a_name, team_b_name),
         subset=['Verdict']
     )
     st.dataframe(styler_moon, use_container_width=True, height=400)
-    st.write(results["moon_timeline_analysis"]["summary"])
+    st.write(display_results["moon_timeline_analysis"]["summary"])
     
     st.subheader("Favorable Planets")
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.write(f"**For Asc (Ascendant):**")
-        st.json(results['asc_timeline_analysis']['favorable_planets'])
+        st.write(f"**For {team_a_name} (Ascendant):**")
+        st.json(display_results['asc_timeline_analysis']['favorable_planets'])
     with col2:
-        st.write(f"**For Desc (Descendant):**")
-        st.json(results['desc_timeline_analysis']['favorable_planets'])
+        st.write(f"**For {team_b_name} (Descendant):**")
+        st.json(display_results['desc_timeline_analysis']['favorable_planets'])
     with col3:
         st.write("**For Moon SSL:**")
-        st.json(results['moon_timeline_analysis']['favorable_planets'])
+        st.json(display_results['moon_timeline_analysis']['favorable_planets'])
         
     st.subheader("Unfavorable Planets")
     col4, col5, col6 = st.columns(3)
     with col4:
-        st.write(f"**For Asc (Ascendant):**")
-        st.json(results['asc_timeline_analysis']['unfavorable_planets'])
+        st.write(f"**For {team_a_name} (Ascendant):**")
+        st.json(display_results['asc_timeline_analysis']['unfavorable_planets'])
     with col5:
-        st.write(f"**For Desc (Descendant):**")
-        st.json(results['desc_timeline_analysis']['unfavorable_planets'])
+        st.write(f"**For {team_b_name} (Descendant):**")
+        st.json(display_results['desc_timeline_analysis']['unfavorable_planets'])
     with col6:
         st.write("**For Moon SSL:**")
-        st.json(results['moon_timeline_analysis']['unfavorable_planets'])
+        st.json(display_results['moon_timeline_analysis']['unfavorable_planets'])
 
 def run_analysis(match_details):
     """
@@ -377,7 +638,7 @@ def run_analysis(match_details):
         engine = KPEngine(match_details['datetime_utc'], match_details['lat'], match_details['lon'])
         analysis_engine = AnalysisEngine(engine, match_details['team_a'], match_details['team_b'])
         
-        muhurta_analysis = analysis_engine.analyze_muhurta_chart()
+        muhurta_analysis = analysis_engine.analyze_muhurta_chart(scoring_method='proportional')
         planets_df = analysis_engine.get_all_planet_details_df()
 
         asc_timeline_gen = TimelineGenerator(engine, 'Ascendant')

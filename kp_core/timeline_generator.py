@@ -206,9 +206,9 @@ class TimelineGenerator:
                 current_time = end_time
                 continue
 
-            # Calculate score using a dummy AnalysisEngine for now.
-            # This part can be integrated better later.
-            score = 0 # Placeholder
+            # Score calculation is now handled by AnalysisEngine.analyze_timeline()
+            # This generator only provides time periods and planet combinations
+            score = 0
 
             timeline_data.append({
                 'Start Time': current_time,
