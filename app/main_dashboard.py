@@ -290,18 +290,48 @@ def color_verdict_cell(verdict_text, team_a_name="Team A", team_b_name="Team B")
 
 @st.cache_data
 def get_lat_lon(location_str):
-    """Gets latitude and longitude from a location string using geopy."""
+    """Gets latitude and longitude from a location string using multiple geocoding services."""
     if not location_str:
         return None, None
     
+    # Try geocode.xyz first (free service that often works on cloud platforms)
     try:
-        geolocator = Nominatim(user_agent="kp_ai_astrologer")
+        import requests
+        import time
+        time.sleep(1)  # Be respectful
+        
+        url = f"https://geocode.xyz/{location_str}?json=1"
+        headers = {'User-Agent': 'kp_ai_astrologer_streamlit_app'}
+        response = requests.get(url, headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            if 'latt' in data and 'longt' in data:
+                try:
+                    lat = float(data['latt'])
+                    lon = float(data['longt'])
+                    if lat != 0 and lon != 0:  # Valid coordinates
+                        return lat, lon
+                except (ValueError, TypeError):
+                    pass
+    except Exception:
+        pass  # Fall through to next service
+    
+    # Fallback to Nominatim with enhanced headers and rate limiting
+    try:
+        import time
+        time.sleep(1.5)  # Respect rate limits
+        geolocator = Nominatim(
+            user_agent="kp_ai_astrologer_streamlit_v1.0",
+            timeout=10
+        )
         location = geolocator.geocode(location_str)
         if location:
             return location.latitude, location.longitude
-    except Exception as e:
-        st.warning("Geocoder service is unavailable. Please enter coordinates manually.")
+    except Exception:
+        pass
         
+    st.warning("Geocoder service is unavailable. Please enter coordinates manually.")
     return None, None
 
 def save_analysis(results):
