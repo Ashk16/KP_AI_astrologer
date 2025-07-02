@@ -290,45 +290,18 @@ def color_verdict_cell(verdict_text, team_a_name="Team A", team_b_name="Team B")
 
 @st.cache_data
 def get_lat_lon(location_str):
-    """Gets latitude and longitude from a location string using geopy.
-    Version: 2.0 - Enhanced with retry mechanism and better error handling
-    """
+    """Gets latitude and longitude from a location string using geopy."""
     if not location_str:
         return None, None
     
-    # Try multiple attempts with increasing timeout
-    max_attempts = 3
-    timeouts = [10, 15, 20]  # seconds
-    
-    for attempt in range(max_attempts):
-        try:
-            # Use a more specific user_agent and timeout
-            geolocator = Nominatim(
-                user_agent="kp_ai_astrologer_v2.0_streamlit_app",
-                timeout=timeouts[attempt]
-            )
-            location = geolocator.geocode(location_str)
-            if location:
-                return location.latitude, location.longitude
-                
-        except GeocoderTimedOut:
-            if attempt < max_attempts - 1:
-                st.info(f"Geocoding timeout (attempt {attempt + 1}/{max_attempts}), retrying...")
-                continue
-            else:
-                st.warning("Geocoding timed out after multiple attempts. Please enter coordinates manually.")
-                
-        except GeocoderUnavailable:
-            if attempt < max_attempts - 1:
-                st.info(f"Geocoder temporarily unavailable (attempt {attempt + 1}/{max_attempts}), retrying...")
-                continue
-            else:
-                st.warning("Geocoder service is unavailable. Please enter coordinates manually.")
-                
-        except Exception as e:
-            st.error(f"An error occurred during geocoding: {e}")
-            break
-            
+    try:
+        geolocator = Nominatim(user_agent="kp_ai_astrologer")
+        location = geolocator.geocode(location_str)
+        if location:
+            return location.latitude, location.longitude
+    except Exception as e:
+        st.warning("Geocoder service is unavailable. Please enter coordinates manually.")
+        
     return None, None
 
 def save_analysis(results):
@@ -789,7 +762,7 @@ def main():
 
         # --- Location Input ---
         location_query = st.text_input("Enter Location (e.g., 'Mumbai, India')", "Wankhede Stadium, Mumbai")
-        st.caption("🔧 Geocoding v2.0 - Enhanced error handling")
+
         
         # Initialize lat/lon
         lat_val, lon_val = 19.0760, 72.8777 # Default to Mumbai
