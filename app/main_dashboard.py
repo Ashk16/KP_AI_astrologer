@@ -290,7 +290,9 @@ def color_verdict_cell(verdict_text, team_a_name="Team A", team_b_name="Team B")
 
 @st.cache_data
 def get_lat_lon(location_str):
-    """Gets latitude and longitude from a location string using geopy."""
+    """Gets latitude and longitude from a location string using geopy.
+    Version: 2.0 - Enhanced with retry mechanism and better error handling
+    """
     if not location_str:
         return None, None
     
@@ -787,6 +789,7 @@ def main():
 
         # --- Location Input ---
         location_query = st.text_input("Enter Location (e.g., 'Mumbai, India')", "Wankhede Stadium, Mumbai")
+        st.caption("🔧 Geocoding v2.0 - Enhanced error handling")
         
         # Initialize lat/lon
         lat_val, lon_val = 19.0760, 72.8777 # Default to Mumbai
