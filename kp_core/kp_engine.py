@@ -3,6 +3,18 @@ import pandas as pd
 from datetime import datetime, timedelta
 import os
 
+def get_ephe_path():
+    """
+    Determines the correct path for the Swiss Ephemeris data files,
+    making it compatible with local execution and Streamlit Cloud deployment.
+    """
+    # The 'swisseph' directory is expected to be in the project root.
+    # This script is in kp_core, so we go up one level.
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ephe_path = os.path.join(project_root, 'swisseph')
+    
+    return ephe_path
+
 # --- Constants and Mappings ---
 
 PLANET_NAMES = {
@@ -119,9 +131,7 @@ class KPEngine:
                              self.utc_dt.hour + self.utc_dt.minute/60 + self.utc_dt.second/3600)
         
         # Set Swiss Ephemeris path
-        # This needs to be configured to the location of your SE files
-        # It's better to set this as an environment variable.
-        swe.set_ephe_path(os.environ.get('SWEP_PATH'))
+        swe.set_ephe_path(get_ephe_path())
 
         self.planets = self._calculate_all_body_details()
         self.cusps = self._calculate_all_cusp_details()
