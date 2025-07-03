@@ -415,7 +415,100 @@ def get_saved_matches():
     return sorted(files, reverse=True)
 
 def get_ist_time(dt_utc):
-    return dt_utc.astimezone(pytz.timezone('Asia/Kolkata'))
+    """Convert UTC datetime to IST"""
+    return pd.to_datetime(dt_utc).tz_convert('Asia/Kolkata')
+
+def get_magnitude_category(magnitude):
+    """
+    Categorize event magnitude into user-friendly buckets.
+    
+    Args:
+        magnitude: Event magnitude value
+        
+    Returns:
+        str: Magnitude category
+    """
+    if pd.isna(magnitude):
+        return "Unknown"
+    elif magnitude >= 3.0:
+        return "🔥 Major Events"
+    elif magnitude >= 2.0:
+        return "⚡ Significant" 
+    elif magnitude >= 1.0:
+        return "📈 Moderate"
+    elif magnitude >= 0.5:
+        return "📊 Minor"
+    else:
+        return "😴 Minimal"
+
+def clean_comment_for_display(comment):
+    """
+    Clean comment by removing score, magnitude, and confidence information.
+    Keeps only the descriptive planetary and cricket context parts.
+    
+    Args:
+        comment: Original comment string
+        
+    Returns:
+        str: Cleaned comment
+    """
+    if pd.isna(comment):
+        return ""
+    
+    # Split comment by separator
+    parts = comment.split(" | ")
+    
+    # Filter out parts containing score, magnitude, or confidence info
+    filtered_parts = []
+    for part in parts:
+        # Skip parts that contain technical indicators
+        skip_indicators = [
+            "magnitude:", "score:", "nl:", "sl:", "combined:", 
+            "📊", "high", "medium", "low"
+        ]
+        
+        # Keep the part if it doesn't contain any skip indicators
+        if not any(indicator in part.lower() for indicator in skip_indicators):
+            filtered_parts.append(part)
+    
+    return " | ".join(filtered_parts)
+
+def prepare_timeline_for_display(timeline_df):
+    """
+    Prepare timeline DataFrame for user-friendly display by adding formatted columns.
+    
+    Args:
+        timeline_df: Original timeline DataFrame
+        
+    Returns:
+        DataFrame: Enhanced timeline with additional display columns
+    """
+    if timeline_df.empty:
+        return timeline_df
+    
+    df_display = timeline_df.copy()
+    
+    # Add formatted Score column if it exists
+    if 'Score' in df_display.columns:
+        df_display['Score_Display'] = df_display['Score'].apply(lambda x: f"{x:+.3f}" if pd.notna(x) else "")
+    else:
+        df_display['Score_Display'] = ""
+    
+    # Add Magnitude column and category if Event_Magnitude exists
+    if 'Event_Magnitude' in df_display.columns:
+        df_display['Magnitude_Display'] = df_display['Event_Magnitude'].apply(lambda x: f"{x:.2f}" if pd.notna(x) else "")
+        df_display['Magnitude_Category'] = df_display['Event_Magnitude'].apply(get_magnitude_category)
+    else:
+        df_display['Magnitude_Display'] = ""
+        df_display['Magnitude_Category'] = ""
+    
+    # Clean comments
+    if 'Comment' in df_display.columns:
+        df_display['Comment_Clean'] = df_display['Comment'].apply(clean_comment_for_display)
+    else:
+        df_display['Comment_Clean'] = ""
+    
+    return df_display
 
 def display_analysis(results):
     """Display the analysis results for a single match."""
@@ -630,8 +723,8 @@ def display_analysis(results):
     team_a_name = team_mapping.get('ascendant_team', 'Asc')
     team_b_name = team_mapping.get('descendant_team', 'Desc')
 
-    st.subheader(f"Ascendant Based Timeline (Asc) - Star Lord + Sub Lord Level")
-    st.markdown('<p class="timeline-description">Aggregated timeline showing periods at Star Lord and Sub Lord level for practical match analysis. Each period represents longer, more actionable time segments.</p>', unsafe_allow_html=True)
+    st.subheader(f"Ascendant Based Timeline (Asc) - Enhanced Dynamic Analysis")
+    st.markdown('<p class="timeline-description">Enhanced timeline using dynamic layer influence methodology. Shows planetary dominance, convergence factors, and event magnitudes for precise match analysis.</p>', unsafe_allow_html=True)
     asc_timeline_df = display_results["asc_timeline_df"].copy() # Use a copy to avoid modifying session state
     
     # Convert times to IST for display using the correct pandas method
@@ -644,8 +737,87 @@ def display_analysis(results):
         planet_short = PlanetNameUtils.to_short_name(planet)
         planet_scores[planet_short] = planets_df.loc[planet, 'Score']
     
-    # Create a view for display, dropping the score column but keeping Verdict and Comment
-    asc_display_df = asc_timeline_df.drop(columns=['Score'])
+    # Display enhanced analysis summary if available
+    if 'average_magnitude' in display_results["asc_timeline_analysis"]:
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Average Event Magnitude", f"{display_results['asc_timeline_analysis']['average_magnitude']:.2f}")
+        with col2:
+            high_intensity = display_results['asc_timeline_analysis'].get('high_intensity_periods', 0)
+            st.metric("High Intensity Periods", high_intensity)
+        with col3:
+            method = display_results['asc_timeline_analysis'].get('method', 'standard')
+            st.metric("Analysis Method", method.replace('_', ' ').title())
+    
+    # Create a view for display with enhanced user-friendly columns
+    if 'NL_Influence' in asc_timeline_df.columns:
+        # Prepare enhanced timeline with additional display columns
+        asc_prepared_df = prepare_timeline_for_display(asc_timeline_df)
+        
+        # Define display columns in the requested order: Score, Verdict, Magnitude, Magnitude Category, Comment
+        base_columns = ['Start Time', 'End Time', 'NL_Planet', 'SL_Planet']
+        enhanced_columns = ['Score_Display', 'Verdict', 'Magnitude_Display', 'Magnitude_Category', 'Comment_Clean']
+        
+        # Add SSL_Planet if it exists (for granular timelines)
+        if 'SSL_Planet' in asc_timeline_df.columns:
+            base_columns.append('SSL_Planet')
+        
+        display_columns = base_columns + enhanced_columns
+        asc_display_df = asc_prepared_df[display_columns].copy()
+        
+        # Rename columns for better display
+        asc_display_df = asc_display_df.rename(columns={
+            'Score_Display': 'Score',
+            'Magnitude_Display': 'Magnitude', 
+            'Magnitude_Category': 'Magnitude Category',
+            'Comment_Clean': 'Comment'
+        })
+        
+        # Add option to view comments separately for better readability
+        if st.checkbox("📝 Show Detailed Comments Separately", key=f"asc_comments_separate_{id(results)}_{hash(str(asc_timeline_df.columns))}"):
+            # Display table without comments
+            asc_no_comments = asc_display_df.drop(columns=['Comment'])
+            styler_asc_no_comments = asc_no_comments.style.applymap(
+                lambda x: color_timeline_planets_by_score(x, planet_scores),
+                subset=[col for col in planet_columns if col in asc_no_comments.columns]
+            ).applymap(
+                lambda x: color_verdict_cell(x, team_a_name, team_b_name),
+                subset=['Verdict']
+            )
+            st.dataframe(styler_asc_no_comments, use_container_width=True, height=400)
+            
+            # Display comments in expandable sections
+            with st.expander("📝 Detailed Period Comments", expanded=True):
+                for idx, row in asc_display_df.iterrows():
+                    st.markdown(f"**{row['Start Time']} - {row['End Time']}** ({row['NL_Planet']}-{row['SL_Planet']}) - *{row['Verdict']}*")
+                    st.markdown(f"<div style='padding-left: 20px; color: #444; line-height: 1.5;'>{row['Comment']}</div>", unsafe_allow_html=True)
+                    st.markdown("---")
+        else:
+            # Display full table with comments - already prepared above
+            pass
+        
+        # Add expander for technical details
+        with st.expander("🔬 Technical Details (Layer Influences & Event Magnitudes)", expanded=False):
+            technical_cols = ['Start Time', 'End Time', 'NL_Planet', 'SL_Planet', 'NL_Influence', 'SL_Influence', 'Event_Magnitude', 'Convergence_Factor', 'Score']
+            if 'SSL_Planet' in asc_timeline_df.columns:
+                technical_cols.insert(4, 'SSL_Planet')
+                technical_cols.insert(6, 'SSL_Influence')
+            
+            tech_df = asc_timeline_df[technical_cols].copy()
+            
+            # Format technical columns for better display
+            for col in ['NL_Influence', 'SL_Influence', 'SSL_Influence']:
+                if col in tech_df.columns:
+                    tech_df[col] = tech_df[col].map(lambda x: f"{x:.1%}" if pd.notna(x) else "")
+            
+            for col in ['Event_Magnitude', 'Convergence_Factor', 'Score']:
+                if col in tech_df.columns:
+                    tech_df[col] = tech_df[col].map(lambda x: f"{x:.3f}" if pd.notna(x) else "")
+            
+            st.dataframe(tech_df, use_container_width=True)
+    else:
+        # Fallback for older timeline format
+        asc_display_df = asc_timeline_df.drop(columns=['Score'] if 'Score' in asc_timeline_df.columns else [])
     
     # Apply coloring to planet columns and verdict column  
     # Check if SSL_Planet column exists (for granular timelines) or not (for aggregated timelines)
@@ -653,26 +825,107 @@ def display_analysis(results):
     if 'SSL_Planet' in asc_display_df.columns:
         planet_columns.append('SSL_Planet')
     
-    styler_asc = asc_display_df.style.applymap(
-        lambda x: color_timeline_planets_by_score(x, planet_scores),
-        subset=planet_columns
-    ).applymap(
-        lambda x: color_verdict_cell(x, team_a_name, team_b_name),
-        subset=['Verdict']
-    )
-    st.dataframe(styler_asc, use_container_width=True, height=400)
+    # Only show the main dataframe if comments are not shown separately
+    if 'NL_Influence' not in asc_timeline_df.columns or not st.session_state.get(f"asc_comments_separate_{id(results)}_{hash(str(asc_timeline_df.columns))}", False):
+        styler_asc = asc_display_df.style.applymap(
+            lambda x: color_timeline_planets_by_score(x, planet_scores),
+            subset=planet_columns
+        ).applymap(
+            lambda x: color_verdict_cell(x, team_a_name, team_b_name),
+            subset=['Verdict']
+        )
+        st.dataframe(styler_asc, use_container_width=True, height=400)
     st.write(display_results["asc_timeline_analysis"]["summary"])
 
-    st.subheader(f"Descendant Based Timeline (Desc) - Star Lord + Sub Lord Level")
-    st.markdown('<p class="timeline-description">Aggregated timeline showing periods at Star Lord and Sub Lord level for practical match analysis. Each period represents longer, more actionable time segments.</p>', unsafe_allow_html=True)
+    st.subheader(f"Descendant Based Timeline (Desc) - Enhanced Dynamic Analysis")
+    st.markdown('<p class="timeline-description">Enhanced timeline using dynamic layer influence methodology. Shows planetary dominance, convergence factors, and event magnitudes for precise match analysis.</p>', unsafe_allow_html=True)
     desc_timeline_df = display_results["desc_timeline_df"].copy() # Use a copy
 
     # Convert times to IST for display using the correct pandas method
     desc_timeline_df['Start Time'] = pd.to_datetime(desc_timeline_df['Start Time']).dt.tz_convert('Asia/Kolkata').dt.strftime('%H:%M:%S')
     desc_timeline_df['End Time'] = pd.to_datetime(desc_timeline_df['End Time']).dt.tz_convert('Asia/Kolkata').dt.strftime('%H:%M:%S')
 
-    # Create a view for display, dropping the score column but keeping Verdict and Comment
-    desc_display_df = desc_timeline_df.drop(columns=['Score'])
+    # Display enhanced analysis summary if available
+    if 'average_magnitude' in display_results["desc_timeline_analysis"]:
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Average Event Magnitude", f"{display_results['desc_timeline_analysis']['average_magnitude']:.2f}")
+        with col2:
+            high_intensity = display_results['desc_timeline_analysis'].get('high_intensity_periods', 0)
+            st.metric("High Intensity Periods", high_intensity)
+        with col3:
+            method = display_results['desc_timeline_analysis'].get('method', 'standard')
+            st.metric("Analysis Method", method.replace('_', ' ').title())
+
+    # Create a view for display with enhanced user-friendly columns
+    if 'NL_Influence' in desc_timeline_df.columns:
+        # Prepare enhanced timeline with additional display columns
+        desc_prepared_df = prepare_timeline_for_display(desc_timeline_df)
+        
+        # Define display columns in the requested order: Score, Verdict, Magnitude, Magnitude Category, Comment
+        base_columns = ['Start Time', 'End Time', 'NL_Planet', 'SL_Planet']
+        enhanced_columns = ['Score_Display', 'Verdict', 'Magnitude_Display', 'Magnitude_Category', 'Comment_Clean']
+        
+        # Add SSL_Planet if it exists (for granular timelines)
+        if 'SSL_Planet' in desc_timeline_df.columns:
+            base_columns.append('SSL_Planet')
+        
+        display_columns = base_columns + enhanced_columns
+        desc_display_df = desc_prepared_df[display_columns].copy()
+        
+        # Rename columns for better display
+        desc_display_df = desc_display_df.rename(columns={
+            'Score_Display': 'Score',
+            'Magnitude_Display': 'Magnitude', 
+            'Magnitude_Category': 'Magnitude Category',
+            'Comment_Clean': 'Comment'
+        })
+        
+        # Add option to view comments separately for better readability
+        if st.checkbox("📝 Show Detailed Comments Separately", key=f"desc_comments_separate_{id(results)}_{hash(str(desc_timeline_df.columns))}"):
+            # Display table without comments
+            desc_no_comments = desc_display_df.drop(columns=['Comment'])
+            styler_desc_no_comments = desc_no_comments.style.applymap(
+                lambda x: color_timeline_planets_by_score(x, planet_scores),
+                subset=[col for col in planet_columns_desc if col in desc_no_comments.columns]
+            ).applymap(
+                lambda x: color_verdict_cell(x, team_a_name, team_b_name),
+                subset=['Verdict']
+            )
+            st.dataframe(styler_desc_no_comments, use_container_width=True, height=400)
+            
+            # Display comments in expandable sections
+            with st.expander("📝 Detailed Period Comments", expanded=True):
+                for idx, row in desc_display_df.iterrows():
+                    st.markdown(f"**{row['Start Time']} - {row['End Time']}** ({row['NL_Planet']}-{row['SL_Planet']}) - *{row['Verdict']}*")
+                    st.markdown(f"<div style='padding-left: 20px; color: #444; line-height: 1.5;'>{row['Comment']}</div>", unsafe_allow_html=True)
+                    st.markdown("---")
+        else:
+            # Display full table with comments - already prepared above
+            pass
+        
+        # Add expander for technical details
+        with st.expander("🔬 Technical Details (Layer Influences & Event Magnitudes)", expanded=False):
+            technical_cols = ['Start Time', 'End Time', 'NL_Planet', 'SL_Planet', 'NL_Influence', 'SL_Influence', 'Event_Magnitude', 'Convergence_Factor', 'Score']
+            if 'SSL_Planet' in desc_timeline_df.columns:
+                technical_cols.insert(4, 'SSL_Planet')
+                technical_cols.insert(6, 'SSL_Influence')
+            
+            tech_df = desc_timeline_df[technical_cols].copy()
+            
+            # Format technical columns for better display
+            for col in ['NL_Influence', 'SL_Influence', 'SSL_Influence']:
+                if col in tech_df.columns:
+                    tech_df[col] = tech_df[col].map(lambda x: f"{x:.1%}" if pd.notna(x) else "")
+            
+            for col in ['Event_Magnitude', 'Convergence_Factor', 'Score']:
+                if col in tech_df.columns:
+                    tech_df[col] = tech_df[col].map(lambda x: f"{x:.3f}" if pd.notna(x) else "")
+            
+            st.dataframe(tech_df, use_container_width=True)
+    else:
+        # Fallback for older timeline format
+        desc_display_df = desc_timeline_df.drop(columns=['Score'] if 'Score' in desc_timeline_df.columns else [])
     
     # Apply coloring to planet columns and verdict column
     # Check if SSL_Planet column exists (for granular timelines) or not (for aggregated timelines)
@@ -680,36 +933,111 @@ def display_analysis(results):
     if 'SSL_Planet' in desc_display_df.columns:
         planet_columns_desc.append('SSL_Planet')
     
-    styler_desc = desc_display_df.style.applymap(
-        lambda x: color_timeline_planets_by_score(x, planet_scores),
-        subset=planet_columns_desc
-    ).applymap(
-        lambda x: color_verdict_cell(x, team_a_name, team_b_name),
-        subset=['Verdict']
-    )
-    st.dataframe(styler_desc, use_container_width=True, height=400)
+    # Only show the main dataframe if comments are not shown separately
+    if 'NL_Influence' not in desc_timeline_df.columns or not st.session_state.get(f"desc_comments_separate_{id(results)}_{hash(str(desc_timeline_df.columns))}", False):
+        styler_desc = desc_display_df.style.applymap(
+            lambda x: color_timeline_planets_by_score(x, planet_scores),
+            subset=planet_columns_desc
+        ).applymap(
+            lambda x: color_verdict_cell(x, team_a_name, team_b_name),
+            subset=['Verdict']
+        )
+        st.dataframe(styler_desc, use_container_width=True, height=400)
     st.write(display_results["desc_timeline_analysis"]["summary"])
     
-    st.subheader("Moon SSL Timeline - Full Granular Detail")
-    st.markdown('<p class="timeline-description">Detailed timeline showing all Sub-Sub Lord periods for precise timing analysis. Useful for identifying exact moments of significant events.</p>', unsafe_allow_html=True)
+    st.subheader("Moon SSL Timeline - Enhanced Dynamic Full Granular Detail")
+    st.markdown('<p class="timeline-description">Enhanced detailed timeline with dynamic layer analysis showing all Sub-Sub Lord periods. Includes planetary influence percentages, convergence factors, and event magnitude predictions for precise timing analysis.</p>', unsafe_allow_html=True)
     moon_timeline_df = display_results["moon_timeline_df"].copy()
 
     # Convert times to IST for display using the correct pandas method
     moon_timeline_df['Start Time'] = pd.to_datetime(moon_timeline_df['Start Time']).dt.tz_convert('Asia/Kolkata').dt.strftime('%H:%M:%S')
     moon_timeline_df['End Time'] = pd.to_datetime(moon_timeline_df['End Time']).dt.tz_convert('Asia/Kolkata').dt.strftime('%H:%M:%S')
 
-    # Create a view for display, dropping the score column but keeping Verdict and Comment
-    moon_display_df = moon_timeline_df.drop(columns=['Score'])
+    # Display enhanced analysis summary if available
+    if 'average_magnitude' in display_results["moon_timeline_analysis"]:
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Average Event Magnitude", f"{display_results['moon_timeline_analysis']['average_magnitude']:.2f}")
+        with col2:
+            high_intensity = display_results['moon_timeline_analysis'].get('high_intensity_periods', 0)
+            st.metric("High Intensity Periods", high_intensity)
+        with col3:
+            method = display_results['moon_timeline_analysis'].get('method', 'standard')
+            st.metric("Analysis Method", method.replace('_', ' ').title())
+
+    # Create a view for display with enhanced user-friendly columns
+    if 'NL_Influence' in moon_timeline_df.columns:
+        # Prepare enhanced timeline with additional display columns
+        moon_prepared_df = prepare_timeline_for_display(moon_timeline_df)
+        
+        # Define display columns in the requested order: Score, Verdict, Magnitude, Magnitude Category, Comment
+        base_columns = ['Start Time', 'End Time', 'NL_Planet', 'SL_Planet', 'SSL_Planet']
+        enhanced_columns = ['Score_Display', 'Verdict', 'Magnitude_Display', 'Magnitude_Category', 'Comment_Clean']
+        
+        display_columns = base_columns + enhanced_columns
+        moon_display_df = moon_prepared_df[display_columns].copy()
+        
+        # Rename columns for better display
+        moon_display_df = moon_display_df.rename(columns={
+            'Score_Display': 'Score',
+            'Magnitude_Display': 'Magnitude', 
+            'Magnitude_Category': 'Magnitude Category',
+            'Comment_Clean': 'Comment'
+        })
+        
+        # Add option to view comments separately for better readability
+        if st.checkbox("📝 Show Detailed Comments Separately", key=f"moon_comments_separate_{id(results)}_{hash(str(moon_timeline_df.columns))}"):
+            # Display table without comments
+            moon_no_comments = moon_display_df.drop(columns=['Comment'])
+            styler_moon_no_comments = moon_no_comments.style.applymap(
+                lambda x: color_timeline_planets_by_score(x, planet_scores),
+                subset=['NL_Planet', 'SL_Planet', 'SSL_Planet']
+            ).applymap(
+                lambda x: color_verdict_cell(x, team_a_name, team_b_name),
+                subset=['Verdict']
+            )
+            st.dataframe(styler_moon_no_comments, use_container_width=True, height=400)
+            
+            # Display comments in expandable sections
+            with st.expander("📝 Detailed Period Comments", expanded=True):
+                for idx, row in moon_display_df.iterrows():
+                    st.markdown(f"**{row['Start Time']} - {row['End Time']}** ({row['NL_Planet']}-{row['SL_Planet']}-{row['SSL_Planet']}) - *{row['Verdict']}*")
+                    st.markdown(f"<div style='padding-left: 20px; color: #444; line-height: 1.5;'>{row['Comment']}</div>", unsafe_allow_html=True)
+                    st.markdown("---")
+        else:
+            # Display full table with comments - already prepared above
+            pass
+        
+        # Add expander for technical details
+        with st.expander("🔬 Technical Details (Layer Influences & Event Magnitudes)", expanded=False):
+            technical_cols = ['Start Time', 'End Time', 'NL_Planet', 'SL_Planet', 'SSL_Planet', 'NL_Influence', 'SL_Influence', 'SSL_Influence', 'Event_Magnitude', 'Convergence_Factor', 'Score']
+            tech_df = moon_timeline_df[technical_cols].copy()
+            
+            # Format technical columns for better display
+            for col in ['NL_Influence', 'SL_Influence', 'SSL_Influence']:
+                if col in tech_df.columns:
+                    tech_df[col] = tech_df[col].map(lambda x: f"{x:.1%}" if pd.notna(x) else "")
+            
+            for col in ['Event_Magnitude', 'Convergence_Factor', 'Score']:
+                if col in tech_df.columns:
+                    tech_df[col] = tech_df[col].map(lambda x: f"{x:.3f}" if pd.notna(x) else "")
+            
+            st.dataframe(tech_df, use_container_width=True)
+    else:
+        # Fallback for older timeline format
+        moon_display_df = moon_timeline_df.drop(columns=['Score'] if 'Score' in moon_timeline_df.columns else [])
     
     # Apply coloring to planet columns and verdict column
-    styler_moon = moon_display_df.style.applymap(
-        lambda x: color_timeline_planets_by_score(x, planet_scores),
-        subset=['NL_Planet', 'SL_Planet', 'SSL_Planet']
-    ).applymap(
-        lambda x: color_verdict_cell(x, team_a_name, team_b_name),
-        subset=['Verdict']
-    )
-    st.dataframe(styler_moon, use_container_width=True, height=400)
+    # Only show the main dataframe if comments are not shown separately
+    if 'NL_Influence' not in moon_timeline_df.columns or not st.session_state.get(f"moon_comments_separate_{id(results)}_{hash(str(moon_timeline_df.columns))}", False):
+        styler_moon = moon_display_df.style.applymap(
+            lambda x: color_timeline_planets_by_score(x, planet_scores),
+            subset=['NL_Planet', 'SL_Planet', 'SSL_Planet']
+        ).applymap(
+            lambda x: color_verdict_cell(x, team_a_name, team_b_name),
+            subset=['Verdict']
+        )
+        st.dataframe(styler_moon, use_container_width=True, height=400)
     st.write(display_results["moon_timeline_analysis"]["summary"])
     
     st.subheader("Favorable Planets")
@@ -800,6 +1128,7 @@ def main():
     .stDataFrame div[data-testid="stDataFrame"] table {
         font-size: 12px;
         width: 100% !important;
+        table-layout: fixed !important;
     }
     
     /* Timeline table specific styling */
@@ -809,6 +1138,7 @@ def main():
         padding: 8px !important;
         vertical-align: top !important;
         max-width: none !important;
+        overflow-wrap: break-word !important;
     }
     
     /* Header styling */
@@ -827,6 +1157,8 @@ def main():
     .stDataFrame div[data-testid="stDataFrame"] td:nth-child(5) {
         text-align: center !important;
         font-weight: bold !important;
+        width: 80px !important;
+        min-width: 80px !important;
     }
     
     /* Time columns styling */
@@ -834,6 +1166,8 @@ def main():
     .stDataFrame div[data-testid="stDataFrame"] td:nth-child(2) {
         text-align: center !important;
         font-family: monospace !important;
+        width: 90px !important;
+        min-width: 90px !important;
     }
     
     /* Verdict column styling */
@@ -841,6 +1175,21 @@ def main():
         text-align: center !important;
         font-weight: bold !important;
         white-space: normal !important;
+        width: 150px !important;
+        min-width: 150px !important;
+    }
+    
+    /* Comment column styling - Make it flexible and visible */
+    .stDataFrame div[data-testid="stDataFrame"] td:nth-last-child(1) {
+        white-space: normal !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+        text-align: left !important;
+        padding: 8px 12px !important;
+        line-height: 1.4 !important;
+        min-width: 400px !important;
+        max-width: 600px !important;
+        width: auto !important;
     }
     
     /* Timeline section styling */
@@ -848,6 +1197,18 @@ def main():
         font-style: italic;
         color: #666;
         margin-bottom: 10px;
+    }
+    
+    /* Ensure horizontal scrolling works */
+    .stDataFrame div[data-testid="stDataFrame"] > div {
+        overflow-x: auto !important;
+        min-width: 100% !important;
+    }
+    
+    /* Comment header styling */
+    .stDataFrame div[data-testid="stDataFrame"] th:nth-last-child(1) {
+        min-width: 400px !important;
+        width: auto !important;
     }
     </style>
     """, unsafe_allow_html=True)
