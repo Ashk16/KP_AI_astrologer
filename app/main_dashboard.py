@@ -31,6 +31,9 @@ from kp_core.analysis_engine import AnalysisEngine
 # --- Constants ---
 ARCHIVE_DIR = "match_archive"
 
+# Toggle to enable/disable Descendant timeline heavy processing & display
+DISPLAY_DESCENDANT_TIMELINE = False
+
 def apply_team_name_replacements(text, asc_team_name, desc_team_name):
     """
     Intelligently replaces generic team references with actual team names while preserving technical terms.
@@ -839,22 +842,34 @@ def display_analysis(results):
 
     st.subheader(f"Descendant Based Timeline (Desc) - Enhanced Dynamic Analysis")
     st.markdown('<p class="timeline-description">Enhanced timeline using dynamic layer influence methodology. Shows planetary dominance, convergence factors, and event magnitudes for precise match analysis.</p>', unsafe_allow_html=True)
-    desc_timeline_df = display_results["desc_timeline_df"].copy() # Use a copy
+    # --- Descendant timeline generation is optional ---
+    if DISPLAY_DESCENDANT_TIMELINE:
+        desc_timeline_gen = TimelineGenerator(engine, 'Descendant')
+        # Use aggregated timeline for Descendant (Star Lord + Sub Lord level)
+        desc_timeline_df = desc_timeline_gen.generate_aggregated_timeline_df(
+            match_details['datetime_utc'], match_details['duration_hours']
+        )
+        desc_timeline_df, desc_timeline_analysis = analysis_engine.analyze_aggregated_timeline(
+            desc_timeline_df, 'descendant'
+        )
+    else:
+        # Create an empty DataFrame with expected columns so downstream formatting does not error
+        desc_timeline_df = pd.DataFrame(columns=['Start Time', 'End Time', 'NL_Planet', 'SL_Planet'])
 
     # Convert times to IST for display using the correct pandas method
     desc_timeline_df['Start Time'] = pd.to_datetime(desc_timeline_df['Start Time']).dt.tz_convert('Asia/Kolkata').dt.strftime('%H:%M:%S')
     desc_timeline_df['End Time'] = pd.to_datetime(desc_timeline_df['End Time']).dt.tz_convert('Asia/Kolkata').dt.strftime('%H:%M:%S')
 
     # Display enhanced analysis summary if available
-    if 'average_magnitude' in display_results["desc_timeline_analysis"]:
+    if 'average_magnitude' in desc_timeline_analysis:
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric("Average Event Magnitude", f"{display_results['desc_timeline_analysis']['average_magnitude']:.2f}")
+            st.metric("Average Event Magnitude", f"{desc_timeline_analysis['average_magnitude']:.2f}")
         with col2:
-            high_intensity = display_results['desc_timeline_analysis'].get('high_intensity_periods', 0)
+            high_intensity = desc_timeline_analysis.get('high_intensity_periods', 0)
             st.metric("High Intensity Periods", high_intensity)
         with col3:
-            method = display_results['desc_timeline_analysis'].get('method', 'standard')
+            method = desc_timeline_analysis.get('method', 'standard')
             st.metric("Analysis Method", method.replace('_', ' ').title())
 
     # Create a view for display with enhanced user-friendly columns
@@ -943,7 +958,7 @@ def display_analysis(results):
             subset=['Verdict']
         )
         st.dataframe(styler_desc, use_container_width=True, height=400)
-    st.write(display_results["desc_timeline_analysis"]["summary"])
+    st.write(desc_timeline_analysis["summary"])
     
     st.subheader("Moon SSL Timeline - Enhanced Dynamic Full Granular Detail")
     st.markdown('<p class="timeline-description">Enhanced detailed timeline with dynamic layer analysis showing all Sub-Sub Lord periods. Includes planetary influence percentages, convergence factors, and event magnitude predictions for precise timing analysis.</p>', unsafe_allow_html=True)
@@ -1047,7 +1062,7 @@ def display_analysis(results):
         st.json(display_results['asc_timeline_analysis']['favorable_planets'])
     with col2:
         st.write(f"**For {team_b_name} (Descendant):**")
-        st.json(display_results['desc_timeline_analysis']['favorable_planets'])
+        st.json(desc_timeline_analysis['favorable_planets'])
     with col3:
         st.write("**For Moon SSL:**")
         st.json(display_results['moon_timeline_analysis']['favorable_planets'])
@@ -1059,7 +1074,7 @@ def display_analysis(results):
         st.json(display_results['asc_timeline_analysis']['unfavorable_planets'])
     with col5:
         st.write(f"**For {team_b_name} (Descendant):**")
-        st.json(display_results['desc_timeline_analysis']['unfavorable_planets'])
+        st.json(desc_timeline_analysis['unfavorable_planets'])
     with col6:
         st.write("**For Moon SSL:**")
         st.json(display_results['moon_timeline_analysis']['unfavorable_planets'])
@@ -1080,11 +1095,20 @@ def run_analysis(match_details):
         asc_timeline_df = asc_timeline_gen.generate_aggregated_timeline_df(match_details['datetime_utc'], match_details['duration_hours'])
         asc_timeline_df, asc_timeline_analysis = analysis_engine.analyze_aggregated_timeline(asc_timeline_df, 'ascendant')
         
-        desc_timeline_gen = TimelineGenerator(engine, 'Descendant')
-        # Use aggregated timeline for Descendant (Star Lord + Sub Lord level)  
-        desc_timeline_df = desc_timeline_gen.generate_aggregated_timeline_df(match_details['datetime_utc'], match_details['duration_hours'])
-        desc_timeline_df, desc_timeline_analysis = analysis_engine.analyze_aggregated_timeline(desc_timeline_df, 'descendant')
-        
+        # --- Descendant timeline generation is optional ---
+        if DISPLAY_DESCENDANT_TIMELINE:
+            desc_timeline_gen = TimelineGenerator(engine, 'Descendant')
+            # Use aggregated timeline for Descendant (Star Lord + Sub Lord level)
+            desc_timeline_df = desc_timeline_gen.generate_aggregated_timeline_df(
+                match_details['datetime_utc'], match_details['duration_hours']
+            )
+            desc_timeline_df, desc_timeline_analysis = analysis_engine.analyze_aggregated_timeline(
+                desc_timeline_df, 'descendant'
+            )
+        else:
+            # Create an empty DataFrame with expected columns so downstream formatting does not error
+            desc_timeline_df = pd.DataFrame(columns=['Start Time', 'End Time', 'NL_Planet', 'SL_Planet'])
+
         moon_timeline_gen = TimelineGenerator(engine, 'Moon')
         # Use granular timeline for Moon (full SSL level)
         moon_timeline_df = moon_timeline_gen.generate_timeline_df(match_details['datetime_utc'], match_details['duration_hours'])
