@@ -1,0 +1,505 @@
+{
+    "muhurta_analysis": {
+        "analysis": "\ud83c\udfcf **Enhanced KP Analysis** - Asc vs Desc\n\n## \ud83d\udcca **TRADITIONAL KP ANALYSIS**\n\n**\ud83c\udf1f STAR LORD OF 1ST CUSP (Primary Indicator):**\n\u2022 Planet: **Ke** | Score: **-0.15**\n\u2022 Houses: H7(R1), H9(R1), H11(R1), H8(R2), H9(R2), H9(R2), H4(R4), H12(R4)\n\u2022 Victory Houses: [11] | Defeat Houses: [7, 9, 8, 9, 9, 4, 12]\n\u2022 Result: \u274c **Favors Desc**\n\n**\u2696\ufe0f SUB LORD OF 1ST CUSP (Modification Factor):**\n\u2022 Planet: **Ju** | Score: **+0.04**\n\u2022 Houses: H3(R1), H7(R2), H2(R3)\n\u2022 Result: \u2705 **Supports Asc**\n\n**\ud83c\udfaf STAR LORD OF 6TH CUSP (Victory Indicator):**\n\u2022 Planet: **Mo** | Score: **-0.34**\n\u2022 Houses: H3(R1), H11(R2), H2(R3)\n\u2022 Result: \u274c **Strong Victory Desc**\n\n**\ud83c\udff9 SUB LORD OF 6TH CUSP (Victory Modification):**\n\u2022 Planet: **Ve** | Score: **-0.02**\n\u2022 Houses: H9(R1), H6(R2), H4(R3), H12(R3), H5(R4), H10(R4)\n\u2022 Result: \u274c **Denies Asc**\n\n**\ud83d\udcca SUB-SUB LORDS (Final Confirmation):**\n\u2022 1st Cusp Sub-Sub Lord: **Ke** | Score: **-0.15**\n\u2022 6th Cusp Sub-Sub Lord: **Ke** | Score: **-0.15**\n\u2022 Combined Result: \u2696\ufe0f **Mixed Confirmation** (Avg: -0.15)\n\n**\ud83d\udd2e RULING PLANETS:**\n\u2022 Ascendant Star Lord: **Ke**\n\u2022 Ascendant Sign Lord: **Ju**\n\u2022 Moon Star Lord: **Unknown**\n\u2022 Moon Sign Lord: **Unknown**\n\u2022 Day Lord: **Ve**\n\u2022 Result: \u274c **Support Desc** (Asc:1 vs Desc:2)\n\n## \ud83c\udfc6 **AUTHENTIC KP CUSP SUB LORD ANALYSIS**\n*The Ultimate Deciding Factor in Classical KP*\n\n**\ud83c\udfaf KEY DECISOR - Eleventh House (Fulfillment of Desires):**\n\u2022 Sub Lord: **Sa**\n\u2022 Impact: **FAVORS_DESCENDANT**\n\u2022 Reasoning: The 11th cusp sub lord is the ultimate deciding factor in KP for event outcomes\n\n**\u2705 SUPPORTING CUSPS (Favor Ascendant):**\n\u2022 H12 (Losses/Expenditure): Sub Lord **Mo** (Strength: 0.27)\n\n**\u274c OPPOSING CUSPS (Favor Descendant):**\n\u2022 H7 (Opponents/Partnership): Sub Lord **Ra** (Strength: 0.93)\n\u2022 H10 (Success/Achievement): Sub Lord **Ra** (Strength: 0.93)\n\u2022 H4 (Endings/Comfort): Sub Lord **Ra** (Strength: 0.93)\n\n**\ud83c\udfc5 CUSP SUB LORD VERDICT:**\n\u2022 Primary Decision: **DESCENDANT_FAVORED**\n\u2022 Overall Assessment: **STRONG_DESCENDANT**\n\u2022 Confidence Level: **High**\n\u2022 Final Score: **-0.52**\n\u2022 Key Reason: 11th cusp sub lord (fulfillment) supports descendant team\n\n## \u2696\ufe0f **ENHANCED WEIGHTED SYNTHESIS**\n*Integrating Traditional + Authentic KP Methods*\n\n**\ud83c\udfc6 ENHANCED PROPORTIONAL SYNTHESIS:**\n\u2022 **Traditional KP Score**: -0.932 (Weight: 8.5)\n\u2022 **Cusp Sub Lord Score**: -0.516 (Weight: 2.1)\n\u2022 **Combined Final Score**: -0.851\n\n\u2022 **Win Probability**: Asc(10.0%) vs Desc(90.0%)\n\u2022 **Verdict**: STRONG_DESCENDANT\n\u2022 **Confidence**: Very High\n\u2022 **Method Agreement**: \u2705 **METHODS AGREE** - High reliability\n\n---\n",
+        "verdict": "STRONG_DESCENDANT",
+        "confidence": "Very High",
+        "asc_probability": 10,
+        "desc_probability": 90,
+        "cusp_analysis": {
+            "cusp_analyses": {
+                "11": {
+                    "cusp_number": 11,
+                    "cusp_name": "Gains/Fulfillment",
+                    "sub_lord": "Sa",
+                    "sub_lord_full": "Saturn",
+                    "significators": [
+                        [
+                            9,
+                            1
+                        ],
+                        [
+                            3,
+                            2
+                        ],
+                        [
+                            2,
+                            4
+                        ]
+                    ],
+                    "impact_direction": "FAVORS_DESCENDANT",
+                    "impact_magnitude": 0.3333333333333333,
+                    "impact_score": -0.3333333333333333,
+                    "reasoning": "Gains/Fulfillment sub lord Sa signifies defeat houses [9], supporting descendant team"
+                },
+                "1": {
+                    "cusp_number": 1,
+                    "cusp_name": "Ascendant/Self",
+                    "sub_lord": "Ju",
+                    "sub_lord_full": "Jupiter",
+                    "significators": [
+                        [
+                            3,
+                            1
+                        ],
+                        [
+                            7,
+                            2
+                        ],
+                        [
+                            2,
+                            3
+                        ]
+                    ],
+                    "impact_direction": "FAVORS_DESCENDANT",
+                    "impact_magnitude": 0.26666666666666666,
+                    "impact_score": -0.26666666666666666,
+                    "reasoning": "Ascendant/Self sub lord Ju signifies defeat houses [7], supporting descendant team"
+                },
+                "6": {
+                    "cusp_number": 6,
+                    "cusp_name": "Victory/Competition",
+                    "sub_lord": "Ve",
+                    "sub_lord_full": "Venus",
+                    "significators": [
+                        [
+                            9,
+                            1
+                        ],
+                        [
+                            6,
+                            2
+                        ],
+                        [
+                            4,
+                            3
+                        ],
+                        [
+                            12,
+                            3
+                        ],
+                        [
+                            5,
+                            4
+                        ],
+                        [
+                            10,
+                            4
+                        ]
+                    ],
+                    "impact_direction": "FAVORS_DESCENDANT",
+                    "impact_magnitude": 0.3999999999999999,
+                    "impact_score": -0.3999999999999999,
+                    "reasoning": "Victory/Competition sub lord Ve signifies defeat houses [9, 4, 12, 5], supporting descendant team"
+                },
+                "7": {
+                    "cusp_number": 7,
+                    "cusp_name": "Opponents/Partnership",
+                    "sub_lord": "Ra",
+                    "sub_lord_full": "Rahu",
+                    "significators": [
+                        [
+                            3,
+                            1
+                        ],
+                        [
+                            8,
+                            1
+                        ],
+                        [
+                            9,
+                            1
+                        ],
+                        [
+                            3,
+                            2
+                        ],
+                        [
+                            3,
+                            2
+                        ],
+                        [
+                            7,
+                            2
+                        ],
+                        [
+                            2,
+                            3
+                        ],
+                        [
+                            2,
+                            4
+                        ]
+                    ],
+                    "impact_direction": "FAVORS_DESCENDANT",
+                    "impact_magnitude": 0.9333333333333332,
+                    "impact_score": -0.9333333333333332,
+                    "reasoning": "Opponents/Partnership sub lord Ra signifies defeat houses [8, 9, 7], supporting descendant team"
+                },
+                "10": {
+                    "cusp_number": 10,
+                    "cusp_name": "Success/Achievement",
+                    "sub_lord": "Ra",
+                    "sub_lord_full": "Rahu",
+                    "significators": [
+                        [
+                            3,
+                            1
+                        ],
+                        [
+                            8,
+                            1
+                        ],
+                        [
+                            9,
+                            1
+                        ],
+                        [
+                            3,
+                            2
+                        ],
+                        [
+                            3,
+                            2
+                        ],
+                        [
+                            7,
+                            2
+                        ],
+                        [
+                            2,
+                            3
+                        ],
+                        [
+                            2,
+                            4
+                        ]
+                    ],
+                    "impact_direction": "FAVORS_DESCENDANT",
+                    "impact_magnitude": 0.9333333333333332,
+                    "impact_score": -0.9333333333333332,
+                    "reasoning": "Success/Achievement sub lord Ra signifies defeat houses [8, 9, 7], supporting descendant team"
+                },
+                "4": {
+                    "cusp_number": 4,
+                    "cusp_name": "Endings/Comfort",
+                    "sub_lord": "Ra",
+                    "sub_lord_full": "Rahu",
+                    "significators": [
+                        [
+                            3,
+                            1
+                        ],
+                        [
+                            8,
+                            1
+                        ],
+                        [
+                            9,
+                            1
+                        ],
+                        [
+                            3,
+                            2
+                        ],
+                        [
+                            3,
+                            2
+                        ],
+                        [
+                            7,
+                            2
+                        ],
+                        [
+                            2,
+                            3
+                        ],
+                        [
+                            2,
+                            4
+                        ]
+                    ],
+                    "impact_direction": "FAVORS_DESCENDANT",
+                    "impact_magnitude": 0.9333333333333332,
+                    "impact_score": -0.9333333333333332,
+                    "reasoning": "Endings/Comfort sub lord Ra signifies defeat houses [8, 9, 7], supporting descendant team"
+                },
+                "8": {
+                    "cusp_number": 8,
+                    "cusp_name": "Obstacles/Transformation",
+                    "sub_lord": "Ra",
+                    "sub_lord_full": "Rahu",
+                    "significators": [
+                        [
+                            3,
+                            1
+                        ],
+                        [
+                            8,
+                            1
+                        ],
+                        [
+                            9,
+                            1
+                        ],
+                        [
+                            3,
+                            2
+                        ],
+                        [
+                            3,
+                            2
+                        ],
+                        [
+                            7,
+                            2
+                        ],
+                        [
+                            2,
+                            3
+                        ],
+                        [
+                            2,
+                            4
+                        ]
+                    ],
+                    "impact_direction": "FAVORS_DESCENDANT",
+                    "impact_magnitude": 0.9333333333333332,
+                    "impact_score": -0.9333333333333332,
+                    "reasoning": "Obstacles/Transformation sub lord Ra signifies defeat houses [8, 9, 7], supporting descendant team"
+                },
+                "12": {
+                    "cusp_number": 12,
+                    "cusp_name": "Losses/Expenditure",
+                    "sub_lord": "Mo",
+                    "sub_lord_full": "Moon",
+                    "significators": [
+                        [
+                            3,
+                            1
+                        ],
+                        [
+                            11,
+                            2
+                        ],
+                        [
+                            2,
+                            3
+                        ]
+                    ],
+                    "impact_direction": "FAVORS_ASCENDANT",
+                    "impact_magnitude": 0.26666666666666666,
+                    "impact_score": 0.26666666666666666,
+                    "reasoning": "Losses/Expenditure sub lord Mo signifies victory houses [11], supporting ascendant team"
+                }
+            },
+            "summary": {
+                "total_weighted_score": -0.5159420289855071,
+                "key_decisor": {
+                    "cusp": 11,
+                    "name": "Eleventh House (Fulfillment of Desires)",
+                    "sub_lord": "Sa",
+                    "impact": "FAVORS_DESCENDANT",
+                    "reasoning": "The 11th cusp sub lord is the ultimate deciding factor in KP for event outcomes"
+                },
+                "supportive_cusps": [
+                    {
+                        "cusp": 12,
+                        "sub_lord": "Mo",
+                        "strength": 0.26666666666666666
+                    }
+                ],
+                "opposing_cusps": [
+                    {
+                        "cusp": 7,
+                        "sub_lord": "Ra",
+                        "strength": 0.9333333333333332
+                    },
+                    {
+                        "cusp": 10,
+                        "sub_lord": "Ra",
+                        "strength": 0.9333333333333332
+                    },
+                    {
+                        "cusp": 4,
+                        "sub_lord": "Ra",
+                        "strength": 0.9333333333333332
+                    },
+                    {
+                        "cusp": 8,
+                        "sub_lord": "Ra",
+                        "strength": 0.9333333333333332
+                    },
+                    {
+                        "cusp": 6,
+                        "sub_lord": "Ve",
+                        "strength": 0.3999999999999999
+                    },
+                    {
+                        "cusp": 11,
+                        "sub_lord": "Sa",
+                        "strength": 0.3333333333333333
+                    },
+                    {
+                        "cusp": 1,
+                        "sub_lord": "Ju",
+                        "strength": 0.26666666666666666
+                    }
+                ],
+                "detailed_breakdown": [
+                    {
+                        "cusp": 11,
+                        "sub_lord": "Sa",
+                        "impact": "FAVORS_DESCENDANT",
+                        "strength": 0.3333333333333333,
+                        "weight": 1.0,
+                        "contribution": -0.3333333333333333
+                    },
+                    {
+                        "cusp": 1,
+                        "sub_lord": "Ju",
+                        "impact": "FAVORS_DESCENDANT",
+                        "strength": 0.26666666666666666,
+                        "weight": 0.8,
+                        "contribution": -0.21333333333333335
+                    },
+                    {
+                        "cusp": 6,
+                        "sub_lord": "Ve",
+                        "impact": "FAVORS_DESCENDANT",
+                        "strength": 0.3999999999999999,
+                        "weight": 0.8,
+                        "contribution": -0.31999999999999995
+                    },
+                    {
+                        "cusp": 7,
+                        "sub_lord": "Ra",
+                        "impact": "FAVORS_DESCENDANT",
+                        "strength": 0.9333333333333332,
+                        "weight": 0.6,
+                        "contribution": -0.5599999999999999
+                    },
+                    {
+                        "cusp": 10,
+                        "sub_lord": "Ra",
+                        "impact": "FAVORS_DESCENDANT",
+                        "strength": 0.9333333333333332,
+                        "weight": 0.5,
+                        "contribution": -0.4666666666666666
+                    },
+                    {
+                        "cusp": 4,
+                        "sub_lord": "Ra",
+                        "impact": "FAVORS_DESCENDANT",
+                        "strength": 0.9333333333333332,
+                        "weight": 0.3,
+                        "contribution": -0.27999999999999997
+                    },
+                    {
+                        "cusp": 8,
+                        "sub_lord": "Ra",
+                        "impact": "FAVORS_DESCENDANT",
+                        "strength": 0.9333333333333332,
+                        "weight": 0.3,
+                        "contribution": -0.27999999999999997
+                    },
+                    {
+                        "cusp": 12,
+                        "sub_lord": "Mo",
+                        "impact": "FAVORS_ASCENDANT",
+                        "strength": 0.26666666666666666,
+                        "weight": 0.3,
+                        "contribution": 0.08
+                    }
+                ]
+            },
+            "final_verdict": {
+                "primary_verdict": "DESCENDANT_FAVORED",
+                "overall_verdict": "STRONG_DESCENDANT",
+                "final_score": -0.5159420289855071,
+                "confidence": "High",
+                "primary_reason": "11th cusp sub lord (fulfillment) supports descendant team",
+                "eleventh_cusp_impact": "FAVORS_DESCENDANT"
+            },
+            "confidence_level": "High"
+        },
+        "traditional_scores": {
+            "c1sl_score": -0.15166666666666664,
+            "c1subl_score": 0.041,
+            "c6sl_score": -0.344,
+            "c6subl_score": -0.023333333333333334,
+            "avg_cssl_score": -0.15166666666666664
+        }
+    },
+    "asc_timeline_analysis": {
+        "summary": "The enhanced dynamic NL+SL timeline shows an average score of -0.255 with event magnitude 1.24. This indicates a general advantage for Desc based on dynamic Star Lord and Sub Lord layer analysis.",
+        "favorable_planets": [
+            "Ju",
+            "Su"
+        ],
+        "unfavorable_planets": [
+            "Ke",
+            "Ma",
+            "Me",
+            "Mo",
+            "Ra",
+            "Sa",
+            "Ve"
+        ],
+        "average_magnitude": 1.2437647058823533,
+        "high_intensity_periods": 8,
+        "method": "dynamic_nl_sl_analysis"
+    },
+    "desc_timeline_analysis": {
+        "summary": "The enhanced dynamic NL+SL timeline shows an average score of 0.306 with event magnitude 1.42. This indicates a general advantage for Desc based on dynamic Star Lord and Sub Lord layer analysis.",
+        "favorable_planets": [
+            "Ke",
+            "Ma",
+            "Me",
+            "Mo",
+            "Ra",
+            "Sa",
+            "Ve"
+        ],
+        "unfavorable_planets": [
+            "Ju",
+            "Su"
+        ],
+        "average_magnitude": 1.4189230769230774,
+        "high_intensity_periods": 12,
+        "method": "dynamic_nl_sl_analysis"
+    },
+    "moon_timeline_analysis": {
+        "summary": "The enhanced dynamic timeline shows an average score of -0.552 with event magnitude 2.75. This indicates a general advantage for Desc with varying intensity periods based on planetary layer dynamics.",
+        "favorable_planets": [
+            "Ju",
+            "Su"
+        ],
+        "unfavorable_planets": [
+            "Ke",
+            "Ma",
+            "Me",
+            "Mo",
+            "Ra",
+            "Sa",
+            "Ve"
+        ],
+        "average_magnitude": 2.75175,
+        "high_intensity_periods": 4,
+        "method": "dynamic_layer_analysis"
+    },
+    "match_details": {
+        "datetime_utc": "2025-07-04T17:35:00+00:00",
+        "lat": 51.4821031,
+        "lon": -0.1117327,
+        "duration_hours": 4.5,
+        "team_a": "Eng",
+        "team_b": "Ind"
+    },
+    "error": null,
+    "traceback": null,
+    "tab_name": "Eng vs Ind - 2025-07-04",
+    "planets_df": "{\"columns\":[\"longitude\",\"sign\",\"sign_lord\",\"nl\",\"sl\",\"ssl\",\"Score\",\"Significators\",\"Comment\"],\"index\":[\"Sun\",\"Moon\",\"Mars\",\"Mercury\",\"Jupiter\",\"Venus\",\"Saturn\",\"Rahu\",\"Ketu\",\"Asc\"],\"data\":[[102.9940552509,\"Cancer\",\"Mo\",\"Sa\",\"Ra\",\"Ra\",0.02,\"3, 7, 2\",\"No special conditions\"],[213.9604997738,\"Scorpio\",\"Ma\",\"Sa\",\"Sa\",\"Me\",-0.344,\"3, 11, 2\",\"\\ud83d\\udd17 Moon debilitated in Scorpio (acts as Ma agent) (Ma negative \\u2192 pro-Desc) (Neecha Bhanga) | Score reduced by -0.614\"],[159.9384677682,\"Virgo\",\"Me\",\"Su\",\"Ve\",\"Ke\",-0.215,\"7, 9, 4, 12\",\"No special conditions\"],[128.9198282358,\"Leo\",\"Su\",\"Ke\",\"Ju\",\"Mo\",-0.4,\"9, 8\",\"No special conditions\"],[95.6652603936,\"Cancer\",\"Mo\",\"Sa\",\"Me\",\"Me\",0.041,\"3, 7, 2\",\"No special conditions\"],[60.0950220753,\"Gemini\",\"Me\",\"Ma\",\"Me\",\"Me\",-0.0233333333,\"9, 6, 4, 12, 5, 10\",\"No special conditions\"],[1.8745370266,\"Aries\",\"Ma\",\"Ke\",\"Ve\",\"Ra\",-0.344,\"9, 3, 2\",\"\\ud83d\\udd17 Saturn debilitated in Aries (acts as Ma agent) (Ma negative \\u2192 pro-Desc) (Neecha Bhanga) | Score reduced by -0.301\"],[351.7158137027,\"Pisces\",\"Ju\",\"Me\",\"Su\",\"Ra\",-0.184,\"3, 8, 9, 3, 3, 7, 2, 2\",\"No special conditions\"],[171.7158137027,\"Virgo\",\"Me\",\"Mo\",\"Ve\",\"Ju\",-0.1516666667,\"7, 9, 11, 8, 9, 9, 4, 12\",\"No special conditions\"],[248.3661810971,\"Sagittarius\",\"Ju\",\"Ke\",\"Ju\",\"Ke\",-0.025,\"9, 1\",\"No special conditions\"]]}",
+    "asc_timeline_df": "{\"columns\":[\"Start Time\",\"End Time\",\"NL_Planet\",\"SL_Planet\",\"Score\",\"Verdict\",\"Comment\",\"NL_Influence\",\"SL_Influence\",\"Event_Magnitude\",\"Convergence_Factor\"],\"index\":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50],\"data\":[[1751650500000,1751650807000,\"Ke\",\"Ju\",-0.0185777778,\"Balanced Period\",\"\\ud83c\\udf1f Ke dominance (33.3%) | \\u2696\\ufe0f Ju modification (66.7%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Evenly matched phase with gradual developments | \\ud83d\\udcca Magnitude: 0.58 | NL:-0.15 SL:+0.04 Combined:-0.019 | LOW\",0.3333333333,0.6666666667,0.576,0.8],[1751650807000,1751651470000,\"Ke\",\"Sa\",-0.5740246914,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Ke dominance (29.6%) | \\u2696\\ufe0f Sa modification (70.4%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 1.62 | NL:-0.15 SL:-0.34 Combined:-0.574 | HIGH\",0.2962962963,0.7037037037,1.62,2.0],[1751651470000,1751652055000,\"Ke\",\"Me\",-0.6528395062,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Ke dominance (29.6%) | \\u2696\\ufe0f Me modification (70.4%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 1.62 | NL:-0.15 SL:-0.40 Combined:-0.653 | HIGH\",0.2962962963,0.7037037037,1.62,2.0],[1751652055000,1751652733000,\"Ve\",\"Ve\",-0.0186666667,\"Balanced Period\",\"\\ud83c\\udf1f Ve dominance (57.1%) | \\u2696\\ufe0f Ve modification (42.9%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Evenly matched phase with gradual developments | \\ud83d\\udcca Magnitude: 1.06 | NL:-0.02 SL:-0.02 Combined:-0.019 | LOW\",0.5714285714,0.4285714286,1.064,0.8],[1751652733000,1751652934000,\"Ve\",\"Su\",-0.0052473118,\"Balanced Period\",\"\\ud83c\\udf1f Ve dominance (61.3%) | \\u2696\\ufe0f Su modification (38.7%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Evenly matched phase with gradual developments | \\ud83d\\udcca Magnitude: 0.99 | NL:-0.02 SL:+0.02 Combined:-0.005 | LOW\",0.6129032258,0.3870967742,0.992,0.8],[1751652934000,1751653266000,\"Ve\",\"Mo\",-0.1179698925,\"Balanced (Slight Desc)\",\"\\ud83c\\udf1f Ve dominance (61.3%) | \\u2696\\ufe0f Mo modification (38.7%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Slight opposition edge - careful play needed | \\ud83d\\udcca Magnitude: 0.99 | NL:-0.02 SL:-0.34 Combined:-0.118 | LOW\",0.6129032258,0.3870967742,0.992,0.8],[1751653266000,1751653497000,\"Ve\",\"Ma\",-0.0480283688,\"Balanced Period\",\"\\ud83c\\udf1f Ve dominance (80.9%) | \\u2696\\ufe0f Ma modification (19.1%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Evenly matched phase with gradual developments | \\ud83d\\udcca Magnitude: 0.75 | NL:-0.02 SL:-0.21 Combined:-0.048 | LOW\",0.8085106383,0.1914893617,0.752,0.8],[1751653497000,1751654084000,\"Ve\",\"Ra\",-0.0684215054,\"Balanced (Slight Desc)\",\"\\ud83c\\udf1f Ve dominance (61.3%) | \\u2696\\ufe0f Ra modification (38.7%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Slight opposition edge - careful play needed | \\ud83d\\udcca Magnitude: 0.99 | NL:-0.02 SL:-0.18 Combined:-0.068 | LOW\",0.6129032258,0.3870967742,0.992,0.8],[1751654084000,1751654596000,\"Ve\",\"Ju\",0.001255914,\"Balanced Period\",\"\\ud83c\\udf1f Ve dominance (61.3%) | \\u2696\\ufe0f Ju modification (38.7%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Evenly matched phase with gradual developments | \\ud83d\\udcca Magnitude: 0.99 | NL:-0.02 SL:+0.04 Combined:+0.001 | LOW\",0.6129032258,0.3870967742,0.992,0.8],[1751654596000,1751655193000,\"Ve\",\"Sa\",-0.1286095238,\"Advantage Desc\",\"\\ud83c\\udf1f Ve dominance (57.1%) | \\u2696\\ufe0f Sa modification (42.9%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Opposition builds pressure and momentum | \\ud83d\\udcca Magnitude: 1.06 | NL:-0.02 SL:-0.34 Combined:-0.129 | MEDIUM\",0.5714285714,0.4285714286,1.064,0.8],[1751655193000,1751655716000,\"Ve\",\"Me\",-0.1478095238,\"Advantage Desc\",\"\\ud83c\\udf1f Ve dominance (57.1%) | \\u2696\\ufe0f Me modification (42.9%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Opposition builds pressure and momentum | \\ud83d\\udcca Magnitude: 1.06 | NL:-0.02 SL:-0.40 Combined:-0.148 | MEDIUM\",0.5714285714,0.4285714286,1.064,0.8],[1751655716000,1751655928000,\"Ve\",\"Ke\",-0.0383262411,\"Balanced Period\",\"\\ud83c\\udf1f Ve dominance (80.9%) | \\u2696\\ufe0f Ke modification (19.1%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Evenly matched phase with gradual developments | \\ud83d\\udcca Magnitude: 0.75 | NL:-0.02 SL:-0.15 Combined:-0.038 | LOW\",0.8085106383,0.1914893617,0.752,0.8],[1751655928000,1751656108000,\"Su\",\"Su\",0.016,\"Balanced Period\",\"\\ud83c\\udf1f Su dominance (57.1%) | \\u2696\\ufe0f Su modification (42.9%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Evenly matched phase with gradual developments | \\ud83d\\udcca Magnitude: 0.90 | NL:+0.02 SL:+0.02 Combined:+0.016 | LOW\",0.5714285714,0.4285714286,0.896,0.8],[1751656108000,1751656405000,\"Su\",\"Mo\",-0.1088,\"Balanced (Slight Desc)\",\"\\ud83c\\udf1f Su dominance (57.1%) | \\u2696\\ufe0f Mo modification (42.9%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Slight opposition edge - careful play needed | \\ud83d\\udcca Magnitude: 0.90 | NL:+0.02 SL:-0.34 Combined:-0.109 | LOW\",0.5714285714,0.4285714286,0.896,0.8],[1751656405000,1751656611000,\"Su\",\"Ma\",-0.0252682927,\"Balanced Period\",\"\\ud83c\\udf1f Su dominance (78.0%) | \\u2696\\ufe0f Ma modification (22.0%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Evenly matched phase with gradual developments | \\ud83d\\udcca Magnitude: 0.66 | NL:+0.02 SL:-0.21 Combined:-0.025 | LOW\",0.7804878049,0.2195121951,0.656,0.8],[1751656611000,1751657132000,\"Su\",\"Ra\",-0.0539428571,\"Balanced (Slight Desc)\",\"\\ud83c\\udf1f Su dominance (57.1%) | \\u2696\\ufe0f Ra modification (42.9%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Slight opposition edge - careful play needed | \\ud83d\\udcca Magnitude: 0.90 | NL:+0.02 SL:-0.18 Combined:-0.054 | LOW\",0.5714285714,0.4285714286,0.896,0.8],[1751657132000,1751657583000,\"Su\",\"Ju\",0.0232,\"Balanced Period\",\"\\ud83c\\udf1f Su dominance (57.1%) | \\u2696\\ufe0f Ju modification (42.9%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Evenly matched phase with gradual developments | \\ud83d\\udcca Magnitude: 0.90 | NL:+0.02 SL:+0.04 Combined:+0.023 | LOW\",0.5714285714,0.4285714286,0.896,0.8],[1751657583000,1751658106000,\"Su\",\"Sa\",-0.1211768595,\"Advantage Desc\",\"\\ud83c\\udf1f Su dominance (52.9%) | \\u2696\\ufe0f Sa modification (47.1%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Opposition builds pressure and momentum | \\ud83d\\udcca Magnitude: 0.97 | NL:+0.02 SL:-0.34 Combined:-0.121 | MEDIUM\",0.5289256198,0.4710743802,0.968,0.8],[1751658106000,1751658561000,\"Su\",\"Me\",-0.1422809917,\"Advantage Desc\",\"\\ud83c\\udf1f Su dominance (52.9%) | \\u2696\\ufe0f Me modification (47.1%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Opposition builds pressure and momentum | \\ud83d\\udcca Magnitude: 0.97 | NL:+0.02 SL:-0.40 Combined:-0.142 | MEDIUM\",0.5289256198,0.4710743802,0.968,0.8],[1751658561000,1751658745000,\"Su\",\"Ke\",-0.0141463415,\"Balanced Period\",\"\\ud83c\\udf1f Su dominance (78.0%) | \\u2696\\ufe0f Ke modification (22.0%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Evenly matched phase with gradual developments | \\ud83d\\udcca Magnitude: 0.66 | NL:+0.02 SL:-0.15 Combined:-0.014 | LOW\",0.7804878049,0.2195121951,0.656,0.8],[1751658745000,1751659259000,\"Su\",\"Ve\",-0.0003305785,\"Balanced Period\",\"\\ud83c\\udf1f Su dominance (52.9%) | \\u2696\\ufe0f Ve modification (47.1%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Evenly matched phase with gradual developments | \\ud83d\\udcca Magnitude: 0.97 | NL:+0.02 SL:-0.02 Combined:-0.000 | LOW\",0.5289256198,0.4710743802,0.968,0.8],[1751659259000,1751659510000,\"Mo\",\"Mo\",-0.688,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Mo dominance (57.1%) | \\u2696\\ufe0f Mo modification (42.9%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 2.24 | NL:-0.34 SL:-0.34 Combined:-0.688 | HIGH\",0.5714285714,0.4285714286,2.24,2.0],[1751659510000,1751659684000,\"Mo\",\"Ma\",-0.6313658537,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Mo dominance (78.0%) | \\u2696\\ufe0f Ma modification (22.0%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 1.64 | NL:-0.34 SL:-0.21 Combined:-0.631 | HIGH\",0.7804878049,0.2195121951,1.64,2.0],[1751659684000,1751660121000,\"Mo\",\"Ra\",-0.5508571429,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Mo dominance (57.1%) | \\u2696\\ufe0f Ra modification (42.9%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 2.24 | NL:-0.34 SL:-0.18 Combined:-0.551 | HIGH\",0.5714285714,0.4285714286,2.24,2.0],[1751660121000,1751660498000,\"Mo\",\"Ju\",-0.1432,\"Advantage Desc\",\"\\ud83c\\udf1f Mo dominance (57.1%) | \\u2696\\ufe0f Ju modification (42.9%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Opposition builds pressure and momentum | \\ud83d\\udcca Magnitude: 0.90 | NL:-0.34 SL:+0.04 Combined:-0.143 | MEDIUM\",0.5714285714,0.4285714286,0.896,0.8],[1751660498000,1751660933000,\"Mo\",\"Sa\",-0.688,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Mo dominance (52.9%) | \\u2696\\ufe0f Sa modification (47.1%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 2.42 | NL:-0.34 SL:-0.34 Combined:-0.688 | HIGH\",0.5289256198,0.4710743802,2.42,2.0],[1751660933000,1751661310000,\"Mo\",\"Me\",-0.7407603306,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Mo dominance (52.9%) | \\u2696\\ufe0f Me modification (47.1%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 2.42 | NL:-0.34 SL:-0.40 Combined:-0.741 | HIGH\",0.5289256198,0.4710743802,2.42,2.0],[1751661310000,1751661462000,\"Mo\",\"Ke\",-0.6035609756,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Mo dominance (78.0%) | \\u2696\\ufe0f Ke modification (22.0%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 1.64 | NL:-0.34 SL:-0.15 Combined:-0.604 | HIGH\",0.7804878049,0.2195121951,1.64,2.0],[1751661462000,1751661887000,\"Mo\",\"Ve\",-0.154353719,\"Advantage Desc\",\"\\ud83c\\udf1f Mo dominance (52.9%) | \\u2696\\ufe0f Ve modification (47.1%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Opposition builds pressure and momentum | \\ud83d\\udcca Magnitude: 0.97 | NL:-0.34 SL:-0.02 Combined:-0.154 | MEDIUM\",0.5289256198,0.4710743802,0.968,0.8],[1751661887000,1751662011000,\"Mo\",\"Su\",-0.1504,\"Advantage Desc\",\"\\ud83c\\udf1f Mo dominance (57.1%) | \\u2696\\ufe0f Su modification (42.9%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Opposition builds pressure and momentum | \\ud83d\\udcca Magnitude: 0.90 | NL:-0.34 SL:+0.02 Combined:-0.150 | MEDIUM\",0.5714285714,0.4285714286,0.896,0.8],[1751662011000,1751662155000,\"Ma\",\"Ma\",-0.43,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Ma dominance (57.1%) | \\u2696\\ufe0f Ma modification (42.9%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 0.84 | NL:-0.21 SL:-0.21 Combined:-0.430 | HIGH\",0.5714285714,0.4285714286,0.84,2.0],[1751662155000,1751662517000,\"Ma\",\"Ra\",-0.3886666667,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Ma dominance (33.3%) | \\u2696\\ufe0f Ra modification (66.7%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 1.44 | NL:-0.21 SL:-0.18 Combined:-0.389 | HIGH\",0.3333333333,0.6666666667,1.44,2.0],[1751662517000,1751662829000,\"Ma\",\"Ju\",-0.0354666667,\"Balanced Period\",\"\\ud83c\\udf1f Ma dominance (33.3%) | \\u2696\\ufe0f Ju modification (66.7%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Evenly matched phase with gradual developments | \\ud83d\\udcca Magnitude: 0.58 | NL:-0.21 SL:+0.04 Combined:-0.035 | LOW\",0.3333333333,0.6666666667,0.576,0.8],[1751662829000,1751663189000,\"Ma\",\"Sa\",-0.6115555556,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Ma dominance (29.6%) | \\u2696\\ufe0f Sa modification (70.4%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 1.62 | NL:-0.21 SL:-0.34 Combined:-0.612 | HIGH\",0.2962962963,0.7037037037,1.62,2.0],[1751663189000,1751663501000,\"Ma\",\"Me\",-0.6903703704,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Ma dominance (29.6%) | \\u2696\\ufe0f Me modification (70.4%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 1.62 | NL:-0.21 SL:-0.40 Combined:-0.690 | HIGH\",0.2962962963,0.7037037037,1.62,2.0],[1751663501000,1751663627000,\"Ma\",\"Ke\",-0.3757142857,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Ma dominance (57.1%) | \\u2696\\ufe0f Ke modification (42.9%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 0.84 | NL:-0.21 SL:-0.15 Combined:-0.376 | HIGH\",0.5714285714,0.4285714286,0.84,2.0],[1751663627000,1751663979000,\"Ma\",\"Ve\",-0.0640987654,\"Balanced (Slight Desc)\",\"\\ud83c\\udf1f Ma dominance (29.6%) | \\u2696\\ufe0f Ve modification (70.4%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Slight opposition edge - careful play needed | \\ud83d\\udcca Magnitude: 0.65 | NL:-0.21 SL:-0.02 Combined:-0.064 | LOW\",0.2962962963,0.7037037037,0.648,0.8],[1751663979000,1751664083000,\"Ma\",\"Su\",-0.0466666667,\"Balanced Period\",\"\\ud83c\\udf1f Ma dominance (33.3%) | \\u2696\\ufe0f Su modification (66.7%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Evenly matched phase with gradual developments | \\ud83d\\udcca Magnitude: 0.58 | NL:-0.21 SL:+0.02 Combined:-0.047 | LOW\",0.3333333333,0.6666666667,0.576,0.8],[1751664083000,1751664253000,\"Ma\",\"Mo\",-0.602,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Ma dominance (33.3%) | \\u2696\\ufe0f Mo modification (66.7%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 1.44 | NL:-0.21 SL:-0.34 Combined:-0.602 | HIGH\",0.3333333333,0.6666666667,1.44,2.0],[1751664253000,1751664552000,\"Ra\",\"Ra\",-0.368,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Ra dominance (57.1%) | \\u2696\\ufe0f Ra modification (42.9%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 2.24 | NL:-0.18 SL:-0.18 Combined:-0.368 | HIGH\",0.5714285714,0.4285714286,2.24,2.0],[1751664552000,1751664811000,\"Ra\",\"Ju\",-0.0700571429,\"Balanced (Slight Desc)\",\"\\ud83c\\udf1f Ra dominance (57.1%) | \\u2696\\ufe0f Ju modification (42.9%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Slight opposition edge - careful play needed | \\ud83d\\udcca Magnitude: 0.90 | NL:-0.18 SL:+0.04 Combined:-0.070 | LOW\",0.5714285714,0.4285714286,0.896,0.8],[1751664811000,1751665111000,\"Ra\",\"Sa\",-0.5187438017,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Ra dominance (52.9%) | \\u2696\\ufe0f Sa modification (47.1%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 2.42 | NL:-0.18 SL:-0.34 Combined:-0.519 | HIGH\",0.5289256198,0.4710743802,2.42,2.0],[1751665111000,1751665372000,\"Ra\",\"Me\",-0.5715041322,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Ra dominance (52.9%) | \\u2696\\ufe0f Me modification (47.1%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 2.42 | NL:-0.18 SL:-0.40 Combined:-0.572 | HIGH\",0.5289256198,0.4710743802,2.42,2.0],[1751665372000,1751665478000,\"Ra\",\"Ke\",-0.353804878,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Ra dominance (78.0%) | \\u2696\\ufe0f Ke modification (22.0%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 1.64 | NL:-0.18 SL:-0.15 Combined:-0.354 | HIGH\",0.7804878049,0.2195121951,1.64,2.0],[1751665478000,1751665774000,\"Ra\",\"Ve\",-0.0866512397,\"Balanced (Slight Desc)\",\"\\ud83c\\udf1f Ra dominance (52.9%) | \\u2696\\ufe0f Ve modification (47.1%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Slight opposition edge - careful play needed | \\ud83d\\udcca Magnitude: 0.97 | NL:-0.18 SL:-0.02 Combined:-0.087 | LOW\",0.5289256198,0.4710743802,0.968,0.8],[1751665774000,1751665861000,\"Ra\",\"Su\",-0.0772571429,\"Balanced (Slight Desc)\",\"\\ud83c\\udf1f Ra dominance (57.1%) | \\u2696\\ufe0f Su modification (42.9%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Slight opposition edge - careful play needed | \\ud83d\\udcca Magnitude: 0.90 | NL:-0.18 SL:+0.02 Combined:-0.077 | LOW\",0.5714285714,0.4285714286,0.896,0.8],[1751665861000,1751666005000,\"Ra\",\"Mo\",-0.5051428571,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Ra dominance (57.1%) | \\u2696\\ufe0f Mo modification (42.9%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 2.24 | NL:-0.18 SL:-0.34 Combined:-0.505 | HIGH\",0.5714285714,0.4285714286,2.24,2.0],[1751666005000,1751666105000,\"Ra\",\"Ma\",-0.3816097561,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Ra dominance (78.0%) | \\u2696\\ufe0f Ma modification (22.0%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 1.64 | NL:-0.18 SL:-0.21 Combined:-0.382 | HIGH\",0.7804878049,0.2195121951,1.64,2.0],[1751666105000,1751666329000,\"Ju\",\"Ju\",0.0328,\"Balanced Period\",\"\\ud83c\\udf1f Ju dominance (57.1%) | \\u2696\\ufe0f Ju modification (42.9%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Evenly matched phase with gradual developments | \\ud83d\\udcca Magnitude: 0.90 | NL:+0.04 SL:+0.04 Combined:+0.033 | LOW\",0.5714285714,0.4285714286,0.896,0.8],[1751666329000,1751666589000,\"Ju\",\"Sa\",-0.1122909091,\"Balanced (Slight Desc)\",\"\\ud83c\\udf1f Ju dominance (52.9%) | \\u2696\\ufe0f Sa modification (47.1%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Slight opposition edge - careful play needed | \\ud83d\\udcca Magnitude: 0.97 | NL:+0.04 SL:-0.34 Combined:-0.112 | LOW\",0.5289256198,0.4710743802,0.968,0.8],[1751666589000,1751666700000,\"Ju\",\"Me\",-0.1333950413,\"Advantage Desc\",\"\\ud83c\\udf1f Ju dominance (52.9%) | \\u2696\\ufe0f Me modification (47.1%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Opposition builds pressure and momentum | \\ud83d\\udcca Magnitude: 0.97 | NL:+0.04 SL:-0.40 Combined:-0.133 | MEDIUM\",0.5289256198,0.4710743802,0.968,0.8]]}",
+    "desc_timeline_df": "{\"columns\":[\"Start Time\",\"End Time\",\"NL_Planet\",\"SL_Planet\",\"Score\",\"Verdict\",\"Comment\",\"NL_Influence\",\"SL_Influence\",\"Event_Magnitude\",\"Convergence_Factor\"],\"index\":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51],\"data\":[[1751650500000,1751650596000,\"Ra\",\"Ra\",0.368,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Ra dominance (57.1%) | \\u2696\\ufe0f Ra modification (42.9%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Excellent period for building partnerships and dominating opponents | \\ud83d\\udcca Magnitude: 2.24 | NL:+0.18 SL:+0.18 Combined:+0.368 | HIGH\",0.5714285714,0.4285714286,2.24,2.0],[1751650596000,1751651157000,\"Ra\",\"Ju\",0.0700571429,\"Balanced (Slight Desc)\",\"\\ud83c\\udf1f Ra dominance (57.1%) | \\u2696\\ufe0f Ju modification (42.9%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Marginal advantage - gradual progress expected | \\ud83d\\udcca Magnitude: 0.90 | NL:+0.18 SL:-0.04 Combined:+0.070 | LOW\",0.5714285714,0.4285714286,0.896,0.8],[1751651157000,1751651815000,\"Ra\",\"Sa\",0.5187438017,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Ra dominance (52.9%) | \\u2696\\ufe0f Sa modification (47.1%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Excellent period for building partnerships and dominating opponents | \\ud83d\\udcca Magnitude: 2.42 | NL:+0.18 SL:+0.34 Combined:+0.519 | HIGH\",0.5289256198,0.4710743802,2.42,2.0],[1751651815000,1751652395000,\"Ra\",\"Me\",0.5715041322,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Ra dominance (52.9%) | \\u2696\\ufe0f Me modification (47.1%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Excellent period for building partnerships and dominating opponents | \\ud83d\\udcca Magnitude: 2.42 | NL:+0.18 SL:+0.40 Combined:+0.572 | HIGH\",0.5289256198,0.4710743802,2.42,2.0],[1751652395000,1751652632000,\"Ra\",\"Ke\",0.353804878,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Ra dominance (78.0%) | \\u2696\\ufe0f Ke modification (22.0%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Excellent period for building partnerships and dominating opponents | \\ud83d\\udcca Magnitude: 1.64 | NL:+0.18 SL:+0.15 Combined:+0.354 | HIGH\",0.7804878049,0.2195121951,1.64,2.0],[1751652632000,1751653300000,\"Ra\",\"Ve\",0.0866512397,\"Balanced (Slight Desc)\",\"\\ud83c\\udf1f Ra dominance (52.9%) | \\u2696\\ufe0f Ve modification (47.1%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Marginal advantage - gradual progress expected | \\ud83d\\udcca Magnitude: 0.97 | NL:+0.18 SL:+0.02 Combined:+0.087 | LOW\",0.5289256198,0.4710743802,0.968,0.8],[1751653300000,1751653497000,\"Ra\",\"Su\",0.0772571429,\"Balanced (Slight Desc)\",\"\\ud83c\\udf1f Ra dominance (57.1%) | \\u2696\\ufe0f Su modification (42.9%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Marginal advantage - gradual progress expected | \\ud83d\\udcca Magnitude: 0.90 | NL:+0.18 SL:-0.02 Combined:+0.077 | LOW\",0.5714285714,0.4285714286,0.896,0.8],[1751653497000,1751653825000,\"Ra\",\"Mo\",0.5051428571,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Ra dominance (57.1%) | \\u2696\\ufe0f Mo modification (42.9%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Excellent period for building partnerships and dominating opponents | \\ud83d\\udcca Magnitude: 2.24 | NL:+0.18 SL:+0.34 Combined:+0.505 | HIGH\",0.5714285714,0.4285714286,2.24,2.0],[1751653825000,1751654052000,\"Ra\",\"Ma\",0.3816097561,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Ra dominance (78.0%) | \\u2696\\ufe0f Ma modification (22.0%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Excellent period for building partnerships and dominating opponents | \\ud83d\\udcca Magnitude: 1.64 | NL:+0.18 SL:+0.21 Combined:+0.382 | HIGH\",0.7804878049,0.2195121951,1.64,2.0],[1751654052000,1751654565000,\"Ju\",\"Ju\",-0.0328,\"Balanced Period\",\"\\ud83c\\udf1f Ju dominance (57.1%) | \\u2696\\ufe0f Ju modification (42.9%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Evenly matched phase with gradual developments | \\ud83d\\udcca Magnitude: 0.90 | NL:-0.04 SL:-0.04 Combined:-0.033 | LOW\",0.5714285714,0.4285714286,0.896,0.8],[1751654565000,1751655162000,\"Ju\",\"Sa\",0.1122909091,\"Balanced (Slight Desc)\",\"\\ud83c\\udf1f Ju dominance (52.9%) | \\u2696\\ufe0f Sa modification (47.1%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Marginal advantage - gradual progress expected | \\ud83d\\udcca Magnitude: 0.97 | NL:-0.04 SL:+0.34 Combined:+0.112 | LOW\",0.5289256198,0.4710743802,0.968,0.8],[1751655162000,1751655685000,\"Ju\",\"Me\",0.1333950413,\"Advantage Desc\",\"\\ud83c\\udf1f Ju dominance (52.9%) | \\u2696\\ufe0f Me modification (47.1%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Good period for consolidation and steady progress | \\ud83d\\udcca Magnitude: 0.97 | NL:-0.04 SL:+0.40 Combined:+0.133 | MEDIUM\",0.5289256198,0.4710743802,0.968,0.8],[1751655685000,1751655898000,\"Ju\",\"Ke\",0.0010341463,\"Balanced Period\",\"\\ud83c\\udf1f Ju dominance (78.0%) | \\u2696\\ufe0f Ke modification (22.0%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Evenly matched phase with gradual developments | \\ud83d\\udcca Magnitude: 0.66 | NL:-0.04 SL:+0.15 Combined:+0.001 | LOW\",0.7804878049,0.2195121951,0.656,0.8],[1751655898000,1751656494000,\"Ju\",\"Ve\",-0.0085553719,\"Balanced Period\",\"\\ud83c\\udf1f Ju dominance (52.9%) | \\u2696\\ufe0f Ve modification (47.1%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Evenly matched phase with gradual developments | \\ud83d\\udcca Magnitude: 0.97 | NL:-0.04 SL:+0.02 Combined:-0.009 | LOW\",0.5289256198,0.4710743802,0.968,0.8],[1751656494000,1751656670000,\"Ju\",\"Su\",-0.0256,\"Balanced Period\",\"\\ud83c\\udf1f Ju dominance (57.1%) | \\u2696\\ufe0f Su modification (42.9%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Evenly matched phase with gradual developments | \\ud83d\\udcca Magnitude: 0.90 | NL:-0.04 SL:-0.02 Combined:-0.026 | LOW\",0.5714285714,0.4285714286,0.896,0.8],[1751656670000,1751656960000,\"Ju\",\"Mo\",0.0992,\"Balanced (Slight Desc)\",\"\\ud83c\\udf1f Ju dominance (57.1%) | \\u2696\\ufe0f Mo modification (42.9%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Marginal advantage - gradual progress expected | \\ud83d\\udcca Magnitude: 0.90 | NL:-0.04 SL:+0.34 Combined:+0.099 | LOW\",0.5714285714,0.4285714286,0.896,0.8],[1751656960000,1751657160000,\"Ju\",\"Ma\",0.0121560976,\"Balanced Period\",\"\\ud83c\\udf1f Ju dominance (78.0%) | \\u2696\\ufe0f Ma modification (22.0%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Evenly matched phase with gradual developments | \\ud83d\\udcca Magnitude: 0.66 | NL:-0.04 SL:+0.21 Combined:+0.012 | LOW\",0.7804878049,0.2195121951,0.656,0.8],[1751657160000,1751657667000,\"Ju\",\"Ra\",0.0443428571,\"Balanced Period\",\"\\ud83c\\udf1f Ju dominance (57.1%) | \\u2696\\ufe0f Ra modification (42.9%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Evenly matched phase with gradual developments | \\ud83d\\udcca Magnitude: 0.90 | NL:-0.04 SL:+0.18 Combined:+0.044 | LOW\",0.5714285714,0.4285714286,0.896,0.8],[1751657667000,1751658187000,\"Sa\",\"Sa\",0.688,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Sa dominance (57.1%) | \\u2696\\ufe0f Sa modification (42.9%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Excellent period for building partnerships and dominating opponents | \\ud83d\\udcca Magnitude: 2.66 | NL:+0.34 SL:+0.34 Combined:+0.688 | HIGH\",0.5714285714,0.4285714286,2.66,2.0],[1751658187000,1751658640000,\"Sa\",\"Me\",0.736,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Sa dominance (57.1%) | \\u2696\\ufe0f Me modification (42.9%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Excellent period for building partnerships and dominating opponents | \\ud83d\\udcca Magnitude: 2.66 | NL:+0.34 SL:+0.40 Combined:+0.736 | HIGH\",0.5714285714,0.4285714286,2.66,2.0],[1751658640000,1751658823000,\"Sa\",\"Ke\",0.6143404255,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Sa dominance (80.9%) | \\u2696\\ufe0f Ke modification (19.1%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Excellent period for building partnerships and dominating opponents | \\ud83d\\udcca Magnitude: 1.88 | NL:+0.34 SL:+0.15 Combined:+0.614 | HIGH\",0.8085106383,0.1914893617,1.88,2.0],[1751658823000,1751659335000,\"Sa\",\"Ve\",0.1652571429,\"Advantage Desc\",\"\\ud83c\\udf1f Sa dominance (57.1%) | \\u2696\\ufe0f Ve modification (42.9%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Good period for consolidation and steady progress | \\ud83d\\udcca Magnitude: 1.06 | NL:+0.34 SL:+0.02 Combined:+0.165 | MEDIUM\",0.5714285714,0.4285714286,1.064,0.8],[1751659335000,1751659486000,\"Sa\",\"Su\",0.1624774194,\"Advantage Desc\",\"\\ud83c\\udf1f Sa dominance (61.3%) | \\u2696\\ufe0f Su modification (38.7%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Good period for consolidation and steady progress | \\ud83d\\udcca Magnitude: 0.99 | NL:+0.34 SL:-0.02 Combined:+0.162 | MEDIUM\",0.6129032258,0.3870967742,0.992,0.8],[1751659486000,1751659733000,\"Sa\",\"Mo\",0.688,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Sa dominance (61.3%) | \\u2696\\ufe0f Mo modification (38.7%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Excellent period for building partnerships and dominating opponents | \\ud83d\\udcca Magnitude: 2.48 | NL:+0.34 SL:+0.34 Combined:+0.688 | HIGH\",0.6129032258,0.3870967742,2.48,2.0],[1751659733000,1751659904000,\"Sa\",\"Ma\",0.6385957447,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Sa dominance (80.9%) | \\u2696\\ufe0f Ma modification (19.1%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Excellent period for building partnerships and dominating opponents | \\ud83d\\udcca Magnitude: 1.88 | NL:+0.34 SL:+0.21 Combined:+0.639 | HIGH\",0.8085106383,0.1914893617,1.88,2.0],[1751659904000,1751660334000,\"Sa\",\"Ra\",0.5641290323,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Sa dominance (61.3%) | \\u2696\\ufe0f Ra modification (38.7%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Excellent period for building partnerships and dominating opponents | \\ud83d\\udcca Magnitude: 2.48 | NL:+0.34 SL:+0.18 Combined:+0.564 | HIGH\",0.6129032258,0.3870967742,2.48,2.0],[1751660334000,1751660705000,\"Sa\",\"Ju\",0.1559741935,\"Advantage Desc\",\"\\ud83c\\udf1f Sa dominance (61.3%) | \\u2696\\ufe0f Ju modification (38.7%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Good period for consolidation and steady progress | \\ud83d\\udcca Magnitude: 0.99 | NL:+0.34 SL:-0.04 Combined:+0.156 | MEDIUM\",0.6129032258,0.3870967742,0.992,0.8],[1751660705000,1751661089000,\"Me\",\"Me\",0.8,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Me dominance (57.1%) | \\u2696\\ufe0f Me modification (42.9%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Excellent period for building partnerships and dominating opponents | \\ud83d\\udcca Magnitude: 2.66 | NL:+0.40 SL:+0.40 Combined:+0.800 | HIGH\",0.5714285714,0.4285714286,2.66,2.0],[1751661089000,1751661244000,\"Me\",\"Ke\",0.704893617,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Me dominance (80.9%) | \\u2696\\ufe0f Ke modification (19.1%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Excellent period for building partnerships and dominating opponents | \\ud83d\\udcca Magnitude: 1.88 | NL:+0.40 SL:+0.15 Combined:+0.705 | HIGH\",0.8085106383,0.1914893617,1.88,2.0],[1751661244000,1751661676000,\"Me\",\"Ve\",0.1908571429,\"Advantage Desc\",\"\\ud83c\\udf1f Me dominance (57.1%) | \\u2696\\ufe0f Ve modification (42.9%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Good period for consolidation and steady progress | \\ud83d\\udcca Magnitude: 1.06 | NL:+0.40 SL:+0.02 Combined:+0.191 | MEDIUM\",0.5714285714,0.4285714286,1.064,0.8],[1751661676000,1751661803000,\"Me\",\"Su\",0.1899354839,\"Advantage Desc\",\"\\ud83c\\udf1f Me dominance (61.3%) | \\u2696\\ufe0f Su modification (38.7%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Good period for consolidation and steady progress | \\ud83d\\udcca Magnitude: 0.99 | NL:+0.40 SL:-0.02 Combined:+0.190 | MEDIUM\",0.6129032258,0.3870967742,0.992,0.8],[1751661803000,1751662011000,\"Me\",\"Mo\",0.7566451613,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Me dominance (61.3%) | \\u2696\\ufe0f Mo modification (38.7%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Excellent period for building partnerships and dominating opponents | \\ud83d\\udcca Magnitude: 2.48 | NL:+0.40 SL:+0.34 Combined:+0.757 | HIGH\",0.6129032258,0.3870967742,2.48,2.0],[1751662011000,1751662155000,\"Me\",\"Ma\",0.7291489362,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Me dominance (80.9%) | \\u2696\\ufe0f Ma modification (19.1%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Excellent period for building partnerships and dominating opponents | \\ud83d\\udcca Magnitude: 1.88 | NL:+0.40 SL:+0.21 Combined:+0.729 | HIGH\",0.8085106383,0.1914893617,1.88,2.0],[1751662155000,1751662517000,\"Me\",\"Ra\",0.6327741935,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Me dominance (61.3%) | \\u2696\\ufe0f Ra modification (38.7%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Excellent period for building partnerships and dominating opponents | \\ud83d\\udcca Magnitude: 2.48 | NL:+0.40 SL:+0.18 Combined:+0.633 | HIGH\",0.6129032258,0.3870967742,2.48,2.0],[1751662517000,1751662829000,\"Me\",\"Ju\",0.1834322581,\"Advantage Desc\",\"\\ud83c\\udf1f Me dominance (61.3%) | \\u2696\\ufe0f Ju modification (38.7%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Good period for consolidation and steady progress | \\ud83d\\udcca Magnitude: 0.99 | NL:+0.40 SL:-0.04 Combined:+0.183 | MEDIUM\",0.6129032258,0.3870967742,0.992,0.8],[1751662829000,1751663189000,\"Me\",\"Sa\",0.752,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Me dominance (57.1%) | \\u2696\\ufe0f Sa modification (42.9%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Excellent period for building partnerships and dominating opponents | \\ud83d\\udcca Magnitude: 2.66 | NL:+0.40 SL:+0.34 Combined:+0.752 | HIGH\",0.5714285714,0.4285714286,2.66,2.0],[1751663189000,1751663319000,\"Ke\",\"Ke\",0.3033333333,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Ke dominance (57.1%) | \\u2696\\ufe0f Ke modification (42.9%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Excellent period for building partnerships and dominating opponents | \\ud83d\\udcca Magnitude: 0.84 | NL:+0.15 SL:+0.15 Combined:+0.303 | HIGH\",0.5714285714,0.4285714286,0.84,2.0],[1751663319000,1751663681000,\"Ke\",\"Ve\",0.0490864198,\"Balanced Period\",\"\\ud83c\\udf1f Ke dominance (29.6%) | \\u2696\\ufe0f Ve modification (70.4%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Evenly matched phase with gradual developments | \\ud83d\\udcca Magnitude: 0.65 | NL:+0.15 SL:+0.02 Combined:+0.049 | LOW\",0.2962962963,0.7037037037,0.648,0.8],[1751663681000,1751663787000,\"Ke\",\"Su\",0.0297777778,\"Balanced Period\",\"\\ud83c\\udf1f Ke dominance (33.3%) | \\u2696\\ufe0f Su modification (66.7%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Evenly matched phase with gradual developments | \\ud83d\\udcca Magnitude: 0.58 | NL:+0.15 SL:-0.02 Combined:+0.030 | LOW\",0.3333333333,0.6666666667,0.576,0.8],[1751663787000,1751663962000,\"Ke\",\"Mo\",0.5597777778,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Ke dominance (33.3%) | \\u2696\\ufe0f Mo modification (66.7%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Excellent period for building partnerships and dominating opponents | \\ud83d\\udcca Magnitude: 1.44 | NL:+0.15 SL:+0.34 Combined:+0.560 | HIGH\",0.3333333333,0.6666666667,1.44,2.0],[1751663962000,1751664083000,\"Ke\",\"Ma\",0.3576190476,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Ke dominance (57.1%) | \\u2696\\ufe0f Ma modification (42.9%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Excellent period for building partnerships and dominating opponents | \\ud83d\\udcca Magnitude: 0.84 | NL:+0.15 SL:+0.21 Combined:+0.358 | HIGH\",0.5714285714,0.4285714286,0.84,2.0],[1751664083000,1751664387000,\"Ke\",\"Ra\",0.3464444444,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Ke dominance (33.3%) | \\u2696\\ufe0f Ra modification (66.7%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Excellent period for building partnerships and dominating opponents | \\ud83d\\udcca Magnitude: 1.44 | NL:+0.15 SL:+0.18 Combined:+0.346 | HIGH\",0.3333333333,0.6666666667,1.44,2.0],[1751664387000,1751664650000,\"Ke\",\"Ju\",0.0185777778,\"Balanced Period\",\"\\ud83c\\udf1f Ke dominance (33.3%) | \\u2696\\ufe0f Ju modification (66.7%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Evenly matched phase with gradual developments | \\ud83d\\udcca Magnitude: 0.58 | NL:+0.15 SL:-0.04 Combined:+0.019 | LOW\",0.3333333333,0.6666666667,0.576,0.8],[1751664650000,1751664954000,\"Ke\",\"Sa\",0.5740246914,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Ke dominance (29.6%) | \\u2696\\ufe0f Sa modification (70.4%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Excellent period for building partnerships and dominating opponents | \\ud83d\\udcca Magnitude: 1.62 | NL:+0.15 SL:+0.34 Combined:+0.574 | HIGH\",0.2962962963,0.7037037037,1.62,2.0],[1751664954000,1751665219000,\"Ke\",\"Me\",0.6528395062,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Ke dominance (29.6%) | \\u2696\\ufe0f Me modification (70.4%) | \\ufffd\\ufffd High convergence - aligned energies | \\ud83c\\udfcf Excellent period for building partnerships and dominating opponents | \\ud83d\\udcca Magnitude: 1.62 | NL:+0.15 SL:+0.40 Combined:+0.653 | HIGH\",0.2962962963,0.7037037037,1.62,2.0],[1751665219000,1751665523000,\"Ve\",\"Ve\",0.0186666667,\"Balanced Period\",\"\\ud83c\\udf1f Ve dominance (57.1%) | \\u2696\\ufe0f Ve modification (42.9%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Evenly matched phase with gradual developments | \\ud83d\\udcca Magnitude: 1.06 | NL:+0.02 SL:+0.02 Combined:+0.019 | LOW\",0.5714285714,0.4285714286,1.064,0.8],[1751665523000,1751665612000,\"Ve\",\"Su\",0.0052473118,\"Balanced Period\",\"\\ud83c\\udf1f Ve dominance (61.3%) | \\u2696\\ufe0f Su modification (38.7%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Evenly matched phase with gradual developments | \\ud83d\\udcca Magnitude: 0.99 | NL:+0.02 SL:-0.02 Combined:+0.005 | LOW\",0.6129032258,0.3870967742,0.992,0.8],[1751665612000,1751665759000,\"Ve\",\"Mo\",0.1179698925,\"Balanced (Slight Desc)\",\"\\ud83c\\udf1f Ve dominance (61.3%) | \\u2696\\ufe0f Mo modification (38.7%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Marginal advantage - gradual progress expected | \\ud83d\\udcca Magnitude: 0.99 | NL:+0.02 SL:+0.34 Combined:+0.118 | LOW\",0.6129032258,0.3870967742,0.992,0.8],[1751665759000,1751665861000,\"Ve\",\"Ma\",0.0480283688,\"Balanced Period\",\"\\ud83c\\udf1f Ve dominance (80.9%) | \\u2696\\ufe0f Ma modification (19.1%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Evenly matched phase with gradual developments | \\ud83d\\udcca Magnitude: 0.75 | NL:+0.02 SL:+0.21 Combined:+0.048 | LOW\",0.8085106383,0.1914893617,0.752,0.8],[1751665861000,1751666119000,\"Ve\",\"Ra\",0.0684215054,\"Balanced (Slight Desc)\",\"\\ud83c\\udf1f Ve dominance (61.3%) | \\u2696\\ufe0f Ra modification (38.7%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Marginal advantage - gradual progress expected | \\ud83d\\udcca Magnitude: 0.99 | NL:+0.02 SL:+0.18 Combined:+0.068 | LOW\",0.6129032258,0.3870967742,0.992,0.8],[1751666119000,1751666343000,\"Ve\",\"Ju\",-0.001255914,\"Balanced Period\",\"\\ud83c\\udf1f Ve dominance (61.3%) | \\u2696\\ufe0f Ju modification (38.7%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Evenly matched phase with gradual developments | \\ud83d\\udcca Magnitude: 0.99 | NL:+0.02 SL:-0.04 Combined:-0.001 | LOW\",0.6129032258,0.3870967742,0.992,0.8],[1751666343000,1751666700000,\"Ve\",\"Sa\",0.1286095238,\"Advantage Desc\",\"\\ud83c\\udf1f Ve dominance (57.1%) | \\u2696\\ufe0f Sa modification (42.9%) | \\u26a1 Mixed signals - competing influences | \\ud83c\\udfcf Good period for consolidation and steady progress | \\ud83d\\udcca Magnitude: 1.06 | NL:+0.02 SL:+0.34 Combined:+0.129 | MEDIUM\",0.5714285714,0.4285714286,1.064,0.8]]}",
+    "moon_timeline_df": "{\"columns\":[\"Start Time\",\"End Time\",\"NL_Planet\",\"SL_Planet\",\"SSL_Planet\",\"Score\",\"Verdict\",\"Comment\",\"NL_Influence\",\"SL_Influence\",\"SSL_Influence\",\"Event_Magnitude\",\"Convergence_Factor\"],\"index\":[0,1,2,3,4,5,6,7,8,9,10,11],\"data\":[[1751650500000,1751650546000,\"Sa\",\"Sa\",\"Me\",-0.7128888889,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Sa dominance (44.4%) | \\u2696\\ufe0f Sa modification (33.3%) | \\ud83c\\udfaf Me delivery (22.2%) | \\ud83d\\udd25 High convergence - aligned energies | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 3.42 | Score: -0.713 | HIGH\",0.4444444444,0.3333333333,0.2222222222,3.42,2.0],[1751650546000,1751651445000,\"Sa\",\"Sa\",\"Ke\",-0.6561655172,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Sa dominance (52.4%) | \\u2696\\ufe0f Sa modification (39.3%) | \\ud83c\\udfaf Ke delivery (8.3%) | \\ud83d\\udd25 High convergence - aligned energies | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 2.90 | Score: -0.656 | HIGH\",0.524137931,0.3931034483,0.0827586207,2.9,2.0],[1751651445000,1751654014000,\"Sa\",\"Sa\",\"Ve\",-0.354562963,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Sa dominance (44.4%) | \\u2696\\ufe0f Sa modification (33.3%) | \\ud83c\\udfaf Ve delivery (22.2%) | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 2.22 | Score: -0.355 | HIGH\",0.4444444444,0.3333333333,0.2222222222,2.223,1.3],[1751654014000,1751654785000,\"Sa\",\"Sa\",\"Su\",-0.3554278788,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Sa dominance (46.1%) | \\u2696\\ufe0f Sa modification (34.5%) | \\ud83c\\udfaf Su delivery (19.4%) | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 2.15 | Score: -0.355 | HIGH\",0.4606060606,0.3454545455,0.1939393939,2.145,1.3],[1751654785000,1751656070000,\"Sa\",\"Sa\",\"Mo\",-0.688,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Sa dominance (46.1%) | \\u2696\\ufe0f Sa modification (34.5%) | \\ud83c\\udfaf Mo delivery (19.4%) | \\ud83d\\udd25 High convergence - aligned energies | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 3.30 | Score: -0.688 | HIGH\",0.4606060606,0.3454545455,0.1939393939,3.3,2.0],[1751656070000,1751656969000,\"Sa\",\"Sa\",\"Ma\",-0.6666482759,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Sa dominance (52.4%) | \\u2696\\ufe0f Sa modification (39.3%) | \\ud83c\\udfaf Ma delivery (8.3%) | \\ud83d\\udd25 High convergence - aligned energies | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 2.90 | Score: -0.667 | HIGH\",0.524137931,0.3931034483,0.0827586207,2.9,2.0],[1751656969000,1751659281000,\"Sa\",\"Sa\",\"Ra\",-0.6259393939,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Sa dominance (46.1%) | \\u2696\\ufe0f Sa modification (34.5%) | \\ud83c\\udfaf Ra delivery (19.4%) | \\ud83d\\udd25 High convergence - aligned energies | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 3.30 | Score: -0.626 | HIGH\",0.4606060606,0.3454545455,0.1939393939,3.3,2.0],[1751659281000,1751661336000,\"Sa\",\"Sa\",\"Ju\",-0.3501333333,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Sa dominance (46.1%) | \\u2696\\ufe0f Sa modification (34.5%) | \\ud83c\\udfaf Ju delivery (19.4%) | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 2.15 | Score: -0.350 | HIGH\",0.4606060606,0.3454545455,0.1939393939,2.145,1.3],[1751661336000,1751663290000,\"Sa\",\"Me\",\"Me\",-0.7502222222,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Sa dominance (44.4%) | \\u2696\\ufe0f Me modification (33.3%) | \\ud83c\\udfaf Me delivery (22.2%) | \\ud83d\\udd25 High convergence - aligned energies | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 3.42 | Score: -0.750 | HIGH\",0.4444444444,0.3333333333,0.2222222222,3.42,2.0],[1751663290000,1751664094000,\"Sa\",\"Me\",\"Ke\",-0.7001931034,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Sa dominance (52.4%) | \\u2696\\ufe0f Me modification (39.3%) | \\ud83c\\udfaf Ke delivery (8.3%) | \\ud83d\\udd25 High convergence - aligned energies | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 2.90 | Score: -0.700 | HIGH\",0.524137931,0.3931034483,0.0827586207,2.9,2.0],[1751664094000,1751666393000,\"Sa\",\"Me\",\"Ve\",-0.3788296296,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Sa dominance (44.4%) | \\u2696\\ufe0f Me modification (33.3%) | \\ud83c\\udfaf Ve delivery (22.2%) | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 2.22 | Score: -0.379 | HIGH\",0.4444444444,0.3333333333,0.2222222222,2.223,1.3],[1751666393000,1751666700000,\"Sa\",\"Me\",\"Su\",-0.3805769697,\"Strong Advantage Desc\",\"\\ud83c\\udf1f Sa dominance (46.1%) | \\u2696\\ufe0f Me modification (34.5%) | \\ud83c\\udfaf Su delivery (19.4%) | \\ud83c\\udfcf Challenging period - wickets or pressure likely | \\ud83d\\udcca Magnitude: 2.15 | Score: -0.381 | HIGH\",0.4606060606,0.3454545455,0.1939393939,2.145,1.3]]}"
+}

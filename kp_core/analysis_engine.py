@@ -2,6 +2,7 @@ import pandas as pd
 import os
 import sys
 from collections import defaultdict
+import numpy as np
 
 # --- Path Correction ---
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -21,23 +22,21 @@ SIGNIFICATOR_RULE_WEIGHTS = {
 
 # === CORRECTED HOUSE WEIGHTS FOR CRICKET/SPORTS (KP SPORTS ASTROLOGY) ===
 HOUSE_WEIGHTS = {
-    # Victory Houses for Ascendant Team (as per authentic KP sports principles)
+    # Victory Houses for Ascendant Team
     6: 1.0,   # Victory over opponents/enemies (strongest for winning)
     11: 0.9,  # Gains, profits, fulfillment of desires, success
-    1: 0.8,   # Self, strength, health, overall well-being of the team
+    1: 0.5,   # Self, strength, health, overall well-being of the team
     10: 0.7,  # Achievements, public recognition, performance excellence
-    3: 0.4,   # Courage, effort, initiative (supportive for victory)
+    3: 0.3,   # Courage, effort, initiative (supportive for victory)
+    2: 0.2,   # Resources & Support. Team's form, available resources
     
-    # Defeat Houses for Ascendant Team (as per authentic KP sports principles)
-    12: -1.0, # Losses, expenditure, self-undoing (strongest for losing)
-    8: -0.9,  # Obstacles, sudden events, crises, accidents, "death"/wickets
-    7: -0.8,  # The opponent (direct opposition/confrontation)
-    5: -0.7,  # 11th from 7th (opponent's gains), speculation/risk-taking
-    4: -0.6,  # End of activity, change of field, downfall, home disadvantage
-    
-    # Neutral Houses (KP considers these generally neutral for match outcomes)
-    9: 0.2,   # Fortune, luck (can be supportive but not decisive)
-    2: 0.1,   # Resources, runs (helpful but secondary for overall outcome)
+    # Defeat Houses for Ascendant Team
+    8: -1.0,  # Crisis & Sudden Events. Primary house for wickets, injuries, collapses
+    12: -0.9, # Total Loss & Self-Undoing. Ultimate failure, errors
+    5: -0.8,  # Opponent's Gains. 11th from 7th, opponent achieving goals
+    7: -0.6,  # Opponent's Strength. Opponent is formidable and playing well
+    9: -0.3,  # Opponent's Courage & Efforts. 3rd from 7th, opponent's initiative
+    4: -0.2   # End of Play / Home Advantage. Complex house signifying end of activity
 }
 
 # === AUTHENTIC VEDIC PLANETARY FRIENDSHIP/ENMITY TABLE ===
@@ -172,13 +171,25 @@ class AnalysisEngine:
 
     # === CUSP IMPORTANCE WEIGHTS (Classical KP) ===
 
-    def __init__(self, engine: KPEngine, team_a_name: str, team_b_name: str):
+    # Default house weights (KP sports astrology)
+    DEFAULT_HOUSE_WEIGHTS = {
+        1: 0.5, 2: 0.2, 3: 0.3, 4: -0.2, 5: -0.8, 6: 1.0, 7: -0.6, 8: -1.0, 9: -0.3, 10: 0.7, 11: 0.9, 12: -0.9
+    }
+    # Default timeline weights
+    DEFAULT_TIMELINE_WEIGHTS = {
+        'ssl_timeline': {'NL': 0.1, 'SL': 0.2, 'SSL': 0.7},
+        'asc_timeline': {'NL': 0.2, 'SL': 0.3, 'Context': 0.5}
+    }
+
+    def __init__(self, engine: KPEngine, team_a_name: str, team_b_name: str, house_weights=None, timeline_weights=None):
         self.engine = engine
         self.team_a = team_a_name
         self.team_b = team_b_name
         self.planets = engine.get_all_planets_df()
         self.cusps = engine.get_all_cusps_df()
-
+        # Use provided weights or defaults
+        self.house_weights = house_weights if house_weights is not None else self.DEFAULT_HOUSE_WEIGHTS.copy()
+        self.timeline_weights = timeline_weights if timeline_weights is not None else self.DEFAULT_TIMELINE_WEIGHTS.copy()
         # --- Pre-computation for efficiency ---
         self._precompute_chart_data()
 
@@ -324,57 +335,51 @@ class AnalysisEngine:
         Returns:
             float: The weight for the house from the given perspective
         """
-        base_weight = HOUSE_WEIGHTS.get(house_num, 0)
-        
-        if perspective.lower() == 'descendant':
-            # For descendant perspective, simply reverse the sign of the weight
-            # What's good for ascendant becomes bad for descendant, and vice versa
-            # H8 (defeat for ascendant) becomes victory for descendant = +0.9
-            # H6 (victory for ascendant) becomes defeat for descendant = -1.0
-            return -base_weight
-        
-        return base_weight
+        # Use dynamic house weights if set, else default
+        return self.house_weights.get(house_num, self.DEFAULT_HOUSE_WEIGHTS.get(house_num, 0.0))
 
     def calculate_planet_score(self, planet_name: str, perspective: str = 'ascendant') -> float:
         """
         Calculates a score for a planet based on its weighted significations.
-        Now includes Classical KP Debilitation and Exaltation Rules for accurate predictions.
+        Implements authentic KP principles where all planets (except Rahu/Ketu) give their own results
+        with intensity modifications based on dignity.
         
         Args:
             planet_name: Name of the planet (can be either short or full name)
             perspective: Either 'ascendant' or 'descendant'
             
         Returns:
-            float: The calculated score from the given perspective (with all corrections)
+            float: The calculated score from the given perspective (with intensity modifications)
         """
+        from functools import reduce
+        
         # Standardize planet name for processing
         planet_name = PlanetNameUtils.standardize_for_index(planet_name)
 
-        # === CLASSICAL KP AGENCY RULE FOR DEBILITATED PLANETS ===
-        if self._is_planet_debilitated(planet_name):
-            return self._calculate_debilitated_planet_score(planet_name, perspective)
-        
-        # === NORMAL PLANET CALCULATION ===
-        significations = self.get_significators(planet_name)
-        if not significations:
-            return 0.0
+        # === RAHU/KETU SPECIAL HANDLING ===
+        if planet_name in ['Rahu', 'Ketu']:
+            return self._calculate_rahu_ketu_score(planet_name, perspective)
 
-        total_score = 0
-        unique_houses = set()
-        for house, rule in significations:
-            rule_weight = SIGNIFICATOR_RULE_WEIGHTS.get(rule, 0)
-            house_weight = self._get_house_weight(house, perspective)
-            total_score += (rule_weight * house_weight)
-            unique_houses.add(house)
-            
-        # Calculate base score normalized by number of unique houses
-        base_score = total_score / len(unique_houses) if unique_houses else 0.0
+        # === CALCULATE BASE SCORE FROM SIGNIFICATORS ===
+        base_score = self._calculate_base_score(planet_name, perspective)
         
-        # === CLASSICAL KP CORRECTIONS (FOR NON-DEBILITATED PLANETS) ===
-        exaltation_enhancements = self._apply_exaltation_rules(planet_name, base_score, perspective)
+        # === CALCULATE INTENSITY MODIFIER ===
+        # Get individual strength factors
+        natural_strength = self._get_planetary_natural_strength(planet_name)
+        positional_strength = self._get_planetary_positional_strength(planet_name)
+        significator_relevance = self._get_significator_relevance(planet_name, perspective)
         
-        # Return corrected score
-        final_score = base_score + exaltation_enhancements
+        # Calculate final intensity modifier
+        # We use geometric mean to prevent extreme diminishing when multiple reducing factors are present
+        intensity_factors = [natural_strength, positional_strength, significator_relevance]
+        intensity_modifier = pow(reduce(lambda x, y: x * y, intensity_factors), 1/len(intensity_factors))
+        
+        # Ensure the modifier stays within reasonable bounds (0.3 to 3.0)
+        intensity_modifier = max(0.3, min(3.0, intensity_modifier))
+        
+        # Apply intensity modifier to base score
+        final_score = base_score * intensity_modifier
+        
         return final_score
 
     def _is_planet_debilitated(self, planet_name: str) -> bool:
@@ -399,248 +404,24 @@ class AnalysisEngine:
         
         return planet_sign == debil_sign
     
-    def _get_exaltation_debilitation_strength(self, planet_name: str) -> float:
-        """
-        Calculate precise exaltation/debilitation strength based on degree proximity.
-        Returns a modifier between 0.3 (worst debilitation) and 3.0 (perfect exaltation).
-        
-        Args:
-            planet_name: Standardized planet name
-            
-        Returns:
-            float: Strength modifier for exaltation/debilitation
-        """
-        if planet_name not in self.planets.index:
-            return 1.0
-            
-        planet_info = self.planets.loc[planet_name]
-        planet_sign = planet_info['sign']
-        planet_degree = planet_info['longitude'] % 30  # Degree within sign
-        
-        # Check exaltation
-        if planet_name in self.EXALTATION_MAPPING:
-            exalt_sign, exalt_degree = self.EXALTATION_MAPPING[planet_name]
-            if planet_sign == exalt_sign:
-                # Calculate strength based on proximity to exact exaltation degree
-                degree_diff = abs(planet_degree - exalt_degree)
-                if degree_diff <= 1.0:
-                    return 3.0  # Perfect exaltation (within 1 degree)
-                elif degree_diff <= 5.0:
-                    return 2.5  # Strong exaltation (within 5 degrees)
-                elif degree_diff <= 10.0:
-                    return 2.0  # Good exaltation (within 10 degrees)
-                else:
-                    return 1.8  # Mild exaltation (same sign but distant)
-        
-        # Check debilitation
-        if planet_name in self.DEBILITATION_MAPPING:
-            debil_sign, debil_degree = self.DEBILITATION_MAPPING[planet_name]
-            if planet_sign == debil_sign:
-                # Calculate weakness based on proximity to exact debilitation degree
-                degree_diff = abs(planet_degree - debil_degree)
-                if degree_diff <= 1.0:
-                    return 0.3  # Severe debilitation (within 1 degree)
-                elif degree_diff <= 5.0:
-                    return 0.4  # Strong debilitation (within 5 degrees)
-                elif degree_diff <= 10.0:
-                    return 0.5  # Moderate debilitation (within 10 degrees)
-                else:
-                    return 0.7  # Mild debilitation (same sign but distant)
-        
-        return 1.0  # Neutral strength
+    # Function removed as its functionality is now integrated into _get_planetary_natural_strength
 
-    def _calculate_debilitated_planet_score(self, planet_name: str, perspective: str = 'ascendant') -> float:
-        """
-        Calculate score for a debilitated planet using the Classical KP Agency Rule.
-        
-        The debilitated planet acts as an agent of its sign lord and gives results
-        according to the sign lord's direction and house significators.
-        
-        Args:
-            planet_name: Standardized debilitated planet name
-            perspective: Either 'ascendant' or 'descendant'
-            
-        Returns:
-            float: Score based on sign lord's influence and direction
-        """
-        if planet_name not in self.planets.index:
-            return 0.0
-            
-        planet_info = self.planets.loc[planet_name]
-        planet_sign = planet_info['sign']
-        
-        # === SIGN LORD MAPPING ===
-        SIGN_LORD_MAPPING = {
-            'Aries': 'Mars', 'Taurus': 'Venus', 'Gemini': 'Mercury', 'Cancer': 'Moon',
-            'Leo': 'Sun', 'Virgo': 'Mercury', 'Libra': 'Venus', 'Scorpio': 'Mars',
-            'Sagittarius': 'Jupiter', 'Capricorn': 'Saturn', 'Aquarius': 'Saturn', 'Pisces': 'Jupiter'
-        }
-        
-        # Get the sign lord
-        sign_lord_name = SIGN_LORD_MAPPING.get(planet_sign)
-        if not sign_lord_name or sign_lord_name not in self.planets.index:
-            return 0.0  # Fallback if sign lord not found
-        
-        # === CLASSICAL KP AGENCY RULE ===
-        # Step 1: Calculate sign lord's base score and direction
-        sign_lord_base_score = self._calculate_base_score(sign_lord_name, perspective)
-        
-        # Step 2: Get sign lord's house significators (what the debilitated planet will deliver)
-        sign_lord_significators = self.get_significators(sign_lord_name)
-        if not sign_lord_significators:
-            return 0.0
-        
-        # Step 3: Calculate agency score using sign lord's houses but with modifications
-        total_score = 0
-        unique_houses = set()
-        for house, rule in sign_lord_significators:
-            rule_weight = SIGNIFICATOR_RULE_WEIGHTS.get(rule, 0)
-            house_weight = self._get_house_weight(house, perspective)
-            total_score += (rule_weight * house_weight)
-            unique_houses.add(house)
-            
-        agency_base_score = total_score / len(unique_houses) if unique_houses else 0.0
-        
-        # Step 4: Apply sign lord's directional influence
-        # If sign lord favors ascendant (positive), debilitated planet should also favor ascendant
-        # If sign lord favors descendant (negative), debilitated planet should also favor descendant
-        if sign_lord_base_score > 0:
-            # Sign lord favors ascendant - apply positive influence
-            agency_score = abs(agency_base_score)
-        elif sign_lord_base_score < 0:
-            # Sign lord favors descendant - apply negative influence  
-            agency_score = -abs(agency_base_score)
-        else:
-            # Sign lord is neutral
-            agency_score = agency_base_score
-        
-        # Step 5: Apply debilitation corrections if sign lord is strong enough
-        if abs(sign_lord_base_score) > 0.03:  # Sign lord strong enough for Neecha Bhanga
-            # Calculate Neecha Bhanga correction
-            neecha_bhanga_strength = abs(sign_lord_base_score) * 0.6
-            
-            # Enhanced strength if sign lord significates victory houses
-            victory_houses = [h for h, r in sign_lord_significators if h in [1, 6, 10, 11]]
-            if len(victory_houses) >= 2:
-                neecha_bhanga_strength *= 1.2
-            
-            # Apply correction in the same direction as sign lord
-            if sign_lord_base_score > 0:
-                agency_score += neecha_bhanga_strength
-            else:
-                agency_score -= neecha_bhanga_strength
-        
-        return agency_score
+    # Function removed as debilitation is now handled through intensity modifiers in calculate_planet_score
 
-    def _apply_exaltation_rules(self, planet_name: str, base_score: float, perspective: str = 'ascendant') -> float:
-        """
-        Applies Classical KP Exaltation Enhancement Rules:
-        
-        CORE PRINCIPLE: "An exalted planet increases the INTENSITY of what it is supposed to do."
-        
-        - If base score is positive (+0.60), exaltation makes it MORE positive (e.g., +0.90)
-        - If base score is negative (-0.45), exaltation makes it MORE negative (e.g., -0.67)
-        
-        Exaltation amplifies the planet's natural indications based on house significators.
-        It does NOT reverse negative influences - it intensifies them!
-        
-        Args:
-            planet_name: Standardized planet name
-            base_score: Original calculated score based on house significators
-            perspective: Either 'ascendant' or 'descendant'
-            
-        Returns:
-            float: Enhancement amount to be added to base score (can be positive or negative)
-        """
-        if planet_name not in self.planets.index:
-            return 0.0
-            
-        planet_info = self.planets.loc[planet_name]
-        planet_sign = planet_info['sign']
-        planet_longitude = planet_info['longitude']
-        
-        # Check if planet is exalted
-        if planet_name not in self.EXALTATION_MAPPING:
-            return 0.0  # No exaltation rules for some bodies
-            
-        exalt_sign, exalt_degree = self.EXALTATION_MAPPING[planet_name]
-        is_exalted = planet_sign == exalt_sign
-        
-        if not is_exalted:
-            return 0.0  # Planet not exalted, no enhancement needed
-            
-        # Calculate degree proximity to exact exaltation
-        degree_in_sign = planet_longitude % 30  # Get degree within the sign
-        distance_from_exact = abs(degree_in_sign - exalt_degree)
-        
-        # Proximity factor: closer to exact degree = stronger exaltation
-        if distance_from_exact <= 3.0:  # Within 3 degrees of exact (very close)
-            proximity_factor = 1.0  # 100% strength
-        elif distance_from_exact <= 8.0:  # Within 8 degrees (close)
-            proximity_factor = 0.9 - ((distance_from_exact - 3.0) / 5.0) * 0.3  # 90% to 60%
-        else:  # Beyond 8 degrees (still exalted but weaker)
-            proximity_factor = 0.6 - ((distance_from_exact - 8.0) / 22.0) * 0.2  # 60% to 40%
-        
-        proximity_factor = max(proximity_factor, 0.4)  # Minimum 40% strength
-        
-        # === CLASSICAL KP INTENSITY AMPLIFICATION ===
-        # Base amplification: 40-80% increase in intensity based on proximity
-        base_amplification_rate = 0.4 + (0.4 * proximity_factor)  # 40% to 80%
-        
-        # Calculate the amplification (maintaining the same direction as base score)
-        intensity_amplification = base_score * base_amplification_rate
-        
-        # === ADDITIONAL ENHANCEMENT FACTORS ===
-        additional_enhancement = 0.0
-        
-        # 1. Natural Authority Enhancement (planet-specific)
-        if planet_name in ['Sun', 'Mars', 'Jupiter']:  # Natural authority planets
-            authority_factor = 0.15 * proximity_factor  # Up to 15% additional
-            additional_enhancement += abs(base_score) * authority_factor
-        elif planet_name in ['Moon', 'Venus']:  # Natural grace/benefic planets
-            grace_factor = 0.12 * proximity_factor  # Up to 12% additional
-            additional_enhancement += abs(base_score) * grace_factor
-        elif planet_name in ['Mercury', 'Saturn']:  # Natural intelligence/discipline planets
-            wisdom_factor = 0.10 * proximity_factor  # Up to 10% additional
-            additional_enhancement += abs(base_score) * wisdom_factor
-        
-        # 2. House Significator Enhancement
-        planet_significators = self.get_significators(planet_name)
-        planet_houses = [h for h, r in planet_significators]
-        
-        # Count strong house significators (Rule 1 and 2)
-        strong_significators = [r for h, r in planet_significators if r in [1, 2]]
-        if strong_significators:
-            significator_factor = len(strong_significators) * 0.05 * proximity_factor  # 5% per strong significator
-            significator_factor = min(significator_factor, 0.20)  # Cap at 20%
-            additional_enhancement += abs(base_score) * significator_factor
-        
-        # === APPLY ENHANCEMENTS IN THE SAME DIRECTION AS BASE SCORE ===
-        if base_score >= 0:
-            # Positive base score: add positive enhancements
-            total_enhancement = intensity_amplification + additional_enhancement
-        else:
-            # Negative base score: add negative enhancements (make more negative)
-            total_enhancement = intensity_amplification - additional_enhancement
-        
-        # === MAXIMUM ENHANCEMENT CAP ===
-        # Limit enhancement to prevent unrealistic values
-        max_enhancement_magnitude = abs(base_score) * 1.5  # Maximum 150% amplification
-        if abs(total_enhancement) > max_enhancement_magnitude:
-            total_enhancement = max_enhancement_magnitude * (1 if total_enhancement >= 0 else -1)
-        
-        return total_enhancement
+    # Function removed as exaltation is now handled through intensity modifiers in calculate_planet_score
 
     def _calculate_base_score(self, planet_name: str, perspective: str = 'ascendant') -> float:
         """
-        Calculates base score without debilitation corrections (to avoid recursion).
+        Calculates base score using only the top 2 most impactful significator rules.
+        This eliminates the normalization bias where planets with more significators 
+        get artificially lower scores.
         
         Args:
             planet_name: Name of the planet
             perspective: Either 'ascendant' or 'descendant'
             
         Returns:
-            float: Base score without corrections
+            float: Base score from top 2 significator rules
         """
         planet_name = PlanetNameUtils.standardize_for_index(planet_name)
         
@@ -648,15 +429,181 @@ class AnalysisEngine:
         if not significations:
             return 0.0
 
-        total_score = 0
-        unique_houses = set()
+        # Calculate impact for each significator rule
+        rule_impacts = []
         for house, rule in significations:
             rule_weight = SIGNIFICATOR_RULE_WEIGHTS.get(rule, 0)
             house_weight = self._get_house_weight(house, perspective)
-            total_score += (rule_weight * house_weight)
-            unique_houses.add(house)
+            weighted_score = rule_weight * house_weight
+            impact = abs(weighted_score)  # Absolute impact for sorting
+            rule_impacts.append((impact, weighted_score, house, rule))
+        
+        # Sort by impact (descending) and take top 2
+        rule_impacts.sort(key=lambda x: x[0], reverse=True)
+        top_2_rules = rule_impacts[:2]
+        
+        # Calculate score from top 2 rules only
+        total_score = sum(weighted_score for _, weighted_score, _, _ in top_2_rules)
+        
+        return total_score
+
+    # === RAHU/KETU AGENCY IMPLEMENTATION ===
+    
+    def _find_rahu_ketu_agent(self, node_name: str) -> str:
+        """
+        Find Rahu/Ketu's primary agent using KP hierarchy
+        Priority: Conjunction > Nakshatra Lord > Sign Lord
+        """
+        if node_name not in self.planets.index:
+            return 'Sun'  # Fallback
+        
+        planet_info = self.planets.loc[node_name]
+        
+        # Priority 1: Check for conjunction (within 6 degrees)
+        conjunct_planet = self._find_conjunction_partner(node_name, orb=6.0)
+        if conjunct_planet:
+            return conjunct_planet
+        
+        # Priority 2: Nakshatra Lord (Star Lord)
+        nakshatra_lord = planet_info['nl']
+        nakshatra_lord_full = PlanetNameUtils.to_full_name(nakshatra_lord)
+        if nakshatra_lord_full and nakshatra_lord_full not in ['Rahu', 'Ketu']:
+            return nakshatra_lord_full
+        
+        # Priority 3: Sign Lord (Dispositor)
+        sign_lord = self._get_sign_lord_for_planet(node_name)
+        return sign_lord
+    
+    def _find_conjunction_partner(self, planet_name: str, orb: float = 6.0) -> str:
+        """
+        Find if planet is conjunct with another planet within orb
+        """
+        if planet_name not in self.planets.index:
+            return None
+        
+        planet_longitude = self.planets.loc[planet_name]['longitude']
+        
+        for other_planet in self.planets.index:
+            if other_planet == planet_name or other_planet in ['Rahu', 'Ketu']:
+                continue
             
-        return total_score / len(unique_houses) if unique_houses else 0.0
+            other_longitude = self.planets.loc[other_planet]['longitude']
+            
+            # Calculate angular distance
+            diff = abs(planet_longitude - other_longitude)
+            if diff > 180:
+                diff = 360 - diff
+            
+            if diff <= orb:
+                return other_planet
+        
+        return None
+    
+    def _get_sign_lord_for_planet(self, planet_name: str) -> str:
+        """
+        Get sign lord for a planet
+        """
+        if planet_name not in self.planets.index:
+            return 'Sun'  # Fallback
+        
+        planet_sign = self.planets.loc[planet_name]['sign']
+        
+        # Sign lord mapping
+        SIGN_LORD_MAPPING = {
+            'Aries': 'Mars', 'Taurus': 'Venus', 'Gemini': 'Mercury', 'Cancer': 'Moon',
+            'Leo': 'Sun', 'Virgo': 'Mercury', 'Libra': 'Venus', 'Scorpio': 'Mars',
+            'Sagittarius': 'Jupiter', 'Capricorn': 'Saturn', 'Aquarius': 'Saturn', 'Pisces': 'Jupiter'
+        }
+        
+        return SIGN_LORD_MAPPING.get(planet_sign, 'Sun')
+    
+    def _get_top_2_score_from_significators(self, significators: list, perspective: str) -> float:
+        """
+        Helper method to get top 2 score from a list of significators
+        """
+        if not significators:
+            return 0.0
+        
+        # Calculate impact for each significator rule
+        rule_impacts = []
+        for house, rule in significators:
+            rule_weight = SIGNIFICATOR_RULE_WEIGHTS.get(rule, 0)
+            house_weight = self._get_house_weight(house, perspective)
+            weighted_score = rule_weight * house_weight
+            impact = abs(weighted_score)
+            rule_impacts.append((impact, weighted_score))
+        
+        # Sort by impact and take top 2
+        rule_impacts.sort(key=lambda x: x[0], reverse=True)
+        top_2_rules = rule_impacts[:2]
+        
+        return sum(weighted_score for _, weighted_score in top_2_rules)
+    
+    def _calculate_rahu_ketu_score(self, node_name: str, perspective: str = 'ascendant') -> float:
+        """
+        Calculate Rahu/Ketu score using KP principles:
+        1. Primary influence (80%) comes from agent's significations
+        2. Secondary influence (20%) comes from own significations
+        3. Amplification/Detachment applies to agent's score first
+        4. Own significations cannot reverse the agent's indication (positive/negative)
+        """
+        
+        # Get own significators and calculate score
+        own_significators = self.get_significators(node_name)
+        own_score = self._get_top_2_score_from_significators(own_significators, perspective)
+        
+        # Find primary agent and get agent significators
+        primary_agent = self._find_rahu_ketu_agent(node_name)
+        agent_significators = self.get_significators(primary_agent)
+        agent_score = self._get_top_2_score_from_significators(agent_significators, perspective)
+        
+        # Apply Rahu/Ketu modifiers to agent score first
+        if node_name == 'Rahu':
+            modified_agent_score = agent_score * 1.15  # Rahu amplifies agent's results
+        else:  # Ketu
+            modified_agent_score = agent_score * 0.85  # Ketu detaches from agent's results
+            
+        # Calculate weighted combination
+        weighted_agent = modified_agent_score * 0.8
+        weighted_own = own_score * 0.2
+        
+        # Prevent sign reversal - own significations cannot flip agent's indication
+        if modified_agent_score > 0:
+            # If agent is positive, final score must stay positive
+            final_score = max(0.1, weighted_agent + weighted_own)
+        elif modified_agent_score < 0:
+            # If agent is negative, final score must stay negative
+            final_score = min(-0.1, weighted_agent + weighted_own)
+        else:
+            # If agent is exactly 0, allow own significations to determine direction
+            final_score = weighted_agent + weighted_own
+        
+        return final_score
+        
+    def _get_previous_sign(self, planet_name: str) -> str:
+        """
+        Get the previous sign of a planet from stored history.
+        Returns None if no history exists.
+        """
+        # TODO: Implement sign history tracking
+        # For now, return None to indicate no history
+        return None
+    
+    def _get_rahu_ketu_significators_bucketed(self, node_name: str) -> dict:
+        """
+        Get Rahu/Ketu significators bucketed into Own and Agent categories
+        """
+        own_significators = self.get_significators(node_name)
+        primary_agent = self._find_rahu_ketu_agent(node_name)
+        agent_significators = self.get_significators(primary_agent)
+        
+        return {
+            'own': own_significators,
+            'agent': agent_significators,
+            'agent_name': primary_agent
+        }
+
+    # === END RAHU/KETU AGENCY IMPLEMENTATION ===
 
     def get_all_planet_scores_df(self):
         """Calculates scores for all planets and adds them to the planets DataFrame."""
@@ -673,43 +620,73 @@ class AnalysisEngine:
         df = self.engine.get_all_planets_df().copy()
         
         scores = {planet: self.calculate_planet_score(planet) for planet in df.index}
-        significators_str = {
-            planet: ", ".join(map(str, [s[0] for s in self.get_significators(planet)])) 
-            for planet in df.index
-        }
         
-        # Generate comments explaining debilitation/exaltation effects
+        # Generate significators string with special handling for Rahu/Ketu
+        significators_str = {}
+        for planet in df.index:
+            if planet in ['Rahu', 'Ketu']:
+                # Show bucketed significators for Rahu/Ketu
+                bucket_info = self._get_rahu_ketu_significators_bucketed(planet)
+                own_houses = [str(s[0]) for s in bucket_info['own']]
+                agent_houses = [str(s[0]) for s in bucket_info['agent']]
+                significators_str[planet] = f"Own: {', '.join(own_houses)} | Agent({bucket_info['agent_name']}): {', '.join(agent_houses)}"
+            else:
+                # Regular significators for other planets
+                significators_str[planet] = ", ".join(map(str, [s[0] for s in self.get_significators(planet)]))
+        
+        
+        # Generate comments explaining debilitation/exaltation effects and Rahu/Ketu agency
         comments = {}
         for planet in df.index:
-            base_score = self._calculate_base_score(planet)
-            final_score = scores[planet]
-            
             comment_parts = []
             
-            # Check for debilitation explanation
-            debil_explanation = self._get_debilitation_explanation(planet, base_score, final_score)
-            if debil_explanation:
-                comment_parts.append(debil_explanation.strip())
-            
-            # Check for exaltation explanation  
-            exalt_explanation = self._get_exaltation_explanation(planet, base_score, final_score)
-            if exalt_explanation:
-                comment_parts.append(exalt_explanation.strip())
-            
-            # Calculate impact on base score
-            total_impact = final_score - base_score
-            if abs(total_impact) >= 0.1:
-                if total_impact > 0:
-                    impact_desc = f"Score enhanced by +{total_impact:.3f}"
+            if planet in ['Rahu', 'Ketu']:
+                # Special comment for Rahu/Ketu agency
+                bucket_info = self._get_rahu_ketu_significators_bucketed(planet)
+                agent_name = bucket_info['agent_name']
+                agent_score = self._get_top_2_score_from_significators(bucket_info['agent'], 'ascendant')
+                own_score = self._get_top_2_score_from_significators(bucket_info['own'], 'ascendant')
+                
+                agent_influence = "positive" if agent_score > 0 else "negative"
+                own_influence = "pro-Asc" if own_score > 0 else "pro-Desc"
+                
+                comment = f"{planet} acts as {agent_name} agent ({agent_name} {agent_influence} → {own_influence})"
+                
+                if planet == 'Rahu':
+                    comment += " (Amplified +15%)"
                 else:
-                    impact_desc = f"Score reduced by {total_impact:.3f}"
-                comment_parts.append(impact_desc)
-            
-            # Combine all comment parts
-            if comment_parts:
-                comments[planet] = " | ".join(comment_parts)
+                    comment += " (Detached -15%)"
+                
+                comments[planet] = comment
             else:
-                comments[planet] = "No special conditions"
+                # Regular comments for other planets
+                base_score = self._calculate_base_score(planet)
+                final_score = scores[planet]
+                
+                # Check for debilitation explanation
+                debil_explanation = self._get_debilitation_explanation(planet, base_score, final_score)
+                if debil_explanation:
+                    comment_parts.append(debil_explanation.strip())
+                
+                # Check for exaltation explanation  
+                exalt_explanation = self._get_exaltation_explanation(planet, base_score, final_score)
+                if exalt_explanation:
+                    comment_parts.append(exalt_explanation.strip())
+                
+                # Calculate impact on base score
+                total_impact = final_score - base_score
+                if abs(total_impact) >= 0.1:
+                    if total_impact > 0:
+                        impact_desc = f"Score enhanced by +{total_impact:.3f}"
+                    else:
+                        impact_desc = f"Score reduced by {total_impact:.3f}"
+                    comment_parts.append(impact_desc)
+                
+                # Combine all comment parts
+                if comment_parts:
+                    comments[planet] = " | ".join(comment_parts)
+                else:
+                    comments[planet] = "No special conditions"
 
         df['Score'] = df.index.map(scores)
         df['Significators'] = df.index.map(significators_str)
@@ -718,327 +695,130 @@ class AnalysisEngine:
 
     def analyze_muhurta_chart(self, scoring_method='proportional'):
         """
-        Enhanced KP Muhurta Chart Analysis with Authentic Cusp Sub Lord Integration:
-        
-        TRADITIONAL LAYERS:
-        1. Star Lord of 1st Cusp (Primary Indicator)
-        2. Sub Lord of 1st Cusp (Modification Factor)
-        3. Star Lord of 6th Cusp (Victory Indicator)
-        4. Sub Lord of 6th Cusp (Victory Modification)
-        5. Sub-Sub Lords for confirmation
-        6. Ruling Planets support
-        
-        ENHANCED AUTHENTIC KP LAYER:
-        7. Cusp Sub Lord Analysis (Ultimate Deciding Factor)
-        
-        Args:
-            scoring_method: 'proportional' or 'binary'
+        KP Muhurta Chart Analysis using CSSL Methodology.
+        Focuses on 1st, 6th, and 7th cusps with proper KP interpretation.
         """
         analysis_parts = []
         
-        # --- Quick Team Setup ---
-        analysis_parts.append(f"🏏 **Enhanced KP Analysis** - Asc vs Desc")
+        # --- Header ---
+        analysis_parts.append(f"🏏 **KP CSSL Analysis** - {self.team_a} vs {self.team_b}")
         analysis_parts.append("")
         
-        # --- TRADITIONAL KP ANALYSIS (Existing System) ---
-        analysis_parts.append("## 📊 **TRADITIONAL KP ANALYSIS**")
-        analysis_parts.append("")
-        
-        # --- STAR LORD OF 1ST CUSP (Primary Indicator) ---
-        cusp_1_star_lord = self.cusps.loc[1]['nl']
-        c1sl_full = PlanetNameUtils.to_full_name(cusp_1_star_lord)
-        c1sl_sigs = self.get_significators(c1sl_full) if c1sl_full in self.planets.index else []
-        c1sl_score = self.calculate_planet_score(c1sl_full, 'ascendant') if c1sl_full in self.planets.index else 0.0
-        
-        analysis_parts.append("**🌟 STAR LORD OF 1ST CUSP (Primary Indicator):**")
-        analysis_parts.append(f"• Planet: **{cusp_1_star_lord}** | Score: **{c1sl_score:+.2f}**")
-        
-        if c1sl_sigs:
-            victory_houses = [h for h, r in c1sl_sigs if h in [1, 6, 10, 11]]
-            defeat_houses = [h for h, r in c1sl_sigs if h in [4, 5, 7, 8, 9, 12]]
-            
-            sig_summary = []
-            for house, rule in c1sl_sigs:
-                sig_summary.append(f"H{house}(R{rule})")
-            
-            analysis_parts.append(f"• Houses: {', '.join(sig_summary)}")
-            analysis_parts.append(f"• Victory Houses: {victory_houses} | Defeat Houses: {defeat_houses}")
-            
-            if c1sl_score > 0.3:
-                c1sl_verdict = f"✅ **Strong Favor Asc**"
-            elif c1sl_score > 0:
-                c1sl_verdict = f"✅ **Favors Asc**"
-            elif c1sl_score < -0.3:
-                c1sl_verdict = f"❌ **Strong Favor Desc**"
-            elif c1sl_score < 0:
-                c1sl_verdict = f"❌ **Favors Desc**"
-            else:
-                c1sl_verdict = "⚖️ **Close Contest**"
-            
-            analysis_parts.append(f"• Result: {c1sl_verdict}")
-        else:
-            analysis_parts.append("• Result: ⚪ **Neutral**")
-            c1sl_verdict = "NEUTRAL"
-        
-        analysis_parts.append("")
-        
-        # --- SUB LORD OF 1ST CUSP (Modification Factor) ---
-        cusp_1_sub_lord = self.cusps.loc[1]['sl']
-        c1subl_full = PlanetNameUtils.to_full_name(cusp_1_sub_lord)
-        c1subl_sigs = self.get_significators(c1subl_full) if c1subl_full in self.planets.index else []
-        c1subl_score = self.calculate_planet_score(c1subl_full, 'ascendant') if c1subl_full in self.planets.index else 0.0
-        
-        analysis_parts.append("**⚖️ SUB LORD OF 1ST CUSP (Modification Factor):**")
-        analysis_parts.append(f"• Planet: **{cusp_1_sub_lord}** | Score: **{c1subl_score:+.2f}**")
-        
-        if c1subl_sigs:
-            victory_houses = [h for h, r in c1subl_sigs if h in [1, 6, 10, 11]]
-            defeat_houses = [h for h, r in c1subl_sigs if h in [4, 5, 7, 8, 9, 12]]
-            
-            sig_summary = []
-            for house, rule in c1subl_sigs:
-                sig_summary.append(f"H{house}(R{rule})")
-            
-            analysis_parts.append(f"• Houses: {', '.join(sig_summary)}")
-            
-            if c1subl_score > 0.3:
-                c1subl_verdict = f"✅ **Strongly Supports Asc**"
-            elif c1subl_score > 0:
-                c1subl_verdict = f"✅ **Supports Asc**"
-            elif c1subl_score < -0.3:
-                c1subl_verdict = f"❌ **Strongly Opposes Asc**"
-            elif c1subl_score < 0:
-                c1subl_verdict = f"❌ **Opposes Asc**"
-            else:
-                c1subl_verdict = "⚖️ **Neutral Modification**"
-            
-            analysis_parts.append(f"• Result: {c1subl_verdict}")
-        else:
-            analysis_parts.append("• Result: ⚪ **Neutral**")
-            c1subl_verdict = "NEUTRAL"
-        
-        analysis_parts.append("")
-        
-        # --- STAR LORD OF 6TH CUSP (Victory Indicator) ---
-        cusp_6_star_lord = self.cusps.loc[6]['nl']
-        c6sl_full = PlanetNameUtils.to_full_name(cusp_6_star_lord)
-        c6sl_sigs = self.get_significators(c6sl_full) if c6sl_full in self.planets.index else []
-        c6sl_score = self.calculate_planet_score(c6sl_full, 'ascendant') if c6sl_full in self.planets.index else 0.0
-        
-        analysis_parts.append("**🎯 STAR LORD OF 6TH CUSP (Victory Indicator):**")
-        analysis_parts.append(f"• Planet: **{cusp_6_star_lord}** | Score: **{c6sl_score:+.2f}**")
-        
-        if c6sl_sigs:
-            victory_houses = [h for h, r in c6sl_sigs if h in [1, 6, 10, 11]]
-            defeat_houses = [h for h, r in c6sl_sigs if h in [4, 5, 7, 8, 9, 12]]
-            
-            sig_summary = []
-            for house, rule in c6sl_sigs:
-                sig_summary.append(f"H{house}(R{rule})")
-            
-            analysis_parts.append(f"• Houses: {', '.join(sig_summary)}")
-            
-            if c6sl_score > 0.3:
-                c6sl_verdict = f"✅ **Strong Victory Asc**"
-            elif c6sl_score > 0:
-                c6sl_verdict = f"✅ **Victory Asc**"
-            elif c6sl_score < -0.3:
-                c6sl_verdict = f"❌ **Strong Victory Desc**"
-            elif c6sl_score < 0:
-                c6sl_verdict = f"❌ **Victory Desc**"
-            else:
-                c6sl_verdict = "⚖️ **Competitive Victory**"
-            
-            analysis_parts.append(f"• Result: {c6sl_verdict}")
-        else:
-            analysis_parts.append("• Result: ⚪ **Neutral**")
-            c6sl_verdict = "NEUTRAL"
-        
-        analysis_parts.append("")
-        
-        # --- SUB LORD OF 6TH CUSP (Victory Modification) ---
-        cusp_6_sub_lord = self.cusps.loc[6]['sl']
-        c6subl_full = PlanetNameUtils.to_full_name(cusp_6_sub_lord)
-        c6subl_sigs = self.get_significators(c6subl_full) if c6subl_full in self.planets.index else []
-        c6subl_score = self.calculate_planet_score(c6subl_full, 'ascendant') if c6subl_full in self.planets.index else 0.0
-        
-        analysis_parts.append("**🏹 SUB LORD OF 6TH CUSP (Victory Modification):**")
-        analysis_parts.append(f"• Planet: **{cusp_6_sub_lord}** | Score: **{c6subl_score:+.2f}**")
-        
-        if c6subl_sigs:
-            victory_houses = [h for h, r in c6subl_sigs if h in [1, 6, 10, 11]]
-            defeat_houses = [h for h, r in c6subl_sigs if h in [4, 5, 7, 8, 9, 12]]
-            
-            sig_summary = []
-            for house, rule in c6subl_sigs:
-                sig_summary.append(f"H{house}(R{rule})")
-            
-            analysis_parts.append(f"• Houses: {', '.join(sig_summary)}")
-            
-            if c6subl_score > 0.3:
-                c6subl_verdict = f"✅ **Strongly Confirms Asc**"
-            elif c6subl_score > 0:
-                c6subl_verdict = f"✅ **Confirms Asc**"
-            elif c6subl_score < -0.3:
-                c6subl_verdict = f"❌ **Strongly Denies Asc**"
-            elif c6subl_score < 0:
-                c6subl_verdict = f"❌ **Denies Asc**"
-            else:
-                c6subl_verdict = "⚖️ **Mixed Signals**"
-            
-            analysis_parts.append(f"• Result: {c6subl_verdict}")
-        else:
-            analysis_parts.append("• Result: ⚪ **Neutral**")
-            c6subl_verdict = "NEUTRAL"
-        
-        analysis_parts.append("")
-        
-        # --- SUB-SUB LORDS (Final Confirmation) ---
+        # Get CSSL for key cusps and their scores
         cssl_1 = self.cusps.loc[1]['ssl']
-        cssl_1_full = PlanetNameUtils.to_full_name(cssl_1)
-        cssl_1_sigs = self.get_significators(cssl_1_full) if cssl_1_full in self.planets.index else []
-        cssl_1_score = self.calculate_planet_score(cssl_1_full, 'ascendant') if cssl_1_full in self.planets.index else 0.0
-        
         cssl_6 = self.cusps.loc[6]['ssl']
+        cssl_7 = self.cusps.loc[7]['ssl']
+        
+        cssl_1_full = PlanetNameUtils.to_full_name(cssl_1)
         cssl_6_full = PlanetNameUtils.to_full_name(cssl_6)
-        cssl_6_sigs = self.get_significators(cssl_6_full) if cssl_6_full in self.planets.index else []
+        cssl_7_full = PlanetNameUtils.to_full_name(cssl_7)
+        
+        cssl_1_score = self.calculate_planet_score(cssl_1_full, 'ascendant') if cssl_1_full in self.planets.index else 0.0
         cssl_6_score = self.calculate_planet_score(cssl_6_full, 'ascendant') if cssl_6_full in self.planets.index else 0.0
+        cssl_7_score = self.calculate_planet_score(cssl_7_full, 'ascendant') if cssl_7_full in self.planets.index else 0.0
         
-        analysis_parts.append("**📊 SUB-SUB LORDS (Final Confirmation):**")
-        analysis_parts.append(f"• 1st Cusp Sub-Sub Lord: **{cssl_1}** | Score: **{cssl_1_score:+.2f}**")
-        analysis_parts.append(f"• 6th Cusp Sub-Sub Lord: **{cssl_6}** | Score: **{cssl_6_score:+.2f}**")
+        # === REFINED HOUSE CATEGORIZATION ===
+        VICTORY_HOUSES = [1, 6, 10, 11]  # Primary victory houses
+        DEFEAT_HOUSES = [8, 12]          # Primary defeat houses
+        SUPPORT_HOUSES = [2, 3, 9]       # Secondary support
+        CHALLENGE_HOUSES = [4, 5, 7]     # Secondary challenges
         
-        avg_cssl_score = (cssl_1_score + cssl_6_score) / 2
-        
-        if avg_cssl_score > 0.2:
-            cssl_verdict = "✅ **Confirmation Asc**"
-        elif avg_cssl_score < -0.2:
-            cssl_verdict = "❌ **Confirmation Desc**"
-        else:
-            cssl_verdict = "⚖️ **Mixed Confirmation**"
-        
-        analysis_parts.append(f"• Combined Result: {cssl_verdict} (Avg: {avg_cssl_score:+.2f})")
-        analysis_parts.append("")
-        
-        # --- RULING PLANETS ---
-        analysis_parts.append("**🔮 RULING PLANETS:**")
-        
-        asc_star_lord = self.cusps.loc[1]['nl']
-        asc_sign_lord = self.cusps.loc[1]['sign_lord']
-        moon_star_lord = self.planets.get('Moon', {}).get('nl', 'Unknown')
-        moon_sign_lord = self.planets.get('Moon', {}).get('sign_lord', 'Unknown')
-        day_lord = self._get_day_lord()
-        
-        ruling_planets = [asc_star_lord, asc_sign_lord, moon_star_lord, moon_sign_lord, day_lord]
-        rp_counts = {planet: ruling_planets.count(planet) for planet in set(ruling_planets)}
-        
-        analysis_parts.append(f"• Ascendant Star Lord: **{asc_star_lord}**")
-        analysis_parts.append(f"• Ascendant Sign Lord: **{asc_sign_lord}**")
-        analysis_parts.append(f"• Moon Star Lord: **{moon_star_lord}**")
-        analysis_parts.append(f"• Moon Sign Lord: **{moon_sign_lord}**")
-        analysis_parts.append(f"• Day Lord: **{day_lord}**")
-        
-        # Calculate RP team scores
-        rp_team_a_count = 0
-        rp_team_b_count = 0
-        
-        for planet, count in rp_counts.items():
-            planet_full = PlanetNameUtils.to_full_name(planet)
-            if planet_full in self.planets.index:
-                planet_score = self.calculate_planet_score(planet_full, 'ascendant')
-                if planet_score > 0:
-                    rp_team_a_count += count
-                elif planet_score < 0:
-                    rp_team_b_count += count
-        
-        if rp_team_a_count > rp_team_b_count:
-            rp_verdict = "✅ **Support Asc**"
-        elif rp_team_b_count > rp_team_a_count:
-            rp_verdict = "❌ **Support Desc**"
-        else:
-            rp_verdict = "⚖️ **Neutral Support**"
-        
-        analysis_parts.append(f"• Result: {rp_verdict} (Asc:{rp_team_a_count} vs Desc:{rp_team_b_count})")
-        analysis_parts.append("")
-        
-        # === NEW: AUTHENTIC KP CUSP SUB LORD ANALYSIS ===
-        analysis_parts.append("## 🏆 **AUTHENTIC KP CUSP SUB LORD ANALYSIS**")
-        analysis_parts.append("*The Ultimate Deciding Factor in Classical KP*")
-        analysis_parts.append("")
-        
-        cusp_analysis = self.analyze_cusp_sub_lords('ascendant')
-        
-        # Key Decisor (11th Cusp)
-        key_decisor = cusp_analysis['summary']['key_decisor']
-        analysis_parts.append(f"**🎯 KEY DECISOR - {key_decisor['name']}:**")
-        analysis_parts.append(f"• Sub Lord: **{key_decisor['sub_lord']}**")
-        analysis_parts.append(f"• Impact: **{key_decisor['impact']}**")
-        analysis_parts.append(f"• Reasoning: {key_decisor['reasoning']}")
-        analysis_parts.append("")
-        
-        # Supporting and Opposing Cusps
-        supporting_cusps = cusp_analysis['summary']['supportive_cusps']
-        opposing_cusps = cusp_analysis['summary']['opposing_cusps']
-        
-        if supporting_cusps:
-            analysis_parts.append("**✅ SUPPORTING CUSPS (Favor Ascendant):**")
-            for cusp in supporting_cusps[:3]:  # Top 3
-                cusp_name = self._get_cusp_name(cusp['cusp'])
-                analysis_parts.append(f"• H{cusp['cusp']} ({cusp_name}): Sub Lord **{cusp['sub_lord']}** (Strength: {cusp['strength']:.2f})")
-            analysis_parts.append("")
-        
-        if opposing_cusps:
-            analysis_parts.append("**❌ OPPOSING CUSPS (Favor Descendant):**")
-            for cusp in opposing_cusps[:3]:  # Top 3
-                cusp_name = self._get_cusp_name(cusp['cusp'])
-                analysis_parts.append(f"• H{cusp['cusp']} ({cusp_name}): Sub Lord **{cusp['sub_lord']}** (Strength: {cusp['strength']:.2f})")
-            analysis_parts.append("")
-        
-        # Cusp Analysis Verdict
-        final_verdict = cusp_analysis['final_verdict']
-        analysis_parts.append("**🏅 CUSP SUB LORD VERDICT:**")
-        analysis_parts.append(f"• Primary Decision: **{final_verdict['primary_verdict']}**")
-        analysis_parts.append(f"• Overall Assessment: **{final_verdict['overall_verdict']}**")
-        analysis_parts.append(f"• Confidence Level: **{cusp_analysis['confidence_level']}**")
-        analysis_parts.append(f"• Final Score: **{final_verdict['final_score']:+.2f}**")
-        analysis_parts.append(f"• Key Reason: {final_verdict['primary_reason']}")
-        analysis_parts.append("")
-        
-        # === ENHANCED SYNTHESIS ===
-        analysis_parts.append("## ⚖️ **ENHANCED WEIGHTED SYNTHESIS**")
-        analysis_parts.append("*Integrating Traditional + Authentic KP Methods*")
-        analysis_parts.append("")
-        
-        if scoring_method == 'proportional':
-            final_analysis = self._calculate_enhanced_proportional_synthesis(
-                c1sl_score, c1subl_score, c6sl_score, c6subl_score, avg_cssl_score, 
-                rp_team_a_count, rp_team_b_count, cusp_analysis, analysis_parts)
-        else:
-            final_analysis = self._calculate_enhanced_binary_synthesis(
-                c1sl_verdict, c1subl_verdict, c6sl_verdict, c6subl_verdict, cssl_verdict, 
-                rp_verdict, cusp_analysis, analysis_parts)
-        
-        analysis_parts.append("")
-        analysis_parts.append("---")
-        analysis_parts.append("")
-        
-        return {
-            'analysis': '\n'.join(analysis_parts),
-            'verdict': final_analysis['verdict'],
-            'confidence': final_analysis['confidence'],
-            'asc_probability': final_analysis['asc_probability'],
-            'desc_probability': final_analysis['desc_probability'],
-            'cusp_analysis': cusp_analysis,
-            'traditional_scores': {
-                'c1sl_score': c1sl_score,
-                'c1subl_score': c1subl_score,
-                'c6sl_score': c6sl_score,
-                'c6subl_score': c6subl_score,
-                'avg_cssl_score': avg_cssl_score
+        def categorize_houses(significators):
+            houses = [h for h, r in significators]
+            return {
+                'victory': [h for h in houses if h in VICTORY_HOUSES],
+                'defeat': [h for h in houses if h in DEFEAT_HOUSES],
+                'support': [h for h in houses if h in SUPPORT_HOUSES],
+                'challenge': [h for h in houses if h in CHALLENGE_HOUSES]
             }
-        }
+        
+        # === ANALYSIS OF EACH CUSP ===
+        def analyze_cusp_strength(score, houses_dict, cusp_type):
+            """Generate verdict based on KP principles"""
+            victory_count = len(houses_dict['victory'])
+            defeat_count = len(houses_dict['defeat'])
+            
+            if score > 0.5:
+                return "✅ Strong Positive Indication"
+            elif score > 0.2:
+                return "✅ Moderate Positive"
+            elif score < -0.5:
+                return "❌ Strong Negative Indication"
+            elif score < -0.2:
+                return "❌ Moderate Negative"
+            else:
+                if victory_count > defeat_count:
+                    return "⚖️ Slightly Favorable"
+                elif defeat_count > victory_count:
+                    return "⚖️ Slightly Challenging"
+                return "⚖️ Neutral"
+        
+        # Analyze each cusp
+        cusps_analysis = {}
+        for cusp_num, cssl, score in [(1, cssl_1_full, cssl_1_score), 
+                                    (6, cssl_6_full, cssl_6_score),
+                                    (7, cssl_7_full, cssl_7_score)]:
+            
+            sigs = self.get_significators(cssl) if cssl in self.planets.index else []
+            houses_dict = categorize_houses(sigs)
+            
+            cusps_analysis[cusp_num] = {
+                'score': score,
+                'houses': houses_dict,
+                'verdict': analyze_cusp_strength(score, houses_dict, 
+                    'opponent' if cusp_num == 7 else 'self')
+            }
+        
+        # === PROBABILITY CALCULATION ===
+        # More decisive probability spread based on scores
+        weighted_score = (
+            cusps_analysis[1]['score'] * 0.3 +  # 1st cusp
+            cusps_analysis[6]['score'] * 0.5 +  # 6th cusp
+            -cusps_analysis[7]['score'] * 0.2   # 7th cusp (inverted)
+        )
+        
+        # Convert score to probability with wider spread
+        base_prob = 50 + (weighted_score * 25)  # Multiplier increased from 10 to 25
+        win_prob = max(min(base_prob, 85), 15)  # Allow 15-85% range instead of previous narrow range
+        
+        # === GENERATE DETAILED ANALYSIS ===
+        for cusp_num in [1, 6, 7]:
+            analysis = cusps_analysis[cusp_num]
+            cusp_name = {1: "Self/Team Strength", 6: "Victory/Defeat", 7: "Opponent Strength"}[cusp_num]
+            
+            analysis_parts.append(f"\n**{'🏠' if cusp_num == 1 else '🏆' if cusp_num == 6 else '🎯'} {cusp_num}st CUSP CSSL ({cusp_name}):**")
+            analysis_parts.append(f"• Sub-Sub Lord: {PlanetNameUtils.to_short_name(locals()[f'cssl_{cusp_num}'])} | Score: {analysis['score']:+.2f}")
+            
+            houses = analysis['houses']
+            if houses:
+                analysis_parts.append(f"• Victory Houses: {houses['victory']} | Defeat Houses: {houses['defeat']}")
+                if houses['support'] or houses['challenge']:
+                    analysis_parts.append(f"• Support Houses: {houses['support']} | Challenge Houses: {houses['challenge']}")
+            analysis_parts.append(f"• Assessment: {analysis['verdict']}")
+        
+        # === FINAL VERDICT ===
+        analysis_parts.append("\n📊 **FINAL VERDICT**")
+        team_a_prob = win_prob
+        team_b_prob = 100 - win_prob
+        
+        predicted_winner = self.team_a if team_a_prob > team_b_prob else self.team_b
+        win_margin = abs(team_a_prob - team_b_prob)
+        
+        confidence = "High" if win_margin > 25 else "Medium" if win_margin > 15 else "Low"
+        contest_type = "Decisive Victory" if win_margin > 25 else "Clear Advantage" if win_margin > 15 else "Close Contest"
+        
+        analysis_parts.append(f"• Predicted Winner: **{predicted_winner}**")
+        analysis_parts.append(f"• Win Probability: {max(team_a_prob, team_b_prob):.1f}%")
+        analysis_parts.append(f"• Contest Type: 🎯 {contest_type}")
+        analysis_parts.append(f"• Confidence Level: {confidence}")
+        
+        analysis_parts.append(f"\n📈 **DETAILED PROBABILITIES:**")
+        analysis_parts.append(f"• {self.team_a}: {team_a_prob:.1f}%")
+        analysis_parts.append(f"• {self.team_b}: {team_b_prob:.1f}%")
+        
+        return "\n".join(analysis_parts)
 
-    def _calculate_enhanced_proportional_synthesis(self, c1sl_score, c1subl_score, c6sl_score, c6subl_score, avg_cssl_score, rp_team_a_count, rp_team_b_count, cusp_analysis, analysis_parts):
+    def _calculate_enhanced_proportional_synthesis_DEPRECATED(self, c1sl_score, c1subl_score, c6sl_score, c6subl_score, avg_cssl_score, rp_team_a_count, rp_team_b_count, cusp_analysis, analysis_parts):
         """Enhanced proportional synthesis integrating cusp sub lord analysis."""
         analysis_parts.append("**🏆 ENHANCED PROPORTIONAL SYNTHESIS:**")
         
@@ -1181,7 +961,7 @@ class AnalysisEngine:
             'methods_agree': traditional_favors_asc == cusp_favors_asc
         }
     
-    def _calculate_enhanced_binary_synthesis(self, c1sl_verdict, c1subl_verdict, c6sl_verdict, c6subl_verdict, cssl_verdict, rp_verdict, cusp_analysis, analysis_parts):
+    def _calculate_enhanced_binary_synthesis_DEPRECATED(self, c1sl_verdict, c1subl_verdict, c6sl_verdict, c6subl_verdict, cssl_verdict, rp_verdict, cusp_analysis, analysis_parts):
         """Enhanced binary synthesis integrating cusp sub lord analysis."""
         analysis_parts.append("**🏆 ENHANCED BINARY SYNTHESIS:**")
         
@@ -1383,23 +1163,23 @@ class AnalysisEngine:
             verdict = f"Strong Advantage {team_name}"
             cricket_context = "Excellent period for building partnerships and dominating opponents"
             confidence_level = "HIGH"
-        elif combined_score >= 0.12:
+        elif combined_score >= 0.3:  # Updated from 0.12 for new top-2 scale
             verdict = f"Advantage {team_name}"
             cricket_context = "Good period for consolidation and steady progress"
             confidence_level = "MEDIUM"
-        elif combined_score > 0.05:
+        elif combined_score > 0.125:  # Updated from 0.05 for new top-2 scale
             verdict = f"Balanced (Slight {team_name})"
             cricket_context = "Marginal advantage - gradual progress expected"
             confidence_level = "LOW"
-        elif combined_score <= -0.25:
+        elif combined_score <= -0.625:  # Updated from -0.25 for new top-2 scale
             verdict = f"Strong Advantage {opponent_name}"
             cricket_context = "Challenging period - wickets or pressure likely"
             confidence_level = "HIGH"
-        elif combined_score <= -0.12:
+        elif combined_score <= -0.3:  # Updated from -0.12 for new top-2 scale
             verdict = f"Advantage {opponent_name}"
             cricket_context = "Opposition builds pressure and momentum"
             confidence_level = "MEDIUM"
-        elif combined_score < -0.05:
+        elif combined_score < -0.125:  # Updated from -0.05 for new top-2 scale
             verdict = f"Balanced (Slight {opponent_name})"
             cricket_context = "Slight opposition edge - careful play needed"
             confidence_level = "LOW"
@@ -1530,27 +1310,27 @@ class AnalysisEngine:
         # === SIMPLIFIED VERDICT BASED ON ACTUAL SCORE ===
         # Trust the scoring system more than complex layer combinations
         
-        if ssl_score >= 0.3:
+        if ssl_score >= 0.75:  # Updated from 0.3 for new top-2 scale
             verdict = f"Strong Advantage {team_name}"
             cricket_context = "Excellent period for building partnerships and dominating opponents"
             confidence_level = "HIGH"
-        elif ssl_score >= 0.15:
+        elif ssl_score >= 0.375:  # Updated from 0.15 for new top-2 scale
             verdict = f"Advantage {team_name}"
             cricket_context = "Good period for consolidation and steady progress"
             confidence_level = "MEDIUM"
-        elif ssl_score > 0.05:
+        elif ssl_score > 0.125:  # Updated from 0.05 for new top-2 scale
             verdict = f"Balanced (Slight {team_name})"
             cricket_context = "Marginal advantage - gradual progress expected"
             confidence_level = "LOW"
-        elif ssl_score <= -0.3:
+        elif ssl_score <= -0.75:  # Updated from -0.3 for new top-2 scale
             verdict = f"Strong Advantage {opponent_name}"
             cricket_context = "Challenging period - wickets or pressure likely"
             confidence_level = "HIGH"
-        elif ssl_score <= -0.15:
+        elif ssl_score <= -0.375:  # Updated from -0.15 for new top-2 scale
             verdict = f"Advantage {opponent_name}"
             cricket_context = "Opposition builds pressure and momentum"
             confidence_level = "MEDIUM"
-        elif ssl_score < -0.05:
+        elif ssl_score < -0.125:  # Updated from -0.05 for new top-2 scale
             verdict = f"Balanced (Slight {opponent_name})"
             cricket_context = "Slight opposition edge - careful play needed"
             confidence_level = "LOW"
@@ -1595,13 +1375,7 @@ class AnalysisEngine:
     def analyze_timeline(self, timeline_df, perspective='ascendant'):
         """
         Enhanced timeline analysis using dynamic layer influence methodology.
-        
-        Args:
-            timeline_df: DataFrame with timeline data (includes SSL_Planet column)
-            perspective: Either 'ascendant' or 'descendant'
-            
-        Returns:
-            tuple: (scored_timeline_df, analysis_dict)
+        For Moon timeline (with NL, SL, SSL), use the user-configurable weighted method.
         """
         if timeline_df.empty:
             return timeline_df, {"summary": "No timeline data available", "favorable_planets": [], "unfavorable_planets": []}
@@ -1612,31 +1386,21 @@ class AnalysisEngine:
             nl_planet = row.get('NL_Planet')
             sl_planet = row.get('SL_Planet') 
             ssl_planet = row.get('SSL_Planet')
-            
             if pd.isna(ssl_planet):
                 ssl_planet = None
-            
-            # Calculate dynamic layer influences
-            dynamics = self._calculate_dynamic_layer_influences(nl_planet, sl_planet, ssl_planet, perspective)
-            
             # Calculate individual layer scores
             nl_score = self.calculate_planet_score(nl_planet, perspective) if pd.notna(nl_planet) else 0.0
             sl_score = self.calculate_planet_score(sl_planet, perspective) if pd.notna(sl_planet) else 0.0
             ssl_score = self.calculate_planet_score(ssl_planet, perspective) if ssl_planet else 0.0
-            
-            # Calculate weighted dynamic score based on layer influences
-            weighted_score = (nl_score * dynamics['nl_influence'] + 
-                            sl_score * dynamics['sl_influence'] + 
-                            ssl_score * dynamics['ssl_influence'])
-            
-            # Apply convergence factor
-            final_score = weighted_score * dynamics['convergence_factor']
-            
-            # Generate enhanced verdict and comment
+            # --- NEW: Use weighted method for Moon timeline ---
+            weighted_score = self._calculate_ssl_hierarchical_score(ssl_score, sl_score, nl_score)
+            final_score = weighted_score  # No convergence factor for new method
+            # Optionally, keep dynamic influences for display
+            dynamics = self._calculate_dynamic_layer_influences(nl_planet, sl_planet, ssl_planet, perspective)
+            # Generate enhanced verdict and comment using the new weighted score
             verdict, comment = self._generate_dynamic_verdict_and_comment(
                 row, perspective, dynamics, nl_score, sl_score, ssl_score, final_score
             )
-            
             enhanced_row = row.to_dict()
             enhanced_row.update({
                 'Score': final_score,
@@ -1648,21 +1412,15 @@ class AnalysisEngine:
                 'Event_Magnitude': dynamics['event_magnitude'],
                 'Convergence_Factor': dynamics['convergence_factor']
             })
-            
             enhanced_rows.append(enhanced_row)
-        
         enhanced_df = pd.DataFrame(enhanced_rows)
-        
         # Calculate analysis summary
         avg_score = enhanced_df['Score'].mean()
         avg_magnitude = enhanced_df['Event_Magnitude'].mean()
-        
         # Identify favorable and unfavorable planets
         favorable_planets, unfavorable_planets = self._identify_timeline_planets(enhanced_df, perspective)
-        
         # Generate team-specific summary
         team_name = "Asc" if perspective == 'ascendant' else "Desc"
-        
         if abs(avg_score) < 0.1:
             summary = f"The enhanced dynamic timeline shows an average score of {avg_score:.3f} with event magnitude {avg_magnitude:.2f}. The timeline appears balanced with moderate intensity periods, suggesting a tightly contested match."
         elif avg_score > 0:
@@ -1670,7 +1428,6 @@ class AnalysisEngine:
         else:
             opponent_name = "Desc" if perspective == 'ascendant' else "Asc"
             summary = f"The enhanced dynamic timeline shows an average score of {avg_score:.3f} with event magnitude {avg_magnitude:.2f}. This indicates a general advantage for {opponent_name} with varying intensity periods based on planetary layer dynamics."
-        
         analysis = {
             "summary": summary,
             "favorable_planets": sorted(favorable_planets),
@@ -1679,48 +1436,43 @@ class AnalysisEngine:
             "high_intensity_periods": len(enhanced_df[enhanced_df['Event_Magnitude'] > 3.0]),
             "method": "dynamic_layer_analysis"
         }
-        
         return enhanced_df, analysis
 
     def analyze_aggregated_timeline(self, timeline_df, perspective='ascendant'):
         """
         Enhanced aggregated timeline analysis using dynamic NL+SL methodology.
-        
-        Args:
-            timeline_df: DataFrame with timeline data (NL_Planet, SL_Planet only)
-            perspective: Either 'ascendant' or 'descendant'
-            
-        Returns:
-            tuple: (scored_timeline_df, analysis_dict)
+        For context score, use weighted sum of planet scores by their SSL proportion in the timeline.
         """
         if timeline_df.empty:
             return timeline_df, {"summary": "No timeline data available", "favorable_planets": [], "unfavorable_planets": []}
-        
         enhanced_rows = []
-        
+        # --- Calculate SSL proportions for context score ---
+        ssl_counts = {}
+        total_periods = len(timeline_df)
+        for _, row in timeline_df.iterrows():
+            ssl = row.get('SSL_Planet')
+            if pd.notna(ssl):
+                ssl = str(ssl)
+                ssl_counts[ssl] = ssl_counts.get(ssl, 0) + 1
+        ssl_proportion = {p: (ssl_counts.get(p, 0) / total_periods) for p in self.planets.index}
+        # Precompute planet scores
+        planet_score = {p: self.calculate_planet_score(p, perspective) for p in self.planets.index}
         for _, row in timeline_df.iterrows():
             nl_planet = row.get('NL_Planet')
             sl_planet = row.get('SL_Planet')
-            
-            # Calculate dynamic layer influences (no SSL for aggregated)
-            dynamics = self._calculate_dynamic_layer_influences(nl_planet, sl_planet, None, perspective)
-            
             # Calculate individual layer scores
             nl_score = self.calculate_planet_score(nl_planet, perspective) if pd.notna(nl_planet) else 0.0
             sl_score = self.calculate_planet_score(sl_planet, perspective) if pd.notna(sl_planet) else 0.0
-            
-            # Calculate weighted dynamic score based on layer influences
-            weighted_score = (nl_score * dynamics['nl_influence'] + 
-                            sl_score * dynamics['sl_influence'])
-            
-            # Apply convergence factor
-            final_score = weighted_score * dynamics['convergence_factor']
-            
-            # Generate enhanced verdict and comment for NL+SL
+            # --- NEW: Weighted context score ---
+            context_score = sum(planet_score[p] * ssl_proportion[p] for p in self.planets.index)
+            # Use user-configurable weights for final score
+            final_score = self._calculate_asc_timeline_score(nl_score, sl_score, context_score)
+            # Optionally, keep dynamic influences for display
+            dynamics = self._calculate_dynamic_layer_influences(nl_planet, sl_planet, None, perspective)
+            # Generate verdict and comment
             verdict, comment = self._generate_dynamic_nl_sl_verdict_and_comment(
                 row, perspective, dynamics, nl_score, sl_score, final_score
             )
-            
             enhanced_row = row.to_dict()
             enhanced_row.update({
                 'Score': final_score,
@@ -1731,21 +1483,15 @@ class AnalysisEngine:
                 'Event_Magnitude': dynamics['event_magnitude'],
                 'Convergence_Factor': dynamics['convergence_factor']
             })
-            
             enhanced_rows.append(enhanced_row)
-        
         enhanced_df = pd.DataFrame(enhanced_rows)
-        
         # Calculate analysis summary
         avg_score = enhanced_df['Score'].mean()
         avg_magnitude = enhanced_df['Event_Magnitude'].mean()
-        
         # Identify favorable and unfavorable planets from NL and SL columns only
         favorable_planets, unfavorable_planets = self._identify_timeline_planets(enhanced_df, perspective, aggregated=True)
-        
         # Generate team-specific summary
         team_name = "Asc" if perspective == 'ascendant' else "Desc"
-        
         if abs(avg_score) < 0.08:
             summary = f"The enhanced dynamic NL+SL timeline shows an average score of {avg_score:.3f} with event magnitude {avg_magnitude:.2f}. The timeline appears balanced at Star Lord and Sub Lord level with dynamic layer interactions, suggesting a tightly contested match."
         elif avg_score > 0:
@@ -1753,7 +1499,6 @@ class AnalysisEngine:
         else:
             opponent_name = "Desc" if perspective == 'ascendant' else "Asc"
             summary = f"The enhanced dynamic NL+SL timeline shows an average score of {avg_score:.3f} with event magnitude {avg_magnitude:.2f}. This indicates a general advantage for {opponent_name} based on dynamic Star Lord and Sub Lord layer analysis."
-        
         analysis = {
             "summary": summary,
             "favorable_planets": sorted(favorable_planets),
@@ -1762,7 +1507,6 @@ class AnalysisEngine:
             "high_intensity_periods": len(enhanced_df[enhanced_df['Event_Magnitude'] > 2.0]),
             "method": "dynamic_nl_sl_analysis"
         }
-        
         return enhanced_df, analysis
 
     def _get_debilitation_explanation(self, planet_name: str, base_score: float, final_score: float) -> str:
@@ -2272,16 +2016,16 @@ class AnalysisEngine:
             primary_reason = "11th cusp sub lord shows neutral or mixed signals"
         
         # Modify based on overall cusp score
-        if final_score > 0.3:
+        if final_score > 0.75:  # Updated from 0.3 for new top-2 scale
             overall_verdict = "STRONG_ASCENDANT"
             confidence = "High"
-        elif final_score > 0.1:
+        elif final_score > 0.25:  # Updated from 0.1 for new top-2 scale
             overall_verdict = "MODERATE_ASCENDANT"
             confidence = "Medium"
-        elif final_score < -0.3:
+        elif final_score < -0.75:  # Updated from -0.3 for new top-2 scale
             overall_verdict = "STRONG_DESCENDANT"
             confidence = "High"
-        elif final_score < -0.1:
+        elif final_score < -0.25:  # Updated from -0.1 for new top-2 scale
             overall_verdict = "MODERATE_DESCENDANT"
             confidence = "Medium"
         else:
@@ -2325,23 +2069,34 @@ class AnalysisEngine:
     def _get_planetary_natural_strength(self, planet_name: str) -> float:
         """
         Calculate natural strength based on sign placement using authentic KP/Vedic principles.
+        Uses moderate intensity modifiers more aligned with KP astrology principles.
         
         Args:
             planet_name: Standardized planet name
             
         Returns:
-            float: Natural strength multiplier
+            float: Natural strength multiplier (0.6-1.5)
         """
         if planet_name not in self.planets.index:
-            return self.NATURAL_STRENGTH_MULTIPLIERS['neutral_sign']
+            return 1.0  # Neutral if planet not found
             
         planet_info = self.planets.loc[planet_name]
         planet_sign = planet_info['sign']
         
-        # Use degree-based exaltation/debilitation system for precise calculation
-        exalt_debil_strength = self._get_exaltation_debilitation_strength(planet_name)
-        if exalt_debil_strength != 1.0:
-            return exalt_debil_strength
+        # Initialize list to collect all applicable strength factors
+        strength_factors = []
+        
+        # Check debilitation - reduces strength by 40%
+        if planet_name in self.DEBILITATION_MAPPING:
+            debil_sign, _ = self.DEBILITATION_MAPPING[planet_name]
+            if planet_sign == debil_sign:
+                strength_factors.append(0.6)  # Weakened but not completely powerless
+        
+        # Check exaltation - increases strength by 50%
+        if planet_name in self.EXALTATION_MAPPING:
+            exalt_sign, _ = self.EXALTATION_MAPPING[planet_name]
+            if planet_sign == exalt_sign:
+                strength_factors.append(1.5)  # Enhanced but not overwhelmingly strong
         
         # Complete sign ownership mapping (authentic Vedic astrology)
         SIGN_OWNERSHIP = {
@@ -2356,9 +2111,9 @@ class AnalysisEngine:
             'Ketu': []   # Ketu doesn't own any sign
         }
         
-        # Check own sign
+        # Check own sign - increases strength by 30%
         if planet_name in SIGN_OWNERSHIP and planet_sign in SIGN_OWNERSHIP[planet_name]:
-            return self.NATURAL_STRENGTH_MULTIPLIERS['own_sign']
+            strength_factors.append(1.3)  # Strong but not as strong as exaltation
         
         # Check friend/enemy relationships through sign lord
         sign_lord = self._get_sign_lord(planet_sign)
@@ -2367,14 +2122,19 @@ class AnalysisEngine:
             relationships = PLANETARY_RELATIONSHIPS[planet_name]
             
             if sign_lord in relationships['friends']:
-                return self.NATURAL_STRENGTH_MULTIPLIERS['friend_sign']
+                strength_factors.append(1.2)  # Mild positive influence
             elif sign_lord in relationships['enemies']:
-                return self.NATURAL_STRENGTH_MULTIPLIERS['enemy_sign']
+                strength_factors.append(0.8)  # Mild negative influence
             elif sign_lord in relationships['neutrals']:
-                return self.NATURAL_STRENGTH_MULTIPLIERS['neutral_sign']
+                strength_factors.append(1.0)  # No modification
         
-        # Default to neutral if relationship not found
-        return self.NATURAL_STRENGTH_MULTIPLIERS['neutral_sign']
+        # If no factors found, return neutral strength
+        if not strength_factors:
+            return 1.0
+            
+        # Calculate geometric mean of all applicable factors
+        # This ensures balanced consideration of multiple conditions
+        return float(np.exp(np.mean(np.log(strength_factors))))
     
     def _get_sign_lord(self, sign_name: str) -> str:
         """
@@ -2641,27 +2401,27 @@ class AnalysisEngine:
         opponent_name = "Desc" if perspective == 'ascendant' else "Asc"
         
         # Determine verdict based on final score
-        if final_score >= 0.3:
+        if final_score >= 0.75:  # Updated from 0.3 for new top-2 scale
             verdict = f"Strong Advantage {team_name}"
             cricket_context = "Excellent period for building partnerships and dominating opponents"
             confidence_level = "HIGH"
-        elif final_score >= 0.15:
+        elif final_score >= 0.375:  # Updated from 0.15 for new top-2 scale
             verdict = f"Advantage {team_name}"
             cricket_context = "Good period for consolidation and steady progress"
             confidence_level = "MEDIUM"
-        elif final_score > 0.05:
+        elif final_score > 0.125:  # Updated from 0.05 for new top-2 scale
             verdict = f"Balanced (Slight {team_name})"
             cricket_context = "Marginal advantage - gradual progress expected"
             confidence_level = "LOW"
-        elif final_score <= -0.3:
+        elif final_score <= -0.75:  # Updated from -0.3 for new top-2 scale
             verdict = f"Strong Advantage {opponent_name}"
             cricket_context = "Challenging period - wickets or pressure likely"
             confidence_level = "HIGH"
-        elif final_score <= -0.15:
+        elif final_score <= -0.375:  # Updated from -0.15 for new top-2 scale
             verdict = f"Advantage {opponent_name}"
             cricket_context = "Opposition builds pressure and momentum"
             confidence_level = "MEDIUM"
-        elif final_score < -0.05:
+        elif final_score < -0.125:  # Updated from -0.05 for new top-2 scale
             verdict = f"Balanced (Slight {opponent_name})"
             cricket_context = "Slight opposition edge - careful play needed"
             confidence_level = "LOW"
@@ -2722,27 +2482,27 @@ class AnalysisEngine:
         opponent_name = "Desc" if perspective == 'ascendant' else "Asc"
         
         # Determine verdict based on final score
-        if final_score >= 0.25:
+        if final_score >= 0.625:  # Updated from 0.25 for new top-2 scale
             verdict = f"Strong Advantage {team_name}"
             cricket_context = "Excellent period for building partnerships and dominating opponents"
             confidence_level = "HIGH"
-        elif final_score >= 0.12:
+        elif final_score >= 0.3:  # Updated from 0.12 for new top-2 scale
             verdict = f"Advantage {team_name}"
             cricket_context = "Good period for consolidation and steady progress"
             confidence_level = "MEDIUM"
-        elif final_score > 0.05:
+        elif final_score > 0.125:  # Updated from 0.05 for new top-2 scale
             verdict = f"Balanced (Slight {team_name})"
             cricket_context = "Marginal advantage - gradual progress expected"
             confidence_level = "LOW"
-        elif final_score <= -0.25:
+        elif final_score <= -0.625:  # Updated from -0.25 for new top-2 scale
             verdict = f"Strong Advantage {opponent_name}"
             cricket_context = "Challenging period - wickets or pressure likely"
             confidence_level = "HIGH"
-        elif final_score <= -0.12:
+        elif final_score <= -0.3:  # Updated from -0.12 for new top-2 scale
             verdict = f"Advantage {opponent_name}"
             cricket_context = "Opposition builds pressure and momentum"
             confidence_level = "MEDIUM"
-        elif final_score < -0.05:
+        elif final_score < -0.125:  # Updated from -0.05 for new top-2 scale
             verdict = f"Balanced (Slight {opponent_name})"
             cricket_context = "Slight opposition edge - careful play needed"
             confidence_level = "LOW"
@@ -2805,5 +2565,12 @@ class AnalysisEngine:
                 unfavorable_planets.append(planet)
         
         return favorable_planets, unfavorable_planets
+
+    def _calculate_asc_timeline_score(self, nl_score: float, sl_score: float, context_score: float) -> float:
+        # Use weights for Asc timeline
+        w = self.timeline_weights.get('asc_timeline', self.DEFAULT_TIMELINE_WEIGHTS['asc_timeline'])
+        return (nl_score * w['NL']) + (sl_score * w['SL']) + (context_score * w['Context'])
+
+
 
  

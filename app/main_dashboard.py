@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import to_hex
 import matplotlib.cm as cm
 import matplotlib.colors as colors
+import numpy as np
 
 # --- Path Correction ---
 # Add the root directory of the project to the Python path
@@ -190,35 +191,28 @@ def apply_team_replacements_to_results(results, asc_team_name, desc_team_name):
 
 def color_planets(val):
     """
-    Applies subtle green/red color based on score.
-    Uses a perceptually uniform colormap with adjusted ranges for better visualization.
+    Applies red/green color gradient based on score.
+    - Positive scores: Green with varying intensity
+    - Negative scores: Red with varying intensity
     """
     if pd.isna(val):
         return ''
-        
-    # Using a perceptually uniform colormap 'PiYG' (Pinkish/Green)
-    cmap = cm.get_cmap('PiYG')
     
-    # Normalize the score to a reasonable range
-    # Scores beyond ±2.0 will get the maximum color intensity
-    norm = colors.Normalize(vmin=-2.0, vmax=2.0)
-    normalized_val = norm(val)
+    # Define base colors
+    GREEN = "rgba(0, 128, 0, {opacity})"  # rgb(0, 128, 0) is pure green
+    RED = "rgba(255, 0, 0, {opacity})"    # rgb(255, 0, 0) is pure red
     
-    # Create more subtle colors by adjusting the color mapping
-    if val < 0:
-        # For negative values (red shades)
-        # Map -2.0 to 0.0 to 0.35 to 0.45 (subtle reds)
-        color_val = 0.45 - (abs(normalized_val) * 0.1)
+    # Calculate opacity based on absolute value
+    # Scores beyond ±2.0 will get maximum opacity of 1.0
+    opacity = min(abs(val) / 2.0, 1.0)
+    # Ensure minimum opacity of 0.1 for visibility
+    opacity = max(opacity, 0.1)
+    
+    # Apply color based on score sign
+    if val > 0:
+        return f'background-color: {GREEN.format(opacity=opacity)}'
     else:
-        # For positive values (green shades)
-        # Map 0.0 to 2.0 to 0.55 to 0.65 (subtle greens)
-        color_val = 0.55 + (normalized_val * 0.1)
-    
-    # Ensure color_val stays within bounds
-    color_val = max(0.35, min(0.65, color_val))
-    
-    rgba_color = cmap(color_val)
-    return f'background-color: {colors.to_hex(rgba_color, keep_alpha=True)}'
+        return f'background-color: {RED.format(opacity=opacity)}'
 
 def color_timeline_planets_by_score(planet_short_name, planet_scores):
     """
@@ -418,32 +412,11 @@ def get_ist_time(dt_utc):
     """Convert UTC datetime to IST"""
     return pd.to_datetime(dt_utc).tz_convert('Asia/Kolkata')
 
-def get_magnitude_category(magnitude):
-    """
-    Categorize event magnitude into user-friendly buckets.
-    
-    Args:
-        magnitude: Event magnitude value
-        
-    Returns:
-        str: Magnitude category
-    """
-    if pd.isna(magnitude):
-        return "Unknown"
-    elif magnitude >= 3.0:
-        return "🔥 Major Events"
-    elif magnitude >= 2.0:
-        return "⚡ Significant" 
-    elif magnitude >= 1.0:
-        return "📈 Moderate"
-    elif magnitude >= 0.5:
-        return "📊 Minor"
-    else:
-        return "😴 Minimal"
+# Function removed as magnitude categorization is no longer used
 
 def clean_comment_for_display(comment):
     """
-    Clean comment by removing score, magnitude, and confidence information.
+    Clean comment by removing score and technical information.
     Keeps only the descriptive planetary and cricket context parts.
     
     Args:
@@ -458,12 +431,12 @@ def clean_comment_for_display(comment):
     # Split comment by separator
     parts = comment.split(" | ")
     
-    # Filter out parts containing score, magnitude, or confidence info
+    # Filter out parts containing technical indicators
     filtered_parts = []
     for part in parts:
         # Skip parts that contain technical indicators
         skip_indicators = [
-            "magnitude:", "score:", "nl:", "sl:", "combined:", 
+            "score:", "nl:", "sl:", "combined:", 
             "📊", "high", "medium", "low"
         ]
         
@@ -493,14 +466,6 @@ def prepare_timeline_for_display(timeline_df):
         df_display['Score_Display'] = df_display['Score'].apply(lambda x: f"{x:+.3f}" if pd.notna(x) else "")
     else:
         df_display['Score_Display'] = ""
-    
-    # Add Magnitude column and category if Event_Magnitude exists
-    if 'Event_Magnitude' in df_display.columns:
-        df_display['Magnitude_Display'] = df_display['Event_Magnitude'].apply(lambda x: f"{x:.2f}" if pd.notna(x) else "")
-        df_display['Magnitude_Category'] = df_display['Event_Magnitude'].apply(get_magnitude_category)
-    else:
-        df_display['Magnitude_Display'] = ""
-        df_display['Magnitude_Category'] = ""
     
     # Clean comments
     if 'Comment' in df_display.columns:
@@ -567,63 +532,46 @@ def display_analysis(results):
     if st.button("Save Current Analysis", key=f"save_{id(results)}"):
          save_analysis(display_results)
          
-    # Muhurta Chart Analysis with toggle for scoring methods
-    col_header, col_toggle = st.columns([3, 1])
+    # Muhurta Chart Analysis
+    st.header("Muhurta Chart Analysis (CSSL Method)")
     
-    with col_header:
-        st.header("Muhurta Chart Analysis")
-    
-    with col_toggle:
-        st.markdown("<br>", unsafe_allow_html=True)  # Spacing
-        scoring_method = st.radio(
-            "Scoring Method:",
-            options=["Proportional", "Binary"],
-            horizontal=True,
-            key=f"muhurta_method_{id(results)}",
-            help="Toggle between proportional (score-based) and binary (verdict-based) synthesis methods"
-        )
-    
-    # Display analysis based on selected method
+    # Display CSSL analysis
     if "muhurta_analysis" in display_results:
-        method_key = scoring_method.lower()
-        
-        # Check if we need to regenerate analysis with different method
+        # Check if we need to regenerate analysis
         if not hasattr(st.session_state, f'muhurta_cache_{id(results)}'):
-            st.session_state[f'muhurta_cache_{id(results)}'] = {}
+            st.session_state[f'muhurta_cache_{id(results)}'] = None
         
-        cache = st.session_state[f'muhurta_cache_{id(results)}']
+        cached_analysis = st.session_state[f'muhurta_cache_{id(results)}']
         
-        if method_key not in cache:
-            # Generate analysis for the selected method
-            with st.spinner(f"Generating {scoring_method} analysis..."):
+        if cached_analysis is None:
+            # Generate CSSL analysis
+            with st.spinner("Generating CSSL analysis..."):
                 try:
                     # Get the analysis engine from session state or recreate
                     match_details = display_results['match_details']
                     engine = KPEngine(match_details['datetime_utc'], match_details['lat'], match_details['lon'])
-                    analysis_engine = AnalysisEngine(engine, match_details['team_a'], match_details['team_b'])
+                    analysis_engine = AnalysisEngine(engine, match_details['team_a'], match_details['team_b'],
+                                                     house_weights=st.session_state.house_weights, timeline_weights=st.session_state.timeline_weights)
                     
-                    # Generate enhanced analysis with the selected method
-                    enhanced_muhurta_analysis = analysis_engine.analyze_muhurta_chart(scoring_method=method_key)
+                    # Generate CSSL analysis
+                    cached_analysis = analysis_engine.analyze_muhurta_chart()
                     
                     # Apply team name replacements to the analysis text
                     team_mapping = display_results.get('team_mapping', {})
                     if team_mapping.get('ascendant_team') and team_mapping.get('descendant_team'):
-                        enhanced_muhurta_analysis['analysis'] = apply_team_name_replacements(
-                            enhanced_muhurta_analysis['analysis'], 
+                        cached_analysis['analysis'] = apply_team_name_replacements(
+                            cached_analysis['analysis'], 
                             team_mapping['ascendant_team'], 
                             team_mapping['descendant_team']
                         )
                     
-                    cache[method_key] = enhanced_muhurta_analysis
+                    st.session_state[f'muhurta_cache_{id(results)}'] = cached_analysis
                     
                 except Exception as e:
-                    st.error(f"Error generating {scoring_method} analysis: {str(e)}")
+                    st.error(f"Error generating CSSL analysis: {str(e)}")
                     # Fallback to existing analysis if available
                     fallback_text = display_results.get("muhurta_analysis", "Analysis not available")
-                    cache[method_key] = {'analysis': fallback_text, 'verdict': 'Unknown', 'confidence': 'Low'}
-        
-        # Get the cached analysis
-        cached_analysis = cache[method_key]
+                    cached_analysis = {'analysis': fallback_text, 'verdict': 'Unknown', 'confidence': 'Low'}
         
         # Display the main analysis text
         if isinstance(cached_analysis, dict) and 'analysis' in cached_analysis:
@@ -657,66 +605,80 @@ def display_analysis(results):
                     help="Probability breakdown for both teams"
                 )
             
-            # Display cusp sub lord analysis if available
-            if 'cusp_analysis' in cached_analysis:
-                with st.expander("🏆 Authentic KP Cusp Sub Lord Analysis Details", expanded=False):
-                    cusp_analysis = cached_analysis['cusp_analysis']
+            # Display CSSL analysis details if available
+            if 'cssl_scores' in cached_analysis and 'cssl_planets' in cached_analysis:
+                with st.expander("🎯 CSSL Analysis Details", expanded=False):
+                    cssl_scores = cached_analysis['cssl_scores']
+                    cssl_planets = cached_analysis['cssl_planets']
                     
-                    # Key Decisor Information
-                    key_decisor = cusp_analysis['summary']['key_decisor']
-                    st.write(f"**🎯 Key Decisor (11th Cusp):** {key_decisor['sub_lord']} - {key_decisor['impact']}")
-                    st.write(f"*{key_decisor['reasoning']}*")
+                    # Display CSSL breakdown
+                    st.write("**🔢 Cusp Sub-Sub Lord Breakdown:**")
                     
-                    # Supporting and Opposing Cusps
-                    col_support, col_oppose = st.columns(2)
+                    col1, col2, col3 = st.columns(3)
                     
-                    with col_support:
-                        st.write("**✅ Supporting Cusps:**")
-                        for cusp in cusp_analysis['summary']['supportive_cusps'][:3]:
-                            st.write(f"• H{cusp['cusp']}: {cusp['sub_lord']} (Strength: {cusp['strength']:.2f})")
+                    with col1:
+                        st.write(f"**🏠 1st Cusp (Self):**")
+                        st.write(f"• Planet: {cssl_planets['cusp_1']}")
+                        st.write(f"• Score: {cssl_scores['cusp_1']:+.2f}")
+                        st.write(f"• Weight: 30%")
                     
-                    with col_oppose:
-                        st.write("**❌ Opposing Cusps:**")
-                        for cusp in cusp_analysis['summary']['opposing_cusps'][:3]:
-                            st.write(f"• H{cusp['cusp']}: {cusp['sub_lord']} (Strength: {cusp['strength']:.2f})")
+                    with col2:
+                        st.write(f"**🏆 6th Cusp (Victory):**")
+                        st.write(f"• Planet: {cssl_planets['cusp_6']}")
+                        st.write(f"• Score: {cssl_scores['cusp_6']:+.2f}")
+                        st.write(f"• Weight: 50%")
                     
-                    # Final Verdict Details
-                    final_verdict = cusp_analysis['final_verdict']
-                    st.write("**🏅 Cusp Analysis Verdict:**")
-                    st.write(f"• Primary Decision: **{final_verdict['primary_verdict']}**")
-                    st.write(f"• Overall Assessment: **{final_verdict['overall_verdict']}**")
-                    st.write(f"• Final Score: **{final_verdict['final_score']:+.2f}**")
-                    st.write(f"• Confidence: **{cusp_analysis['confidence_level']}**")
+                    with col3:
+                        st.write(f"**🎯 7th Cusp (Opponent):**")
+                        st.write(f"• Planet: {cssl_planets['cusp_7']}")
+                        st.write(f"• Score: {cssl_scores['cusp_7']:+.2f}")
+                        st.write(f"• Weight: 20% (Inverted)")
+                    
+                    # Final Score
+                    final_score = cached_analysis.get('final_score', 0)
+                    st.write(f"**📊 Final Combined Score:** {final_score:+.3f}")
+                    
+                    # Contest Type
+                    contest_type = cached_analysis.get('contest_type', 'Unknown')
+                    st.write(f"**🏅 Contest Type:** {contest_type}")
             
-            # Display method agreement/disagreement if available
-            if isinstance(cached_analysis, dict) and 'methods_agree' in cached_analysis:
-                if cached_analysis['methods_agree']:
-                    st.success("✅ **Traditional and Cusp Analysis Methods Agree** - High reliability prediction")
-                else:
-                    st.warning("⚠️ **Traditional and Cusp Analysis Methods Disagree** - Cusp analysis given higher weight")
+            # Display contest type information
+            if 'contest_type' in cached_analysis:
+                contest_type = cached_analysis['contest_type']
+                if "One-Sided" in contest_type:
+                    st.success(f"🔥 **{contest_type}** - Clear dominance indicated")
+                elif "Fairly Balanced" in contest_type:
+                    st.info(f"⚡ **{contest_type}** - Competitive match with clear favorite")
+                elif "Close Contest" in contest_type and "Extremely" not in contest_type:
+                    st.warning(f"⚖️ **{contest_type}** - Tight competition expected")
+                elif "Extremely Close" in contest_type:
+                    st.error(f"🎯 **{contest_type}** - Outcome very difficult to predict")
         
         else:
             # Fallback for older format
             st.write(cached_analysis)
         
-        # Add a small note about the difference
-        if scoring_method == "Proportional":
-            st.info("💡 **Proportional Method**: Uses actual score magnitudes to weight each factor, providing nuanced probability calculations.")
-        else:
-            st.info("💡 **Binary Method**: Uses traditional fixed points based on verdict categories, following classical approach.")
+        # Add a small note about the methodology
+        st.info("💡 **CSSL Methodology**: Uses only the most decisive factors - 1st Cusp (Self), 6th Cusp (Victory), and 7th Cusp (Opponent) Sub-Sub Lords for authentic KP prediction with clear probability percentages and contest type classification.")
 
     st.subheader("Planetary Positions & Scores")
     planets_df = display_results["planets_df"]
     
-    # Specify column order to have Score at the end
-    column_order = [col for col in planets_df.columns if col not in ['Score', 'Significators']] + ['Significators', 'Score']
+    # Specify column order to have Comment at the very end
+    base_columns = [col for col in planets_df.columns if col not in ['Score', 'Significators', 'Comment']]
+    column_order = base_columns + ['Score', 'Significators', 'Comment']
     
     # 1. Reorder the DataFrame columns first
     reordered_df = planets_df.reindex(columns=column_order)
 
-    # 2. Apply styling and formatting to the reordered DataFrame
+    # 2. Apply styling and formatting to both Planet name and Score columns
     styler = reordered_df.style.apply(lambda x: x.map(color_planets), subset=['Score'])
-    st.dataframe(styler.format({'Score': '{:.2f}'}))
+    
+    # Apply the same color to the index (Planet names) based on their scores
+    planet_colors = {planet: color_planets(score) for planet, score in planets_df['Score'].items()}
+    styler = styler.apply(lambda x: pd.Series([planet_colors.get(idx, '') for idx in x.index], index=x.index), axis=0)
+    
+    st.dataframe(styler.format({'Score': '{:.2f}'}), use_container_width=True)
 
     # Get team names for verdict coloring (use replaced names if available)
     team_mapping = display_results.get('team_mapping', {})
@@ -724,7 +686,7 @@ def display_analysis(results):
     team_b_name = team_mapping.get('descendant_team', 'Desc')
 
     st.subheader(f"Ascendant Based Timeline (Asc) - Enhanced Dynamic Analysis")
-    st.markdown('<p class="timeline-description">Enhanced timeline using dynamic layer influence methodology. Shows planetary dominance, convergence factors, and event magnitudes for precise match analysis.</p>', unsafe_allow_html=True)
+    st.markdown('<p class="timeline-description">Enhanced timeline using dynamic layer influence methodology. Shows planetary dominance and influence patterns for precise match analysis.</p>', unsafe_allow_html=True)
     asc_timeline_df = display_results["asc_timeline_df"].copy() # Use a copy to avoid modifying session state
     
     # Convert times to IST for display using the correct pandas method
@@ -737,26 +699,19 @@ def display_analysis(results):
         planet_short = PlanetNameUtils.to_short_name(planet)
         planet_scores[planet_short] = planets_df.loc[planet, 'Score']
     
-    # Display enhanced analysis summary if available
-    if 'average_magnitude' in display_results["asc_timeline_analysis"]:
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Average Event Magnitude", f"{display_results['asc_timeline_analysis']['average_magnitude']:.2f}")
-        with col2:
-            high_intensity = display_results['asc_timeline_analysis'].get('high_intensity_periods', 0)
-            st.metric("High Intensity Periods", high_intensity)
-        with col3:
-            method = display_results['asc_timeline_analysis'].get('method', 'standard')
-            st.metric("Analysis Method", method.replace('_', ' ').title())
+    # Display analysis method if available
+    if 'method' in display_results["asc_timeline_analysis"]:
+        method = display_results['asc_timeline_analysis'].get('method', 'standard')
+        st.metric("Analysis Method", method.replace('_', ' ').title())
     
     # Create a view for display with enhanced user-friendly columns
     if 'NL_Influence' in asc_timeline_df.columns:
         # Prepare enhanced timeline with additional display columns
         asc_prepared_df = prepare_timeline_for_display(asc_timeline_df)
         
-        # Define display columns in the requested order: Score, Verdict, Magnitude, Magnitude Category, Comment
+        # Define display columns in the requested order: Score, Verdict, Comment
         base_columns = ['Start Time', 'End Time', 'NL_Planet', 'SL_Planet']
-        enhanced_columns = ['Score_Display', 'Verdict', 'Magnitude_Display', 'Magnitude_Category', 'Comment_Clean']
+        enhanced_columns = ['Score_Display', 'Verdict', 'Comment_Clean']
         
         # Add SSL_Planet if it exists (for granular timelines)
         if 'SSL_Planet' in asc_timeline_df.columns:
@@ -768,8 +723,6 @@ def display_analysis(results):
         # Rename columns for better display
         asc_display_df = asc_display_df.rename(columns={
             'Score_Display': 'Score',
-            'Magnitude_Display': 'Magnitude', 
-            'Magnitude_Category': 'Magnitude Category',
             'Comment_Clean': 'Comment'
         })
         
@@ -797,8 +750,8 @@ def display_analysis(results):
             pass
         
         # Add expander for technical details
-        with st.expander("🔬 Technical Details (Layer Influences & Event Magnitudes)", expanded=False):
-            technical_cols = ['Start Time', 'End Time', 'NL_Planet', 'SL_Planet', 'NL_Influence', 'SL_Influence', 'Event_Magnitude', 'Convergence_Factor', 'Score']
+        with st.expander("🔬 Technical Details (Layer Influences)", expanded=False):
+            technical_cols = ['Start Time', 'End Time', 'NL_Planet', 'SL_Planet', 'NL_Influence', 'SL_Influence', 'Score']
             if 'SSL_Planet' in asc_timeline_df.columns:
                 technical_cols.insert(4, 'SSL_Planet')
                 technical_cols.insert(6, 'SSL_Influence')
@@ -810,9 +763,8 @@ def display_analysis(results):
                 if col in tech_df.columns:
                     tech_df[col] = tech_df[col].map(lambda x: f"{x:.1%}" if pd.notna(x) else "")
             
-            for col in ['Event_Magnitude', 'Convergence_Factor', 'Score']:
-                if col in tech_df.columns:
-                    tech_df[col] = tech_df[col].map(lambda x: f"{x:.3f}" if pd.notna(x) else "")
+            if 'Score' in tech_df.columns:
+                tech_df['Score'] = tech_df['Score'].map(lambda x: f"{x:.3f}" if pd.notna(x) else "")
             
             st.dataframe(tech_df, use_container_width=True)
     else:
@@ -835,144 +787,29 @@ def display_analysis(results):
             subset=['Verdict']
         )
         st.dataframe(styler_asc, use_container_width=True, height=400)
-    st.write(display_results["asc_timeline_analysis"]["summary"])
+        st.write(display_results["asc_timeline_analysis"]["summary"])
 
-    st.subheader(f"Descendant Based Timeline (Desc) - Enhanced Dynamic Analysis")
-    st.markdown('<p class="timeline-description">Enhanced timeline using dynamic layer influence methodology. Shows planetary dominance, convergence factors, and event magnitudes for precise match analysis.</p>', unsafe_allow_html=True)
-    desc_timeline_df = display_results["desc_timeline_df"].copy() # Use a copy
-
-    # Convert times to IST for display using the correct pandas method
-    desc_timeline_df['Start Time'] = pd.to_datetime(desc_timeline_df['Start Time']).dt.tz_convert('Asia/Kolkata').dt.strftime('%H:%M:%S')
-    desc_timeline_df['End Time'] = pd.to_datetime(desc_timeline_df['End Time']).dt.tz_convert('Asia/Kolkata').dt.strftime('%H:%M:%S')
-
-    # Display enhanced analysis summary if available
-    if 'average_magnitude' in display_results["desc_timeline_analysis"]:
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Average Event Magnitude", f"{display_results['desc_timeline_analysis']['average_magnitude']:.2f}")
-        with col2:
-            high_intensity = display_results['desc_timeline_analysis'].get('high_intensity_periods', 0)
-            st.metric("High Intensity Periods", high_intensity)
-        with col3:
-            method = display_results['desc_timeline_analysis'].get('method', 'standard')
-            st.metric("Analysis Method", method.replace('_', ' ').title())
-
-    # Create a view for display with enhanced user-friendly columns
-    if 'NL_Influence' in desc_timeline_df.columns:
-        # Prepare enhanced timeline with additional display columns
-        desc_prepared_df = prepare_timeline_for_display(desc_timeline_df)
-        
-        # Define display columns in the requested order: Score, Verdict, Magnitude, Magnitude Category, Comment
-        base_columns = ['Start Time', 'End Time', 'NL_Planet', 'SL_Planet']
-        enhanced_columns = ['Score_Display', 'Verdict', 'Magnitude_Display', 'Magnitude_Category', 'Comment_Clean']
-        
-        # Add SSL_Planet if it exists (for granular timelines)
-        if 'SSL_Planet' in desc_timeline_df.columns:
-            base_columns.append('SSL_Planet')
-        
-        display_columns = base_columns + enhanced_columns
-        desc_display_df = desc_prepared_df[display_columns].copy()
-        
-        # Rename columns for better display
-        desc_display_df = desc_display_df.rename(columns={
-            'Score_Display': 'Score',
-            'Magnitude_Display': 'Magnitude', 
-            'Magnitude_Category': 'Magnitude Category',
-            'Comment_Clean': 'Comment'
-        })
-        
-        # Add option to view comments separately for better readability
-        if st.checkbox("📝 Show Detailed Comments Separately", key=f"desc_comments_separate_{id(results)}_{hash(str(desc_timeline_df.columns))}"):
-            # Display table without comments
-            desc_no_comments = desc_display_df.drop(columns=['Comment'])
-            styler_desc_no_comments = desc_no_comments.style.applymap(
-                lambda x: color_timeline_planets_by_score(x, planet_scores),
-                subset=[col for col in planet_columns_desc if col in desc_no_comments.columns]
-            ).applymap(
-                lambda x: color_verdict_cell(x, team_a_name, team_b_name),
-                subset=['Verdict']
-            )
-            st.dataframe(styler_desc_no_comments, use_container_width=True, height=400)
-            
-            # Display comments in expandable sections
-            with st.expander("📝 Detailed Period Comments", expanded=True):
-                for idx, row in desc_display_df.iterrows():
-                    st.markdown(f"**{row['Start Time']} - {row['End Time']}** ({row['NL_Planet']}-{row['SL_Planet']}) - *{row['Verdict']}*")
-                    st.markdown(f"<div style='padding-left: 20px; color: #444; line-height: 1.5;'>{row['Comment']}</div>", unsafe_allow_html=True)
-                    st.markdown("---")
-        else:
-            # Display full table with comments - already prepared above
-            pass
-        
-        # Add expander for technical details
-        with st.expander("🔬 Technical Details (Layer Influences & Event Magnitudes)", expanded=False):
-            technical_cols = ['Start Time', 'End Time', 'NL_Planet', 'SL_Planet', 'NL_Influence', 'SL_Influence', 'Event_Magnitude', 'Convergence_Factor', 'Score']
-            if 'SSL_Planet' in desc_timeline_df.columns:
-                technical_cols.insert(4, 'SSL_Planet')
-                technical_cols.insert(6, 'SSL_Influence')
-            
-            tech_df = desc_timeline_df[technical_cols].copy()
-            
-            # Format technical columns for better display
-            for col in ['NL_Influence', 'SL_Influence', 'SSL_Influence']:
-                if col in tech_df.columns:
-                    tech_df[col] = tech_df[col].map(lambda x: f"{x:.1%}" if pd.notna(x) else "")
-            
-            for col in ['Event_Magnitude', 'Convergence_Factor', 'Score']:
-                if col in tech_df.columns:
-                    tech_df[col] = tech_df[col].map(lambda x: f"{x:.3f}" if pd.notna(x) else "")
-            
-            st.dataframe(tech_df, use_container_width=True)
-    else:
-        # Fallback for older timeline format
-        desc_display_df = desc_timeline_df.drop(columns=['Score'] if 'Score' in desc_timeline_df.columns else [])
-    
-    # Apply coloring to planet columns and verdict column
-    # Check if SSL_Planet column exists (for granular timelines) or not (for aggregated timelines)
-    planet_columns_desc = ['NL_Planet', 'SL_Planet']
-    if 'SSL_Planet' in desc_display_df.columns:
-        planet_columns_desc.append('SSL_Planet')
-    
-    # Only show the main dataframe if comments are not shown separately
-    if 'NL_Influence' not in desc_timeline_df.columns or not st.session_state.get(f"desc_comments_separate_{id(results)}_{hash(str(desc_timeline_df.columns))}", False):
-        styler_desc = desc_display_df.style.applymap(
-            lambda x: color_timeline_planets_by_score(x, planet_scores),
-            subset=planet_columns_desc
-        ).applymap(
-            lambda x: color_verdict_cell(x, team_a_name, team_b_name),
-            subset=['Verdict']
-        )
-        st.dataframe(styler_desc, use_container_width=True, height=400)
-    st.write(display_results["desc_timeline_analysis"]["summary"])
-    
     st.subheader("Moon SSL Timeline - Enhanced Dynamic Full Granular Detail")
-    st.markdown('<p class="timeline-description">Enhanced detailed timeline with dynamic layer analysis showing all Sub-Sub Lord periods. Includes planetary influence percentages, convergence factors, and event magnitude predictions for precise timing analysis.</p>', unsafe_allow_html=True)
+    st.markdown('<p class="timeline-description">Enhanced detailed timeline with dynamic layer analysis showing all Sub-Sub Lord periods. Includes planetary influence percentages for precise timing analysis.</p>', unsafe_allow_html=True)
     moon_timeline_df = display_results["moon_timeline_df"].copy()
 
     # Convert times to IST for display using the correct pandas method
     moon_timeline_df['Start Time'] = pd.to_datetime(moon_timeline_df['Start Time']).dt.tz_convert('Asia/Kolkata').dt.strftime('%H:%M:%S')
     moon_timeline_df['End Time'] = pd.to_datetime(moon_timeline_df['End Time']).dt.tz_convert('Asia/Kolkata').dt.strftime('%H:%M:%S')
 
-    # Display enhanced analysis summary if available
-    if 'average_magnitude' in display_results["moon_timeline_analysis"]:
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Average Event Magnitude", f"{display_results['moon_timeline_analysis']['average_magnitude']:.2f}")
-        with col2:
-            high_intensity = display_results['moon_timeline_analysis'].get('high_intensity_periods', 0)
-            st.metric("High Intensity Periods", high_intensity)
-        with col3:
-            method = display_results['moon_timeline_analysis'].get('method', 'standard')
-            st.metric("Analysis Method", method.replace('_', ' ').title())
+    # Display analysis method if available
+    if 'method' in display_results["moon_timeline_analysis"]:
+        method = display_results['moon_timeline_analysis'].get('method', 'standard')
+        st.metric("Analysis Method", method.replace('_', ' ').title())
 
     # Create a view for display with enhanced user-friendly columns
     if 'NL_Influence' in moon_timeline_df.columns:
         # Prepare enhanced timeline with additional display columns
         moon_prepared_df = prepare_timeline_for_display(moon_timeline_df)
         
-        # Define display columns in the requested order: Score, Verdict, Magnitude, Magnitude Category, Comment
+        # Define display columns in the requested order: Score, Verdict, Comment
         base_columns = ['Start Time', 'End Time', 'NL_Planet', 'SL_Planet', 'SSL_Planet']
-        enhanced_columns = ['Score_Display', 'Verdict', 'Magnitude_Display', 'Magnitude_Category', 'Comment_Clean']
+        enhanced_columns = ['Score_Display', 'Verdict', 'Comment_Clean']
         
         display_columns = base_columns + enhanced_columns
         moon_display_df = moon_prepared_df[display_columns].copy()
@@ -980,8 +817,6 @@ def display_analysis(results):
         # Rename columns for better display
         moon_display_df = moon_display_df.rename(columns={
             'Score_Display': 'Score',
-            'Magnitude_Display': 'Magnitude', 
-            'Magnitude_Category': 'Magnitude Category',
             'Comment_Clean': 'Comment'
         })
         
@@ -1009,8 +844,8 @@ def display_analysis(results):
             pass
         
         # Add expander for technical details
-        with st.expander("🔬 Technical Details (Layer Influences & Event Magnitudes)", expanded=False):
-            technical_cols = ['Start Time', 'End Time', 'NL_Planet', 'SL_Planet', 'SSL_Planet', 'NL_Influence', 'SL_Influence', 'SSL_Influence', 'Event_Magnitude', 'Convergence_Factor', 'Score']
+        with st.expander("🔬 Technical Details (Layer Influences)", expanded=False):
+            technical_cols = ['Start Time', 'End Time', 'NL_Planet', 'SL_Planet', 'SSL_Planet', 'NL_Influence', 'SL_Influence', 'SSL_Influence', 'Score']
             tech_df = moon_timeline_df[technical_cols].copy()
             
             # Format technical columns for better display
@@ -1018,9 +853,8 @@ def display_analysis(results):
                 if col in tech_df.columns:
                     tech_df[col] = tech_df[col].map(lambda x: f"{x:.1%}" if pd.notna(x) else "")
             
-            for col in ['Event_Magnitude', 'Convergence_Factor', 'Score']:
-                if col in tech_df.columns:
-                    tech_df[col] = tech_df[col].map(lambda x: f"{x:.3f}" if pd.notna(x) else "")
+            if 'Score' in tech_df.columns:
+                tech_df['Score'] = tech_df['Score'].map(lambda x: f"{x:.3f}" if pd.notna(x) else "")
             
             st.dataframe(tech_df, use_container_width=True)
     else:
@@ -1064,33 +898,27 @@ def display_analysis(results):
         st.write("**For Moon SSL:**")
         st.json(display_results['moon_timeline_analysis']['unfavorable_planets'])
 
-def run_analysis(match_details):
+def run_analysis(match_details, timeline_weights=None, house_weights=None):
     """
     Orchestrates the KP core analysis and returns a single, consistent dictionary.
+    Accepts timeline_weights and house_weights for dynamic user control.
     """
     try:
         engine = KPEngine(match_details['datetime_utc'], match_details['lat'], match_details['lon'])
-        analysis_engine = AnalysisEngine(engine, match_details['team_a'], match_details['team_b'])
-        
+        # Pass house_weights and timeline_weights to AnalysisEngine
+        analysis_engine = AnalysisEngine(engine, match_details['team_a'], match_details['team_b'],
+                                         house_weights=house_weights, timeline_weights=timeline_weights)
         muhurta_analysis = analysis_engine.analyze_muhurta_chart(scoring_method='proportional')
         planets_df = analysis_engine.get_all_planet_details_df()
-
         asc_timeline_gen = TimelineGenerator(engine, 'Ascendant')
-        # Use aggregated timeline for Ascendant (Star Lord + Sub Lord level)
         asc_timeline_df = asc_timeline_gen.generate_aggregated_timeline_df(match_details['datetime_utc'], match_details['duration_hours'])
         asc_timeline_df, asc_timeline_analysis = analysis_engine.analyze_aggregated_timeline(asc_timeline_df, 'ascendant')
-        
         desc_timeline_gen = TimelineGenerator(engine, 'Descendant')
-        # Use aggregated timeline for Descendant (Star Lord + Sub Lord level)  
         desc_timeline_df = desc_timeline_gen.generate_aggregated_timeline_df(match_details['datetime_utc'], match_details['duration_hours'])
         desc_timeline_df, desc_timeline_analysis = analysis_engine.analyze_aggregated_timeline(desc_timeline_df, 'descendant')
-        
         moon_timeline_gen = TimelineGenerator(engine, 'Moon')
-        # Use granular timeline for Moon (full SSL level)
         moon_timeline_df = moon_timeline_gen.generate_timeline_df(match_details['datetime_utc'], match_details['duration_hours'])
         moon_timeline_df, moon_timeline_analysis = analysis_engine.analyze_timeline(moon_timeline_df, 'ascendant')
-        
-        # Return a single, consistently structured dictionary
         return {
             "muhurta_analysis": muhurta_analysis,
             "planets_df": planets_df,
@@ -1104,7 +932,6 @@ def run_analysis(match_details):
             "error": None,
             "traceback": None
         }
-
     except Exception as e:
         import traceback
         return {
@@ -1276,7 +1103,9 @@ def main():
                         'duration_hours': match_duration,
                         'team_a': team_a,
                         'team_b': team_b
-                    })
+                    },
+                    timeline_weights=st.session_state.timeline_weights,
+                    house_weights=st.session_state.house_weights)
                     
                     # Add tab name to the analysis
                     tab_name = f"{team_a} vs {team_b} - {match_date.strftime('%Y-%m-%d')}"
@@ -1314,6 +1143,47 @@ def main():
                 st.session_state.analyses.append(loaded_analysis)
                 st.session_state.active_tab = len(st.session_state.analyses) - 1
             st.rerun()
+
+        # --- Timeline Layer Weights ---
+        st.subheader("Timeline Layer Weights")
+        st.markdown("*Adjust the influence of NL, SL, SSL/Context in timeline verdicts*")
+        if 'timeline_weights' not in st.session_state:
+            st.session_state.timeline_weights = {
+                'ssl_timeline': {'NL': 0.1, 'SL': 0.2, 'SSL': 0.7},
+                'asc_timeline': {'NL': 0.2, 'SL': 0.3, 'Context': 0.5}
+            }
+        ssl_nl = st.slider("SSL Timeline: NL (%)", 0, 100, int(st.session_state.timeline_weights['ssl_timeline']['NL']*100), 5)
+        ssl_sl = st.slider("SSL Timeline: SL (%)", 0, 100, int(st.session_state.timeline_weights['ssl_timeline']['SL']*100), 5)
+        ssl_ssl = st.slider("SSL Timeline: SSL (%)", 0, 100, int(st.session_state.timeline_weights['ssl_timeline']['SSL']*100), 5)
+        total_ssl = ssl_nl + ssl_sl + ssl_ssl
+        if total_ssl != 100:
+            st.warning("SSL Timeline weights must sum to 100%.")
+        st.session_state.timeline_weights['ssl_timeline'] = {
+            'NL': ssl_nl/100, 'SL': ssl_sl/100, 'SSL': ssl_ssl/100
+        }
+        asc_nl = st.slider("Asc Timeline: NL (%)", 0, 100, int(st.session_state.timeline_weights['asc_timeline']['NL']*100), 5)
+        asc_sl = st.slider("Asc Timeline: SL (%)", 0, 100, int(st.session_state.timeline_weights['asc_timeline']['SL']*100), 5)
+        asc_ctx = st.slider("Asc Timeline: Context (%)", 0, 100, int(st.session_state.timeline_weights['asc_timeline']['Context']*100), 5)
+        total_asc = asc_nl + asc_sl + asc_ctx
+        if total_asc != 100:
+            st.warning("Asc Timeline weights must sum to 100%.")
+        st.session_state.timeline_weights['asc_timeline'] = {
+            'NL': asc_nl/100, 'SL': asc_sl/100, 'Context': asc_ctx/100
+        }
+        st.divider()
+
+    # --- House Weights Controls ---
+    st.subheader("House Weights")
+    st.markdown("*Adjust the weight for each house (1-12). Changes apply in real time.*")
+    if 'house_weights' not in st.session_state:
+        st.session_state.house_weights = {
+            1: 0.5, 2: 0.2, 3: 0.3, 4: -0.2, 5: -0.8, 6: 1.0, 7: -0.6, 8: -1.0, 9: -0.3, 10: 0.7, 11: 0.9, 12: -0.9
+        }
+    cols = st.columns(6)
+    for i in range(1, 13):
+        with cols[(i-1)%6]:
+            st.session_state.house_weights[i] = st.number_input(f"House {i}", value=st.session_state.house_weights[i], key=f"house_{i}", step=0.05, format="%.2f")
+    st.divider()
 
     # --- Display Area with Multiple Tabs ---
     if st.session_state.analyses:
