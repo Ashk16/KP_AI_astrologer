@@ -476,7 +476,17 @@ def prepare_timeline_for_display(timeline_df):
     return df_display
 
 def display_analysis(results):
-    """Display the analysis results for a single match."""
+    """Display the analysis results with enhanced formatting and cached CSSL analysis."""
+    display_results = results
+    
+    # Display astrological settings information
+    match_details = display_results.get('match_details', {})
+    ayanamsa = match_details.get('ayanamsa', 'KRISHNAMURTI')
+    
+    # Create ayanamsa info box
+    st.info(f"🔮 **Astrological Settings**: Using {ayanamsa} Ayanamsa for sidereal calculations (authentic KP astrology)")
+    
+    # Check if there are any errors first
     if results.get("error"):
         st.error("An error occurred during analysis:")
         st.exception(results.get("traceback", "No traceback available."))
@@ -521,7 +531,6 @@ def display_analysis(results):
         )
     
     # Apply team name replacements if requested
-    display_results = results
     if apply_teams and asc_team_input.strip() and desc_team_input.strip():
         display_results = apply_team_replacements_to_results(results, asc_team_input.strip(), desc_team_input.strip())
         st.success(f"✅ Analysis updated with team names: **{asc_team_input}** (Ascendant) vs **{desc_team_input}** (Descendant)")
@@ -549,7 +558,8 @@ def display_analysis(results):
                 try:
                     # Get the analysis engine from session state or recreate
                     match_details = display_results['match_details']
-                    engine = KPEngine(match_details['datetime_utc'], match_details['lat'], match_details['lon'])
+                    ayanamsa = match_details.get('ayanamsa', 'KRISHNAMURTI')
+                    engine = KPEngine(match_details['datetime_utc'], match_details['lat'], match_details['lon'], ayanamsa=ayanamsa)
                     analysis_engine = AnalysisEngine(engine, match_details['team_a'], match_details['team_b'],
                                                      house_weights=st.session_state.house_weights, timeline_weights=st.session_state.timeline_weights)
                     
@@ -904,7 +914,8 @@ def run_analysis(match_details, timeline_weights=None, house_weights=None):
     Accepts timeline_weights and house_weights for dynamic user control.
     """
     try:
-        engine = KPEngine(match_details['datetime_utc'], match_details['lat'], match_details['lon'])
+        ayanamsa = match_details.get('ayanamsa', 'KRISHNAMURTI')
+        engine = KPEngine(match_details['datetime_utc'], match_details['lat'], match_details['lon'], ayanamsa=ayanamsa)
         # Pass house_weights and timeline_weights to AnalysisEngine
         analysis_engine = AnalysisEngine(engine, match_details['team_a'], match_details['team_b'],
                                          house_weights=house_weights, timeline_weights=timeline_weights)
@@ -1082,6 +1093,16 @@ def main():
         
         match_duration = st.number_input("Match Duration (hours)", min_value=1.0, max_value=8.0, value=3.5, step=0.5)
 
+        # Ayanamsa selection
+        st.subheader("Astrological Settings")
+        ayanamsa_options = ['KRISHNAMURTI', 'LAHIRI', 'RAMAN', 'TRUE_CITRA']
+        ayanamsa_choice = st.selectbox(
+            "Ayanamsa (Sidereal Correction)", 
+            ayanamsa_options, 
+            index=0,  # Default to Krishnamurti
+            help="Krishnamurti Ayanamsa is recommended for KP astrology. Lahiri is official in India."
+        )
+
         if st.button("Generate Predictions"):
             try:
                 # Parse the time string
@@ -1097,12 +1118,13 @@ def main():
 
                 with st.spinner("Generating astrological analysis..."):
                     new_analysis = run_analysis({
-                        'datetime_utc': utc_dt,
-                        'lat': lat,
-                        'lon': lon,
-                        'duration_hours': match_duration,
-                        'team_a': team_a,
-                        'team_b': team_b
+                        "team_a": team_a,
+                        "team_b": team_b,
+                        "datetime_utc": utc_dt,
+                        "lat": lat,
+                        "lon": lon,
+                        "duration_hours": match_duration,
+                        "ayanamsa": ayanamsa_choice
                     },
                     timeline_weights=st.session_state.timeline_weights,
                     house_weights=st.session_state.house_weights)

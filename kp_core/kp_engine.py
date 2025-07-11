@@ -115,7 +115,7 @@ class KPEngine:
     """
     Handles core KP astrological calculations.
     """
-    def __init__(self, dt, lat, lon):
+    def __init__(self, dt, lat, lon, ayanamsa='KRISHNAMURTI'):
         """
         Initializes the engine with date, time, and location.
 
@@ -123,19 +123,45 @@ class KPEngine:
             dt (datetime): UTC datetime object.
             lat (float): Latitude.
             lon (float): Longitude.
+            ayanamsa (str): Ayanamsa to use - 'KRISHNAMURTI', 'LAHIRI', or 'RAMAN'
         """
         self.utc_dt = dt
         self.lat = lat
         self.lon = lon
+        self.ayanamsa = ayanamsa
         self.jd = swe.julday(self.utc_dt.year, self.utc_dt.month, self.utc_dt.day, 
                              self.utc_dt.hour + self.utc_dt.minute/60 + self.utc_dt.second/3600)
         
         # Set Swiss Ephemeris path
         swe.set_ephe_path(get_ephe_path())
+        
+        # Set sidereal mode with appropriate ayanamsa
+        self._set_ayanamsa(ayanamsa)
 
         self.planets = self._calculate_all_body_details()
         self.cusps = self._calculate_all_cusp_details()
         self.planets['Asc'] = self.cusps[1] # Ensure Asc is in planets list
+
+    def _set_ayanamsa(self, ayanamsa: str):
+        """
+        Sets the ayanamsa for sidereal calculations.
+        
+        Args:
+            ayanamsa (str): Ayanamsa type
+        """
+        ayanamsa_mapping = {
+            'KRISHNAMURTI': swe.SIDM_KRISHNAMURTI,
+            'LAHIRI': swe.SIDM_LAHIRI,
+            'RAMAN': swe.SIDM_RAMAN,
+            'TRUE_CITRA': swe.SIDM_TRUE_CITRA,
+            'KP': swe.SIDM_KRISHNAMURTI  # Alias for Krishnamurti
+        }
+        
+        sidm = ayanamsa_mapping.get(ayanamsa.upper(), swe.SIDM_KRISHNAMURTI)
+        swe.set_sid_mode(sidm, 0, 0)
+        
+        # Calculate current ayanamsa value for reference
+        self.ayanamsa_value = swe.get_ayanamsa_ut(self.jd)
 
     def _get_lordships(self, longitude):
         """
@@ -187,20 +213,20 @@ class KPEngine:
         return nakshatra_lord, sub_lord, sub_sub_lord
 
     def _calculate_all_body_details(self):
-        """Calculates positions and lordships for all planets."""
+        """Calculates positions and lordships for all planets using sidereal coordinates."""
         planet_data = {}
         for p_id, name in PLANET_NAMES.items():
             if name == 'Asc': continue # Handled in cusps
 
             if name in ['Rahu', 'Ketu']:
                 # pos is an immutable tuple, so we can't modify it directly.
-                pos, _ = swe.calc_ut(self.jd, swe.MEAN_NODE, swe.FLG_SWIEPH)
+                pos, _ = swe.calc_ut(self.jd, swe.MEAN_NODE, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)
                 longitude = pos[0]
                 if name == 'Ketu':
                     # Ketu is 180 degrees opposite Rahu.
                     longitude = (longitude + 180) % 360
             else:
-                pos, _ = swe.calc_ut(self.jd, p_id, swe.FLG_SWIEPH)
+                pos, _ = swe.calc_ut(self.jd, p_id, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)
                 longitude = pos[0]
 
             sign_num = int(longitude / 30)
@@ -218,11 +244,14 @@ class KPEngine:
         return planet_data
 
     def _calculate_all_cusp_details(self):
-        """Calculates positions and lordships for all cusps."""
+        """Calculates positions and lordships for all cusps using sidereal coordinates."""
         cusps, ascmc = swe.houses(self.jd, self.lat, self.lon, b'P')
         cusp_data = {}
         for i in range(12):
             longitude = cusps[i]
+            # Convert to sidereal by subtracting ayanamsa
+            longitude = (longitude - self.ayanamsa_value) % 360
+            
             sign_num = int(longitude / 30)
             sign = ZODIAC_SIGNS[sign_num]
             nl, sl, ssl = self._get_lordships(longitude)
@@ -264,7 +293,7 @@ class KPEngine:
 
     def get_cusp_longitude_at_time(self, dt_utc: datetime, cusp_id: int):
         """
-        Calculates the longitude of a specific cusp at a given time.
+        Calculates the sidereal longitude of a specific cusp at a given time.
         This is a dynamic calculation needed for timeline generation.
         """
         if not (1 <= cusp_id <= 12):
@@ -276,8 +305,40 @@ class KPEngine:
         # Calculate cusps for the given time, using the engine's lat/lon
         cusps, _ = swe.houses(jd, self.lat, self.lon, b'P')
         
-        # Cusp array is 0-indexed, so cusp 1 is at index 0
-        return cusps[cusp_id - 1]
+        # Convert to sidereal by subtracting ayanamsa
+        ayanamsa_at_time = swe.get_ayanamsa_ut(jd)
+        longitude = (cusps[cusp_id - 1] - ayanamsa_at_time) % 360
+        
+        return longitude
+
+    def get_ayanamsa_info(self):
+        """
+        Returns information about the current ayanamsa being used.
+        
+        Returns:
+            dict: Ayanamsa information including type and value
+        """
+        return {
+            'type': self.ayanamsa,
+            'value_degrees': self.ayanamsa_value,
+            'value_dms': self._decimal_to_dms(self.ayanamsa_value)
+        }
+    
+    def _decimal_to_dms(self, decimal_degrees):
+        """
+        Converts decimal degrees to degrees, minutes, seconds format.
+        
+        Args:
+            decimal_degrees (float): Decimal degrees
+            
+        Returns:
+            str: Formatted string in DD°MM'SS" format
+        """
+        degrees = int(decimal_degrees)
+        minutes_float = (decimal_degrees - degrees) * 60
+        minutes = int(minutes_float)
+        seconds = (minutes_float - minutes) * 60
+        return f"{degrees}°{minutes:02d}'{seconds:05.2f}\""
 
 if __name__ == '__main__':
     # Example Usage for testing
@@ -287,16 +348,28 @@ if __name__ == '__main__':
         # For example: os.environ['SWEP_PATH'] = 'C:/sweph/ephe'
         
         utc_now = datetime.utcnow()
-        engine = KPEngine(dt=utc_now, lat=19.0760, lon=72.8777)
+        print(f"Test time: {utc_now} UTC")
+        print("Location: Mumbai (19.0760°N, 72.8777°E)")
+        print()
         
-        print("--- Planetary Positions ---")
-        print(engine.get_all_planets_df())
-        
-        print("\n--- Cusp Positions ---")
-        print(engine.get_all_cusps_df())
-        
-        print("\n--- Moon Details ---")
-        print(engine.get_planet_details('Moon'))
+        # Test with different ayanamsas to show the difference
+        for ayanamsa in ['KRISHNAMURTI', 'LAHIRI']:
+            print(f"=== {ayanamsa} AYANAMSA ===")
+            engine = KPEngine(dt=utc_now, lat=19.0760, lon=72.8777, ayanamsa=ayanamsa)
+            
+            ayanamsa_info = engine.get_ayanamsa_info()
+            print(f"Ayanamsa Value: {ayanamsa_info['value_dms']} ({ayanamsa_info['value_degrees']:.6f}°)")
+            
+            # Show Moon position as example
+            moon_details = engine.get_planet_details('Moon')
+            if moon_details:
+                print(f"Moon: {moon_details['longitude']:.4f}° in {moon_details['sign']} (NL: {moon_details['nl']}, SL: {moon_details['sl']}, SSL: {moon_details['ssl']})")
+            
+            # Show 1st cusp
+            cusp_1 = engine.get_cusp_details(1)
+            if cusp_1:
+                print(f"1st Cusp: {cusp_1['longitude']:.4f}° in {cusp_1['sign']} (NL: {cusp_1['nl']}, SL: {cusp_1['sl']}, SSL: {cusp_1['ssl']})")
+            print()
 
     except Exception as e:
         print(f"An error occurred. Please ensure the Swiss Ephemeris path is set correctly.")

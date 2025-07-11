@@ -36,15 +36,15 @@ class TimelineGenerator:
             self.body_id = None  # Moon is not a cusp, handled differently
 
     def _get_body_details_at_time(self, dt_utc: datetime):
-        """Calculates lordship for the body at a specific time."""
+        """Calculates lordship for the body at a specific time using sidereal coordinates."""
         if self.body_name == 'Moon':
-            # For Moon, we need to calculate its position at the given time
+            # For Moon, we need to calculate its sidereal position at the given time
             jd = swe.julday(dt_utc.year, dt_utc.month, dt_utc.day, 
                            dt_utc.hour + dt_utc.minute/60 + dt_utc.second/3600)
-            pos, _ = swe.calc_ut(jd, swe.MOON, swe.FLG_SWIEPH)
+            pos, _ = swe.calc_ut(jd, swe.MOON, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)
             longitude = pos[0]
         else:
-            # For Ascendant/Descendant, use cusp calculation
+            # For Ascendant/Descendant, use cusp calculation (already sidereal)
             longitude = self.engine.get_cusp_longitude_at_time(dt_utc, self.body_id)
         
         nl, sl, ssl = self.engine._get_lordships(longitude)

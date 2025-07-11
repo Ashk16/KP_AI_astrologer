@@ -695,27 +695,47 @@ class AnalysisEngine:
 
     def analyze_muhurta_chart(self, scoring_method='proportional'):
         """
-        KP Muhurta Chart Analysis using CSSL Methodology.
-        Focuses on 1st, 6th, and 7th cusps with proper KP interpretation.
+        KP Muhurta Chart Analysis using comprehensive KP methodology.
+        Analyzes star lords (nakshatra lords), sub lords, sub-sub lords of cusps 1, 6, and 7,
+        along with ruling planets.
+        
+        Args:
+            scoring_method: Either 'proportional' (default) or 'binary' for strict KP binary analysis
         """
         analysis_parts = []
         
         # --- Header ---
-        analysis_parts.append(f"🏏 **KP CSSL Analysis** - {self.team_a} vs {self.team_b}")
+        analysis_parts.append(f"🏏 **KP Muhurta Analysis** - {self.team_a} vs {self.team_b}")
         analysis_parts.append("")
         
-        # Get CSSL for key cusps and their scores
-        cssl_1 = self.cusps.loc[1]['ssl']
-        cssl_6 = self.cusps.loc[6]['ssl']
-        cssl_7 = self.cusps.loc[7]['ssl']
+        # Get lords for key cusps
+        cusp_lords = {}
+        for cusp_num in [1, 6, 7]:
+            cusp_lords[cusp_num] = {
+                'star_lord': self.cusps.loc[cusp_num]['nl'],  # Nakshatra Lord
+                'sub_lord': self.cusps.loc[cusp_num]['sl'],   # Sub Lord
+                'sub_sub_lord': self.cusps.loc[cusp_num]['ssl']  # Sub-Sub Lord
+            }
         
-        cssl_1_full = PlanetNameUtils.to_full_name(cssl_1)
-        cssl_6_full = PlanetNameUtils.to_full_name(cssl_6)
-        cssl_7_full = PlanetNameUtils.to_full_name(cssl_7)
-        
-        cssl_1_score = self.calculate_planet_score(cssl_1_full, 'ascendant') if cssl_1_full in self.planets.index else 0.0
-        cssl_6_score = self.calculate_planet_score(cssl_6_full, 'ascendant') if cssl_6_full in self.planets.index else 0.0
-        cssl_7_score = self.calculate_planet_score(cssl_7_full, 'ascendant') if cssl_7_full in self.planets.index else 0.0
+        # Calculate scores for each lord
+        cusp_scores = {}
+        for cusp_num, lords in cusp_lords.items():
+            cusp_scores[cusp_num] = {
+                'star_lord': self.calculate_planet_score(
+                    PlanetNameUtils.to_full_name(lords['star_lord']), 
+                    'ascendant' if cusp_num != 7 else 'descendant'
+                ) if PlanetNameUtils.to_full_name(lords['star_lord']) in self.planets.index else 0.0,
+                
+                'sub_lord': self.calculate_planet_score(
+                    PlanetNameUtils.to_full_name(lords['sub_lord']), 
+                    'ascendant' if cusp_num != 7 else 'descendant'
+                ) if PlanetNameUtils.to_full_name(lords['sub_lord']) in self.planets.index else 0.0,
+                
+                'sub_sub_lord': self.calculate_planet_score(
+                    PlanetNameUtils.to_full_name(lords['sub_sub_lord']), 
+                    'ascendant' if cusp_num != 7 else 'descendant'
+                ) if PlanetNameUtils.to_full_name(lords['sub_sub_lord']) in self.planets.index else 0.0
+            }
         
         # === REFINED HOUSE CATEGORIZATION ===
         VICTORY_HOUSES = [1, 6, 10, 11]  # Primary victory houses
@@ -733,68 +753,208 @@ class AnalysisEngine:
             }
         
         # === ANALYSIS OF EACH CUSP ===
-        def analyze_cusp_strength(score, houses_dict, cusp_type):
+        def analyze_cusp_strength(score, houses_dict, cusp_type, method='proportional'):
             """Generate verdict based on KP principles"""
             victory_count = len(houses_dict['victory'])
             defeat_count = len(houses_dict['defeat'])
+            support_count = len(houses_dict['support'])
+            challenge_count = len(houses_dict['challenge'])
             
-            if score > 0.5:
-                return "✅ Strong Positive Indication"
-            elif score > 0.2:
-                return "✅ Moderate Positive"
-            elif score < -0.5:
-                return "❌ Strong Negative Indication"
-            elif score < -0.2:
-                return "❌ Moderate Negative"
+            if method == 'binary':
+                # Binary method focuses on house counts and clear thresholds
+                total_positive = victory_count + (0.5 * support_count)
+                total_negative = defeat_count + (0.5 * challenge_count)
+                
+                if total_positive > total_negative:
+                    if victory_count >= 2:
+                        return "✅ Strong Victory Indication"
+                    else:
+                        return "✅ Moderate Victory Indication"
+                elif total_negative > total_positive:
+                    if defeat_count >= 2:
+                        return "❌ Strong Defeat Indication"
+                    else:
+                        return "❌ Moderate Defeat Indication"
+                else:
+                    return "⚖️ Neutral"
             else:
-                if victory_count > defeat_count:
-                    return "⚖️ Slightly Favorable"
-                elif defeat_count > victory_count:
-                    return "⚖️ Slightly Challenging"
-                return "⚖️ Neutral"
+                # Proportional method (original)
+                if score > 0.5:
+                    return "✅ Strong Positive Indication"
+                elif score > 0.2:
+                    return "✅ Moderate Positive"
+                elif score < -0.5:
+                    return "❌ Strong Negative Indication"
+                elif score < -0.2:
+                    return "❌ Moderate Negative"
+                else:
+                    if victory_count > defeat_count:
+                        return "⚖️ Slightly Favorable"
+                    elif defeat_count > victory_count:
+                        return "⚖️ Slightly Challenging"
+                    return "⚖️ Neutral"
         
-        # Analyze each cusp
+        # Analyze each cusp with all its lords
         cusps_analysis = {}
-        for cusp_num, cssl, score in [(1, cssl_1_full, cssl_1_score), 
-                                    (6, cssl_6_full, cssl_6_score),
-                                    (7, cssl_7_full, cssl_7_score)]:
+        for cusp_num in [1, 6, 7]:
+            lords = cusp_lords[cusp_num]
+            scores = cusp_scores[cusp_num]
             
-            sigs = self.get_significators(cssl) if cssl in self.planets.index else []
-            houses_dict = categorize_houses(sigs)
+            # Analyze each lord
+            lord_analyses = {}
+            for lord_type in ['star_lord', 'sub_lord', 'sub_sub_lord']:
+                planet = lords[lord_type]
+                score = scores[lord_type]
+                
+                full_name = PlanetNameUtils.to_full_name(planet)
+                sigs = self.get_significators(full_name) if full_name in self.planets.index else []
+                houses_dict = categorize_houses(sigs)
+                
+                lord_analyses[lord_type] = {
+                    'planet': planet,
+                    'score': score,
+                    'houses': houses_dict,
+                    'verdict': analyze_cusp_strength(score, houses_dict,
+                        'opponent' if cusp_num == 7 else 'self',
+                        method=scoring_method)
+                }
             
-            cusps_analysis[cusp_num] = {
-                'score': score,
-                'houses': houses_dict,
-                'verdict': analyze_cusp_strength(score, houses_dict, 
-                    'opponent' if cusp_num == 7 else 'self')
+            cusps_analysis[cusp_num] = lord_analyses
+        
+        # Get ruling planets
+        day_lord = self._get_day_lord()
+        lagna_lord = self._get_sign_lord(self.cusps.loc[1]['sign'])
+        
+        ruling_planets = {
+            'day_lord': {
+                'planet': day_lord,
+                'score': self.calculate_planet_score(day_lord, 'ascendant')
+            },
+            'lagna_lord': {
+                'planet': lagna_lord,
+                'score': self.calculate_planet_score(lagna_lord, 'ascendant')
             }
+        }
         
-        # === PROBABILITY CALCULATION ===
-        # More decisive probability spread based on scores
-        weighted_score = (
-            cusps_analysis[1]['score'] * 0.3 +  # 1st cusp
-            cusps_analysis[6]['score'] * 0.5 +  # 6th cusp
-            -cusps_analysis[7]['score'] * 0.2   # 7th cusp (inverted)
-        )
-        
-        # Convert score to probability with wider spread
-        base_prob = 50 + (weighted_score * 25)  # Multiplier increased from 10 to 25
-        win_prob = max(min(base_prob, 85), 15)  # Allow 15-85% range instead of previous narrow range
+        if scoring_method == 'binary':
+            # === BINARY PROBABILITY CALCULATION ===
+            # Count strong indications for each side
+            asc_strong = 0
+            desc_strong = 0
+            asc_moderate = 0
+            desc_moderate = 0
+            
+            # Weights for different lord types
+            lord_weights = {
+                'star_lord': 2.5,
+                'sub_lord': 1.5,
+                'sub_sub_lord': 1.0
+            }
+            
+            for cusp_num, analyses in cusps_analysis.items():
+                for lord_type, analysis in analyses.items():
+                    weight = lord_weights[lord_type]
+                    verdict = analysis['verdict']
+                    
+                    if "Strong Victory" in verdict or "Strong Positive" in verdict:
+                        asc_strong += weight
+                    elif "Strong Defeat" in verdict or "Strong Negative" in verdict:
+                        desc_strong += weight
+                    elif "Moderate Victory" in verdict or "Moderate Positive" in verdict:
+                        asc_moderate += weight
+                    elif "Moderate Defeat" in verdict or "Moderate Negative" in verdict:
+                        desc_moderate += weight
+            
+            # Add ruling planets influence
+            for rp_type, rp_data in ruling_planets.items():
+                if rp_data['score'] > 0.5:
+                    asc_strong += 0.5
+                elif rp_data['score'] > 0.2:
+                    asc_moderate += 0.5
+                elif rp_data['score'] < -0.5:
+                    desc_strong += 0.5
+                elif rp_data['score'] < -0.2:
+                    desc_moderate += 0.5
+            
+            # Calculate probabilities based on weighted indication counts
+            base_prob = 50.0
+            strong_weight = 15.0  # Each strong indication moves probability by 15%
+            moderate_weight = 7.5  # Each moderate indication moves probability by 7.5%
+            
+            win_prob = base_prob + (asc_strong * strong_weight) + (asc_moderate * moderate_weight) - \
+                      (desc_strong * strong_weight) - (desc_moderate * moderate_weight)
+            win_prob = max(min(win_prob, 85), 15)  # Cap between 15% and 85%
+            
+        else:
+            # === PROPORTIONAL PROBABILITY CALCULATION ===
+            # Weights for different aspects
+            weights = {
+                1: {'star_lord': 2.5, 'sub_lord': 1.5, 'sub_sub_lord': 1.0},  # 1st cusp
+                6: {'star_lord': 2.0, 'sub_lord': 1.0, 'sub_sub_lord': 1.0},  # 6th cusp
+                7: {'star_lord': 1.5, 'sub_lord': 1.0, 'sub_sub_lord': 1.0}   # 7th cusp
+            }
+            
+            weighted_score = 0
+            total_weight = 0
+            
+            # Calculate weighted scores from cusp lords
+            for cusp_num, analyses in cusps_analysis.items():
+                for lord_type, analysis in analyses.items():
+                    weight = weights[cusp_num][lord_type]
+                    
+                    # Get significator-based score
+                    houses_dict = analysis['houses']
+                    victory_score = len(houses_dict['victory']) * 1.0
+                    defeat_score = len(houses_dict['defeat']) * -1.0
+                    support_score = len(houses_dict['support']) * 0.5
+                    challenge_score = len(houses_dict['challenge']) * -0.5
+                    
+                    # Combine with planet's base score
+                    combined_score = (victory_score + defeat_score + support_score + challenge_score) * 0.4 + analysis['score'] * 0.6
+                    
+                    # For 7th house (opponent's house), invert the score
+                    if cusp_num == 7:
+                        combined_score = -combined_score
+                    
+                    weighted_score += combined_score * weight
+                    total_weight += weight
+            
+            # Add ruling planets influence with lower weights
+            for rp_type, rp_data in ruling_planets.items():
+                weight = 1.0  # Lower weight for ruling planets
+                weighted_score += rp_data['score'] * weight
+                total_weight += weight
+            
+            # Calculate final score and convert to probability
+            final_score = weighted_score / total_weight if total_weight > 0 else 0
+            win_prob = 50 + (final_score * 35)  # Convert to percentage, max ±35% from baseline
+            win_prob = max(min(win_prob, 85), 15)  # Cap between 15% and 85%
         
         # === GENERATE DETAILED ANALYSIS ===
         for cusp_num in [1, 6, 7]:
-            analysis = cusps_analysis[cusp_num]
+            analyses = cusps_analysis[cusp_num]
             cusp_name = {1: "Self/Team Strength", 6: "Victory/Defeat", 7: "Opponent Strength"}[cusp_num]
             
-            analysis_parts.append(f"\n**{'🏠' if cusp_num == 1 else '🏆' if cusp_num == 6 else '🎯'} {cusp_num}st CUSP CSSL ({cusp_name}):**")
-            analysis_parts.append(f"• Sub-Sub Lord: {PlanetNameUtils.to_short_name(locals()[f'cssl_{cusp_num}'])} | Score: {analysis['score']:+.2f}")
+            analysis_parts.append(f"\n**{'🏠' if cusp_num == 1 else '🏆' if cusp_num == 6 else '🎯'} {cusp_num}st CUSP ANALYSIS ({cusp_name}):**")
             
-            houses = analysis['houses']
-            if houses:
-                analysis_parts.append(f"• Victory Houses: {houses['victory']} | Defeat Houses: {houses['defeat']}")
-                if houses['support'] or houses['challenge']:
-                    analysis_parts.append(f"• Support Houses: {houses['support']} | Challenge Houses: {houses['challenge']}")
-            analysis_parts.append(f"• Assessment: {analysis['verdict']}")
+            for lord_type in ['star_lord', 'sub_lord', 'sub_sub_lord']:
+                analysis = analyses[lord_type]
+                lord_name = {'star_lord': 'Star Lord', 'sub_lord': 'Sub Lord', 'sub_sub_lord': 'Sub-Sub Lord'}[lord_type]
+                
+                analysis_parts.append(f"\n• {lord_name}: {PlanetNameUtils.to_short_name(analysis['planet'])} | Score: {analysis['score']:+.2f}")
+                
+                houses = analysis['houses']
+                if houses:
+                    analysis_parts.append(f"  Victory Houses: {houses['victory']} | Defeat Houses: {houses['defeat']}")
+                    if houses['support'] or houses['challenge']:
+                        analysis_parts.append(f"  Support Houses: {houses['support']} | Challenge Houses: {houses['challenge']}")
+                analysis_parts.append(f"  Assessment: {analysis['verdict']}")
+        
+        # Add ruling planets analysis
+        analysis_parts.append("\n**👑 RULING PLANETS:**")
+        for rp_type, rp_data in ruling_planets.items():
+            rp_name = "Day Lord" if rp_type == 'day_lord' else "Lagna Lord"
+            analysis_parts.append(f"• {rp_name}: {PlanetNameUtils.to_short_name(rp_data['planet'])} | Score: {rp_data['score']:+.2f}")
         
         # === FINAL VERDICT ===
         analysis_parts.append("\n📊 **FINAL VERDICT**")
@@ -804,13 +964,18 @@ class AnalysisEngine:
         predicted_winner = self.team_a if team_a_prob > team_b_prob else self.team_b
         win_margin = abs(team_a_prob - team_b_prob)
         
-        confidence = "High" if win_margin > 25 else "Medium" if win_margin > 15 else "Low"
-        contest_type = "Decisive Victory" if win_margin > 25 else "Clear Advantage" if win_margin > 15 else "Close Contest"
+        if scoring_method == 'binary':
+            confidence = "High" if win_margin > 30 else "Medium" if win_margin > 20 else "Low"
+            contest_type = "Clear Victory" if win_margin > 30 else "Likely Victory" if win_margin > 20 else "Close Contest"
+        else:
+            confidence = "High" if win_margin > 25 else "Medium" if win_margin > 15 else "Low"
+            contest_type = "Decisive Victory" if win_margin > 25 else "Clear Advantage" if win_margin > 15 else "Close Contest"
         
         analysis_parts.append(f"• Predicted Winner: **{predicted_winner}**")
         analysis_parts.append(f"• Win Probability: {max(team_a_prob, team_b_prob):.1f}%")
         analysis_parts.append(f"• Contest Type: 🎯 {contest_type}")
         analysis_parts.append(f"• Confidence Level: {confidence}")
+        analysis_parts.append(f"• Analysis Method: {'Binary KP' if scoring_method == 'binary' else 'Proportional KP'}")
         
         analysis_parts.append(f"\n📈 **DETAILED PROBABILITIES:**")
         analysis_parts.append(f"• {self.team_a}: {team_a_prob:.1f}%")

@@ -5,4 +5,5 @@ pytz>=2023.3
 geopy>=2.3.0
 matplotlib>=3.7.0
 plotly>=5.15.0
-numpy>=1.24.0 
+numpy>=1.24.0
+nsepy>=0.8 
