@@ -151,11 +151,20 @@ def apply_team_replacements_to_results(results, asc_team_name, desc_team_name):
     # Create a copy to avoid modifying the original
     updated_results = results.copy()
     
-    # Replace in muhurta analysis text
+    # Replace in muhurta analysis text (skip if it's a dictionary structure)
     if 'muhurta_analysis' in updated_results:
-        updated_results['muhurta_analysis'] = apply_team_name_replacements(
-            updated_results['muhurta_analysis'], asc_team_name, desc_team_name
-        )
+        muhurta_data = updated_results['muhurta_analysis']
+        # Only apply replacements if it's a string, not a dictionary
+        if isinstance(muhurta_data, str):
+            updated_results['muhurta_analysis'] = apply_team_name_replacements(
+                muhurta_data, asc_team_name, desc_team_name
+            )
+        elif isinstance(muhurta_data, dict) and 'final_verdict' in muhurta_data:
+            # Apply team name replacements to the verdict text if present
+            if 'verdict' in muhurta_data['final_verdict']:
+                muhurta_data['final_verdict']['verdict'] = apply_team_name_replacements(
+                    muhurta_data['final_verdict']['verdict'], asc_team_name, desc_team_name
+                )
     
     # Replace in timeline analyses (Only Moon timeline retained)
     for timeline_key in ['moon_timeline_analysis']:
@@ -554,8 +563,15 @@ def display_analysis(results):
     if "muhurta_analysis" in display_results:
         cached_analysis = display_results["muhurta_analysis"]
         
-        st.markdown(f"**Method**: {cached_analysis.get('method')}")
-        st.markdown(f"**Timestamp**: {cached_analysis.get('timestamp')}")
+        # Handle both dictionary and string formats
+        if isinstance(cached_analysis, dict):
+            st.markdown(f"**Method**: {cached_analysis.get('method', 'Unknown')}")
+            st.markdown(f"**Timestamp**: {cached_analysis.get('timestamp', 'Unknown')}")
+        else:
+            # If it's a string (legacy format), display it directly
+            st.markdown("**Analysis Results:**")
+            st.markdown(str(cached_analysis))
+            return  # Exit early for string format
         
         # House Groups
         house_groups = cached_analysis.get('house_groups', {})
@@ -858,7 +874,7 @@ def run_analysis(match_details, timeline_weights=None, house_weights=None):
         # Pass house_weights and timeline_weights to AnalysisEngine
         analysis_engine = AnalysisEngine(engine, match_details['team_a'], match_details['team_b'],
                                          house_weights=house_weights, timeline_weights=timeline_weights)
-        muhurta_analysis = analysis_engine.analyze_muhurta_chart(scoring_method='simplified')
+        muhurta_analysis = analysis_engine.analyze_muhurta_chart(scoring_method='authentic_kp')
         planets_df = analysis_engine.get_all_planet_details_df()
         cusps_df = engine.get_all_cusps_df()
         moon_timeline_gen = TimelineGenerator(engine, 'Moon')
