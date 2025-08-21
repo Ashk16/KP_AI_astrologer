@@ -78,9 +78,12 @@ class PlanetNameUtils:
         return PlanetNameUtils.to_full_name(name)
     
     @staticmethod
-    def standardize_for_display(name: str) -> str:
+    def standardize_for_display(name: str, is_retrograde: bool = False) -> str:
         """Standardize planet name for display purposes (use short names)."""
-        return PlanetNameUtils.to_short_name(name)
+        short_name = PlanetNameUtils.to_short_name(name)
+        if is_retrograde and short_name not in ['Ra', 'Ke']:  # Don't add (R) to Rahu/Ketu as they're always retrograde
+            return f"(R){short_name}"
+        return short_name
 
 ZODIAC_SIGNS = [
     "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra",
@@ -218,16 +221,23 @@ class KPEngine:
         for p_id, name in PLANET_NAMES.items():
             if name == 'Asc': continue # Handled in cusps
 
+            is_retrograde = False
             if name in ['Rahu', 'Ketu']:
                 # pos is an immutable tuple, so we can't modify it directly.
-                pos, _ = swe.calc_ut(self.jd, swe.MEAN_NODE, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)
+                pos, _ = swe.calc_ut(self.jd, swe.MEAN_NODE, swe.FLG_SWIEPH | swe.FLG_SIDEREAL | swe.FLG_SPEED)
                 longitude = pos[0]
+                speed = pos[3]  # Daily motion in longitude
                 if name == 'Ketu':
                     # Ketu is 180 degrees opposite Rahu.
                     longitude = (longitude + 180) % 360
+                # Rahu and Ketu are always retrograde by nature
+                is_retrograde = True
             else:
-                pos, _ = swe.calc_ut(self.jd, p_id, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)
+                pos, _ = swe.calc_ut(self.jd, p_id, swe.FLG_SWIEPH | swe.FLG_SIDEREAL | swe.FLG_SPEED)
                 longitude = pos[0]
+                speed = pos[3]  # Daily motion in longitude
+                # Planet is retrograde if speed is negative
+                is_retrograde = speed < 0
 
             sign_num = int(longitude / 30)
             sign = ZODIAC_SIGNS[sign_num]
@@ -239,7 +249,8 @@ class KPEngine:
                 'sign_lord': PLANET_SHORT_NAMES[SIGN_LORDS[sign]],
                 'nl': nl,
                 'sl': sl,
-                'ssl': ssl
+                'ssl': ssl,
+                'is_retrograde': is_retrograde
             }
         return planet_data
 
