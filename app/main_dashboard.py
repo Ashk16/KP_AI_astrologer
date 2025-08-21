@@ -571,18 +571,23 @@ def display_analysis(results):
             # If it's a string (legacy format), display it directly
             st.markdown("**Analysis Results:**")
             st.markdown(str(cached_analysis))
-            return  # Exit early for string format
         
-        # House Groups
-        house_groups = cached_analysis.get('house_groups', {})
+        # House Groups (only for dictionary format)
+        if isinstance(cached_analysis, dict):
+            house_groups = cached_analysis.get('house_groups', {})
+        else:
+            house_groups = {}
         if house_groups:
             st.subheader("House Classification")
             col1, col2 = st.columns(2)
             col1.write("Strong Houses: " + str(house_groups['strong_houses']))
             col2.write("Weak Houses: " + str(house_groups['weak_houses']))
         
-        # Primary Promise Test - Tabular
-        promise_test = cached_analysis.get('promise_test', {})
+        # Primary Promise Test - Tabular (only for dictionary format)
+        if isinstance(cached_analysis, dict):
+            promise_test = cached_analysis.get('promise_test', {})
+        else:
+            promise_test = {}
         if promise_test:
             st.subheader("Primary Promise Test")
             analysis_data = []
@@ -606,8 +611,11 @@ def display_analysis(results):
             total_score = promise_test.get('total_score', 0)
             st.metric("Total Promise Score", f"{total_score:.2f}")
         
-        # Ruling Planets Verification - Tabular
-        rp_verification = cached_analysis.get('ruling_planets', {})
+        # Ruling Planets Verification - Tabular (only for dictionary format)
+        if isinstance(cached_analysis, dict):
+            rp_verification = cached_analysis.get('ruling_planets', {})
+        else:
+            rp_verification = {}
         if rp_verification:
             st.subheader("Ruling Planets Verification")
             rp_data = []
@@ -642,8 +650,11 @@ def display_analysis(results):
             col2.metric("Desc Win %", f"{desc_pct:.1f}%")
             col3.metric("Contest Type", contest_type)
         
-        # Final Verdict
-        final_verdict = cached_analysis.get('final_verdict', {})
+        # Final Verdict (only for dictionary format)
+        if isinstance(cached_analysis, dict):
+            final_verdict = cached_analysis.get('final_verdict', {})
+        else:
+            final_verdict = {}
         if final_verdict:
             st.subheader("Final Verdict")
             st.success(final_verdict['verdict'])
