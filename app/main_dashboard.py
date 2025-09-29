@@ -770,7 +770,7 @@ def display_analysis(results):
             return planet_short_name
         # Convert short name to full name for lookup
         planet_full = PlanetNameUtils.to_full_name(planet_short_name)
-        if planet_full in planets_df.index:
+        if planet_full in planets_df.index and 'is_retrograde' in planets_df.columns:
             is_retrograde = planets_df.loc[planet_full, 'is_retrograde']
             return PlanetNameUtils.standardize_for_display(planet_short_name, is_retrograde)
         return planet_short_name
@@ -1039,7 +1039,7 @@ def main():
         match_date = st.date_input("Date of Match", datetime.date.today())
         
         # Time input as a text field for flexibility
-        time_str = st.text_input("Time of Match (HH:MM)", "20:00")
+        time_str = st.text_input("Time of Match (HH:MM:SS)", "20:00:00", help="Enter time in HH:MM:SS format for maximum accuracy")
         
         # Timezone selection
         timezones = pytz.all_timezones
@@ -1063,8 +1063,13 @@ def main():
 
         if st.button("Generate Predictions"):
             try:
-                # Parse the time string
-                match_time = datetime.datetime.strptime(time_str, "%H:%M").time()
+                # Parse the time string - try HH:MM:SS first, then fall back to HH:MM for backward compatibility
+                try:
+                    match_time = datetime.datetime.strptime(time_str, "%H:%M:%S").time()
+                except ValueError:
+                    # Fall back to HH:MM format and add :00 seconds
+                    match_time = datetime.datetime.strptime(time_str, "%H:%M").time()
+                    match_time = match_time.replace(second=0)
                 
                 # Combine date and time
                 local_datetime = datetime.datetime.combine(match_date, match_time)
@@ -1096,7 +1101,7 @@ def main():
                     st.session_state.active_tab = len(st.session_state.analyses) - 1
                     st.rerun()
             except ValueError:
-                st.error("Invalid time format. Please use HH:MM.")
+                st.error("Invalid time format. Please use HH:MM:SS or HH:MM format.")
         
         st.divider()
 
@@ -1147,7 +1152,7 @@ def main():
     st.markdown("*Adjust the weight for each house (1-12). Changes apply in real time.*")
     if 'house_weights' not in st.session_state:
         st.session_state.house_weights = {
-            1: 0.5, 2: 0.2, 3: 0.3, 4: -0.2, 5: -0.8, 6: 1.0, 7: -0.6, 8: -1.0, 9: -0.3, 10: 0.7, 11: 0.9, 12: -0.9
+            1: 0.5, 2: 0.2, 3: 0.3, 4: -0.2, 5: -0.8, 6: 1.0, 7: -0.6, 8: -1.0, 9: 0.3, 10: 0.7, 11: 0.9, 12: -0.9
         }
     cols = st.columns(6)
     for i in range(1, 13):

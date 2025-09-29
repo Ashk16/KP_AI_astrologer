@@ -36,7 +36,7 @@ HOUSE_WEIGHTS = {
     12: -0.9, # Total Loss & Self-Undoing. Ultimate failure, errors
     5: -0.8,  # Opponent's Gains. 11th from 7th, opponent achieving goals
     7: -0.6,  # Opponent's Strength. Opponent is formidable and playing well
-    9: -0.3,  # Opponent's Courage & Efforts. 3rd from 7th, opponent's initiative
+    9: 0.3,   # Fortune & Luck. Brings luck and divine blessings for ascendant (as per KP readers)
     4: -0.2   # End of Play / Home Advantage. Complex house signifying end of activity
 }
 
@@ -104,13 +104,13 @@ CUSP_IMPORTANCE_WEIGHTS = {
 }
 
 # Victory and defeat house classifications for cusp analysis
-VICTORY_HOUSES = [1, 6, 10, 11]
-DEFEAT_HOUSES = [4, 5, 7, 8, 9, 12]
+VICTORY_HOUSES = [1, 6, 9, 10, 11]
+DEFEAT_HOUSES = [4, 5, 7, 8, 12]
 NEUTRAL_HOUSES = [2, 3]
 
 # Add after imports, before class AnalysisEngine
-STRONG_HOUSES = [1, 2, 3, 6, 10, 11]  # Success/Advantage houses
-WEAK_HOUSES = [4, 5, 7, 8, 9, 12]     # Challenge/Disadvantage houses
+STRONG_HOUSES = [1, 2, 3, 6, 9, 10, 11]  # Success/Advantage houses
+WEAK_HOUSES = [4, 5, 7, 8, 12]        # Challenge/Disadvantage houses
 
 class AnalysisEngine:
     """
@@ -177,7 +177,7 @@ class AnalysisEngine:
 
     # Default house weights (KP sports astrology)
     DEFAULT_HOUSE_WEIGHTS = {
-        1: 0.5, 2: 0.2, 3: 0.3, 4: -0.2, 5: -0.8, 6: 1.0, 7: -0.6, 8: -1.0, 9: -0.3, 10: 0.7, 11: 0.9, 12: -0.9
+        1: 0.5, 2: 0.2, 3: 0.3, 4: -0.2, 5: -0.8, 6: 1.0, 7: -0.6, 8: -1.0, 9: 0.3, 10: 0.7, 11: 0.9, 12: -0.9
     }
     # Default timeline weights
     DEFAULT_TIMELINE_WEIGHTS = {
@@ -758,8 +758,8 @@ class AnalysisEngine:
         nl_score = self.calculate_planet_score(nl_standardized, perspective) if nl_standardized in self.planets.index else 0.0
         nl_significators = self.get_significators(nl_standardized) if nl_standardized in self.planets.index else []
         
-        nl_victory_houses = [h for h, r in nl_significators if h in [1, 6, 10, 11]]
-        nl_defeat_houses = [h for h, r in nl_significators if h in [4, 5, 7, 8, 9, 12]]
+        nl_victory_houses = [h for h, r in nl_significators if h in [1, 6, 9, 10, 11]]
+        nl_defeat_houses = [h for h, r in nl_significators if h in [4, 5, 7, 8, 12]]
         
         if len(nl_victory_houses) > len(nl_defeat_houses) and nl_victory_houses:
             nl_promise = "VICTORY"
@@ -779,8 +779,8 @@ class AnalysisEngine:
         sl_score = self.calculate_planet_score(sl_standardized, perspective) if sl_standardized in self.planets.index else 0.0
         sl_significators = self.get_significators(sl_standardized) if sl_standardized in self.planets.index else []
         
-        sl_victory_houses = [h for h, r in sl_significators if h in [1, 6, 10, 11]]
-        sl_defeat_houses = [h for h, r in sl_significators if h in [4, 5, 7, 8, 9, 12]]
+        sl_victory_houses = [h for h, r in sl_significators if h in [1, 6, 9, 10, 11]]
+        sl_defeat_houses = [h for h, r in sl_significators if h in [4, 5, 7, 8, 12]]
         
         if len(sl_victory_houses) > len(sl_defeat_houses) and sl_victory_houses:
             sl_modification = "SUPPORTS"
@@ -895,8 +895,8 @@ class AnalysisEngine:
         # nl_standardized already calculated above
         nl_significators = self.get_significators(nl_standardized) if nl_standardized in self.planets.index else []
         
-        nl_victory_houses = [h for h, r in nl_significators if h in [1, 6, 10, 11]]
-        nl_defeat_houses = [h for h, r in nl_significators if h in [4, 5, 7, 8, 9, 12]]
+        nl_victory_houses = [h for h, r in nl_significators if h in [1, 6, 9, 10, 11]]
+        nl_defeat_houses = [h for h, r in nl_significators if h in [4, 5, 7, 8, 12]]
         
         if len(nl_victory_houses) > len(nl_defeat_houses) and nl_victory_houses:
             nl_promise = "VICTORY"
@@ -915,8 +915,8 @@ class AnalysisEngine:
         # sl_standardized already calculated above
         sl_significators = self.get_significators(sl_standardized) if sl_standardized in self.planets.index else []
         
-        sl_victory_houses = [h for h, r in sl_significators if h in [1, 6, 10, 11]]
-        sl_defeat_houses = [h for h, r in sl_significators if h in [4, 5, 7, 8, 9, 12]]
+        sl_victory_houses = [h for h, r in sl_significators if h in [1, 6, 9, 10, 11]]
+        sl_defeat_houses = [h for h, r in sl_significators if h in [4, 5, 7, 8, 12]]
         
         # Determine how Sub Lord modifies the promise (simplified)
         if len(sl_victory_houses) > len(sl_defeat_houses):
@@ -933,8 +933,8 @@ class AnalysisEngine:
         # ssl_standardized already calculated above
         ssl_significators = self.get_significators(ssl_standardized) if ssl_standardized in self.planets.index else []
         
-        ssl_victory_houses = [h for h, r in ssl_significators if h in [1, 6, 10, 11]]
-        ssl_defeat_houses = [h for h, r in ssl_significators if h in [4, 5, 7, 8, 9, 12]]
+        ssl_victory_houses = [h for h, r in ssl_significators if h in [1, 6, 9, 10, 11]]
+        ssl_defeat_houses = [h for h, r in ssl_significators if h in [4, 5, 7, 8, 12]]
         
         if len(ssl_victory_houses) > len(ssl_defeat_houses) and ssl_victory_houses:
             ssl_delivery = "DELIVERS_VICTORY"
@@ -1876,7 +1876,7 @@ class AnalysisEngine:
             return 0.4
         
         # Count primary significators (victory/defeat related houses)
-        victory_houses = [1, 6, 10, 11]
+        victory_houses = [1, 6, 9, 10, 11]
         defeat_houses = [5, 7, 8, 12]
         
         primary_count = sum(1 for house, rule in significators 
@@ -2120,9 +2120,14 @@ class AnalysisEngine:
         nl_standardized = PlanetNameUtils.standardize_for_index(nl_planet) if pd.notna(nl_planet) else 'Unknown'
         sl_standardized = PlanetNameUtils.standardize_for_index(sl_planet) if pd.notna(sl_planet) else 'Unknown'
         
-        # Get retrograde status for display names
-        nl_is_retrograde = self.planets.loc[nl_standardized]['is_retrograde'] if nl_standardized in self.planets.index else False
-        sl_is_retrograde = self.planets.loc[sl_standardized]['is_retrograde'] if sl_standardized in self.planets.index else False
+        # Get retrograde status for display names with safe access
+        nl_is_retrograde = False
+        if nl_standardized in self.planets.index and 'is_retrograde' in self.planets.columns:
+            nl_is_retrograde = self.planets.loc[nl_standardized]['is_retrograde']
+        
+        sl_is_retrograde = False
+        if sl_standardized in self.planets.index and 'is_retrograde' in self.planets.columns:
+            sl_is_retrograde = self.planets.loc[sl_standardized]['is_retrograde']
         
         # Update display names with retrograde indicators
         nl_display = PlanetNameUtils.standardize_for_display(nl_planet, nl_is_retrograde) if pd.notna(nl_planet) else 'Unknown'
@@ -2228,8 +2233,8 @@ class AnalysisEngine:
         """
         
         # House Groups (as per checklist)
-        ASC_WIN_HOUSES = [1, 2, 3, 6, 10, 11]  # Asc win/advantage houses
-        DESC_WIN_HOUSES = [5, 7, 8, 9, 12]     # Desc win/advantage houses
+        ASC_WIN_HOUSES = [1, 2, 3, 6, 9, 10, 11]  # Asc win/advantage houses
+        DESC_WIN_HOUSES = [5, 7, 8, 12]        # Desc win/advantage houses
         
         # Cusp weights (as per checklist scoring method)
         CUSP_WEIGHTS = {
@@ -2278,7 +2283,7 @@ class AnalysisEngine:
                 
                 # Check for retrograde (reduces weight by half)
                 is_retrograde = False
-                if sl_full in self.planets.index:
+                if sl_full in self.planets.index and 'is_retrograde' in self.planets.columns:
                     is_retrograde = self.planets.loc[sl_full, 'is_retrograde']
                     if is_retrograde and score > 0:
                         score = score / 2
