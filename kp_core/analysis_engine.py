@@ -2072,29 +2072,8 @@ class AnalysisEngine:
             cricket_context = "Evenly matched phase with gradual developments"
             confidence_level = "LOW"
         
-        # Generate planetary role descriptions
-        nl_promise_desc = f"dominance ({dynamics['nl_influence']:.1%})"
-        sl_mod_desc = f"modification ({dynamics['sl_influence']:.1%})"
-        ssl_del_desc = f"delivery ({dynamics['ssl_influence']:.1%})"
-        
-        comment_parts = []
-        
-        # Add basic planetary descriptions
-        comment_parts.append(f"🌟 {nl_planet} {nl_promise_desc}")
-        comment_parts.append(f"⚖️ {sl_planet} {sl_mod_desc}")
-        if ssl_planet:
-            comment_parts.append(f"🎯 {ssl_planet} {ssl_del_desc}")
-        
-        # Add convergence information
-        if dynamics['convergence_factor'] >= 1.8:
-            comment_parts.append("🔥 High convergence - aligned energies")
-        elif dynamics['convergence_factor'] <= 0.9:
-            comment_parts.append("⚡ Mixed signals - competing influences")
-        
-        comment_parts.append(f"🏏 {cricket_context}")
-        comment_parts.append(f"📊 Magnitude: {dynamics['event_magnitude']:.2f} | Score: {final_score:+.3f} | {confidence_level}")
-        
-        detailed_comment = " | ".join(comment_parts)
+        # Simplified comment - only cricket context
+        detailed_comment = cricket_context
         
         return verdict, detailed_comment
 
@@ -2188,6 +2167,97 @@ class AnalysisEngine:
         detailed_comment = " | ".join(comment_parts)
         
         return verdict, detailed_comment
+
+    def analyze_detailed_timeline(self, detailed_timelines, perspective='ascendant'):
+        """
+        Analyzes detailed timelines at NL, SL, SSL, and SSSL levels.
+        Returns analyzed DataFrames for each level with scores and verdicts.
+        
+        Args:
+            detailed_timelines: Dictionary with 'nl_timeline', 'sl_timeline', 'ssl_timeline', 'sssl_timeline'
+            perspective: Either 'ascendant' or 'descendant'
+            
+        Returns:
+            Dictionary with analyzed DataFrames for each level
+        """
+        analyzed_timelines = {}
+        
+        # Analyze each timeline level
+        for level_name, timeline_df in detailed_timelines.items():
+            if timeline_df.empty:
+                analyzed_timelines[level_name] = timeline_df
+                continue
+            
+            enhanced_rows = []
+            
+            for _, row in timeline_df.iterrows():
+                nl_planet = row.get('NL_Planet')
+                sl_planet = row.get('SL_Planet')
+                ssl_planet = row.get('SSL_Planet')
+                sssl_planet = row.get('SSSL_Planet')
+                
+                # Calculate scores based on the level
+                nl_score = self.calculate_planet_score(nl_planet, perspective) if pd.notna(nl_planet) else 0.0
+                sl_score = self.calculate_planet_score(sl_planet, perspective) if pd.notna(sl_planet) else 0.0
+                ssl_score = self.calculate_planet_score(ssl_planet, perspective) if pd.notna(ssl_planet) else 0.0
+                sssl_score = self.calculate_planet_score(sssl_planet, perspective) if pd.notna(sssl_planet) else 0.0
+                
+                # Calculate final score based on level hierarchy
+                if 'sssl' in level_name:
+                    # For SSSL level, use all four levels with heaviest weight on SSSL
+                    final_score = (sssl_score * 0.55) + (ssl_score * 0.25) + (sl_score * 0.15) + (nl_score * 0.05)
+                    primary_planet = sssl_planet
+                elif 'ssl' in level_name:
+                    # For SSL level, focus on SSL with support from SL and NL
+                    final_score = (ssl_score * 0.60) + (sl_score * 0.30) + (nl_score * 0.10)
+                    primary_planet = ssl_planet
+                elif 'sl' in level_name:
+                    # For SL level, focus on SL with NL support
+                    final_score = (sl_score * 0.70) + (nl_score * 0.30)
+                    primary_planet = sl_planet
+                else:  # nl level
+                    # For NL level, NL is dominant
+                    final_score = (nl_score * 0.80) + (sl_score * 0.20)
+                    primary_planet = nl_planet
+                
+                # Generate simple verdict
+                team_name = "Asc" if perspective == 'ascendant' else "Desc"
+                opponent_name = "Desc" if perspective == 'ascendant' else "Asc"
+                
+                if final_score >= 0.5:
+                    verdict = f"Strong Advantage {team_name}"
+                elif final_score >= 0.2:
+                    verdict = f"Advantage {team_name}"
+                elif final_score > 0:
+                    verdict = f"Slight {team_name}"
+                elif final_score <= -0.5:
+                    verdict = f"Strong Advantage {opponent_name}"
+                elif final_score <= -0.2:
+                    verdict = f"Advantage {opponent_name}"
+                elif final_score < 0:
+                    verdict = f"Slight {opponent_name}"
+                else:
+                    verdict = "Balanced"
+                
+                # Simple comment
+                if abs(final_score) >= 0.5:
+                    comment = f"Dominant influence from {primary_planet}"
+                elif abs(final_score) >= 0.2:
+                    comment = f"Moderate influence from {primary_planet}"
+                else:
+                    comment = f"Weak influence from {primary_planet}"
+                
+                enhanced_row = row.to_dict()
+                enhanced_row.update({
+                    'Score': final_score,
+                    'Verdict': verdict,
+                    'Comment': comment
+                })
+                enhanced_rows.append(enhanced_row)
+            
+            analyzed_timelines[level_name] = pd.DataFrame(enhanced_rows)
+        
+        return analyzed_timelines
 
     def _identify_timeline_planets(self, df, perspective, aggregated=False):
         """

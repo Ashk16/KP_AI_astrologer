@@ -47,8 +47,8 @@ class TimelineGenerator:
             # For Ascendant/Descendant, use cusp calculation (already sidereal)
             longitude = self.engine.get_cusp_longitude_at_time(dt_utc, self.body_id)
         
-        nl, sl, ssl = self.engine._get_lordships(longitude)
-        return {'nl': nl, 'sl': sl, 'ssl': ssl, 'longitude': longitude}
+        nl, sl, ssl, sssl = self.engine._get_lordships(longitude)
+        return {'nl': nl, 'sl': sl, 'ssl': ssl, 'sssl': sssl, 'longitude': longitude}
 
     def find_next_ssl_transition(self, current_dt: datetime, initial_ssl: str):
         """
@@ -189,6 +189,91 @@ class TimelineGenerator:
         
         return transition_point.replace(microsecond=0)
 
+    def find_next_sssl_transition(self, current_dt: datetime, initial_sssl: str):
+        """
+        Finds the exact time of the next SSSL (Sub-Sub-Sub Lord) transition using a two-phase search.
+        SSSL changes very frequently, so we use 30-second coarse search intervals.
+        """
+        time_cursor = current_dt
+        end_dt = getattr(self, '_end_dt_for_search', current_dt + timedelta(hours=8))
+
+        # Phase 1: Coarse search (30-second intervals)
+        search_window_start = None
+        while time_cursor < end_dt:
+            time_cursor += timedelta(seconds=30)
+            if time_cursor >= end_dt:
+                break
+            details = self._get_body_details_at_time(time_cursor)
+            if details['sssl'] != initial_sssl:
+                search_window_start = time_cursor - timedelta(seconds=30)
+                break
+        
+        if not search_window_start:
+            return None
+
+        # Phase 2: Fine-grained binary search (to the second)
+        low, high = search_window_start, time_cursor
+        transition_point = high
+
+        while (high - low).total_seconds() > 1:
+            mid = low + (high - low) / 2
+            details = self._get_body_details_at_time(mid)
+            if details['sssl'] == initial_sssl:
+                low = mid
+            else:
+                high, transition_point = mid, mid
+        
+        return transition_point.replace(microsecond=0)
+
+    def find_next_nl_transition(self, current_dt: datetime, initial_nl: str):
+        """
+        Finds the exact time of the next NL (Nakshatra/Star Lord) transition.
+        NL changes slowly, so we use longer search intervals.
+        """
+        time_cursor = current_dt
+        end_dt = getattr(self, '_end_dt_for_search', current_dt + timedelta(hours=8))
+
+        # Phase 1: Coarse search (10-minute intervals)
+        search_window_start = None
+        max_search_iterations = int((end_dt - current_dt).total_seconds() / 600) + 10
+        search_iterations = 0
+        
+        while time_cursor < end_dt and search_iterations < max_search_iterations:
+            search_iterations += 1
+            time_cursor += timedelta(minutes=10)
+            if time_cursor >= end_dt:
+                break
+            try:
+                details = self._get_body_details_at_time(time_cursor)
+                if details['nl'] != initial_nl:
+                    search_window_start = time_cursor - timedelta(minutes=10)
+                    break
+            except Exception:
+                continue
+        
+        if not search_window_start:
+            return None
+
+        # Phase 2: Fine-grained binary search (to the second)
+        low, high = search_window_start, time_cursor
+        transition_point = high
+        binary_iterations = 0
+        max_binary_iterations = 20
+
+        while (high - low).total_seconds() > 1 and binary_iterations < max_binary_iterations:
+            binary_iterations += 1
+            mid = low + (high - low) / 2
+            try:
+                details = self._get_body_details_at_time(mid)
+                if details['nl'] == initial_nl:
+                    low = mid
+                else:
+                    high, transition_point = mid, mid
+            except Exception:
+                break
+        
+        return transition_point.replace(microsecond=0)
+
     def generate_timeline_df(self, start_dt: datetime, duration_hours: float):
         """
         Generates the full timeline DataFrame (granular SSL level).
@@ -319,6 +404,129 @@ class TimelineGenerator:
             i = j
         
         return pd.DataFrame(consolidated_data)
+
+    def generate_detailed_timeline_df(self, start_dt: datetime, duration_hours: float):
+        """
+        Generates detailed timeline DataFrames at all four levels: NL, SL, SSL, and SSSL.
+        Returns a dictionary with separate DataFrames for each level.
+        """
+        self._end_dt_for_search = start_dt + timedelta(hours=duration_hours)
+        
+        timelines = {
+            'nl_timeline': [],
+            'sl_timeline': [],
+            'ssl_timeline': [],
+            'sssl_timeline': []
+        }
+        
+        # Generate NL-level timeline (longest periods)
+        current_time = start_dt
+        max_iterations = 1000
+        iteration = 0
+        
+        while current_time < self._end_dt_for_search and iteration < max_iterations:
+            iteration += 1
+            start_details = self._get_body_details_at_time(current_time)
+            transition_time = self.find_next_nl_transition(current_time, start_details['nl'])
+            end_time = transition_time if transition_time and transition_time < self._end_dt_for_search else self._end_dt_for_search
+            
+            if (end_time - current_time).total_seconds() < 1:
+                current_time = end_time
+                continue
+            
+            timelines['nl_timeline'].append({
+                'Start Time': current_time,
+                'End Time': end_time,
+                'NL_Planet': start_details['nl'],
+                'SL_Planet': start_details['sl'],
+                'SSL_Planet': start_details['ssl'],
+                'SSSL_Planet': start_details['sssl']
+            })
+            
+            current_time = end_time
+        
+        # Generate SL-level timeline (medium periods)
+        current_time = start_dt
+        iteration = 0
+        
+        while current_time < self._end_dt_for_search and iteration < max_iterations:
+            iteration += 1
+            start_details = self._get_body_details_at_time(current_time)
+            transition_time = self.find_next_sl_transition(current_time, start_details['sl'])
+            end_time = transition_time if transition_time and transition_time < self._end_dt_for_search else self._end_dt_for_search
+            
+            if (end_time - current_time).total_seconds() < 1:
+                current_time = end_time
+                continue
+            
+            timelines['sl_timeline'].append({
+                'Start Time': current_time,
+                'End Time': end_time,
+                'NL_Planet': start_details['nl'],
+                'SL_Planet': start_details['sl'],
+                'SSL_Planet': start_details['ssl'],
+                'SSSL_Planet': start_details['sssl']
+            })
+            
+            current_time = end_time
+        
+        # Generate SSL-level timeline (short periods)
+        current_time = start_dt
+        iteration = 0
+        
+        while current_time < self._end_dt_for_search and iteration < max_iterations:
+            iteration += 1
+            start_details = self._get_body_details_at_time(current_time)
+            transition_time = self.find_next_ssl_transition(current_time, start_details['ssl'])
+            end_time = transition_time if transition_time and transition_time < self._end_dt_for_search else self._end_dt_for_search
+            
+            if (end_time - current_time).total_seconds() < 1:
+                current_time = end_time
+                continue
+            
+            timelines['ssl_timeline'].append({
+                'Start Time': current_time,
+                'End Time': end_time,
+                'NL_Planet': start_details['nl'],
+                'SL_Planet': start_details['sl'],
+                'SSL_Planet': start_details['ssl'],
+                'SSSL_Planet': start_details['sssl']
+            })
+            
+            current_time = end_time
+        
+        # Generate SSSL-level timeline (shortest periods)
+        current_time = start_dt
+        iteration = 0
+        
+        while current_time < self._end_dt_for_search and iteration < max_iterations:
+            iteration += 1
+            start_details = self._get_body_details_at_time(current_time)
+            transition_time = self.find_next_sssl_transition(current_time, start_details['sssl'])
+            end_time = transition_time if transition_time and transition_time < self._end_dt_for_search else self._end_dt_for_search
+            
+            if (end_time - current_time).total_seconds() < 1:
+                current_time = end_time
+                continue
+            
+            timelines['sssl_timeline'].append({
+                'Start Time': current_time,
+                'End Time': end_time,
+                'NL_Planet': start_details['nl'],
+                'SL_Planet': start_details['sl'],
+                'SSL_Planet': start_details['ssl'],
+                'SSSL_Planet': start_details['sssl']
+            })
+            
+            current_time = end_time
+        
+        # Convert all to DataFrames
+        return {
+            'nl_timeline': pd.DataFrame(timelines['nl_timeline']),
+            'sl_timeline': pd.DataFrame(timelines['sl_timeline']),
+            'ssl_timeline': pd.DataFrame(timelines['ssl_timeline']),
+            'sssl_timeline': pd.DataFrame(timelines['sssl_timeline'])
+        }
 
 
 if __name__ == '__main__':

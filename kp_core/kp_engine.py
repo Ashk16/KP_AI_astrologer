@@ -168,7 +168,7 @@ class KPEngine:
 
     def _get_lordships(self, longitude):
         """
-        Calculates Nakshatra, Sub, and Sub-Sub Lords for a given longitude
+        Calculates Nakshatra, Sub, Sub-Sub, and Sub-Sub-Sub Lords for a given longitude
         using precise Vimsottari Dasha proportions.
         """
         # --- Nakshatra (Star Lord) Calculation ---
@@ -213,7 +213,25 @@ class KPEngine:
                 break
             position_in_sub_lord += sub_sub_lord_span
 
-        return nakshatra_lord, sub_lord, sub_sub_lord
+        # --- Sub-Sub-Sub Lord Calculation ---
+        arc_in_sub_sub_lord = arc_in_sub_lord - position_in_sub_lord
+        
+        position_in_sub_sub_lord = 0
+        sub_sub_sub_lord = None
+        # The sequence of sub-sub-sub-lords within a sub-sub-lord period also follows the dasa sequence,
+        # starting from the sub-sub-lord itself.
+        sub_sub_sub_lord_dasa_sequence = SUB_LORD_SEQUENCE[SUB_LORD_SEQUENCE.index(sub_sub_lord):] + \
+                                         SUB_LORD_SEQUENCE[:SUB_LORD_SEQUENCE.index(sub_sub_lord)]
+
+        for lord in sub_sub_sub_lord_dasa_sequence:
+            # The span of a sub-sub-sub-lord within a sub-sub-lord's arc
+            sub_sub_sub_lord_span = (DASA_YEARS[lord] / TOTAL_DASA_YEARS) * ((DASA_YEARS[sub_sub_lord] / TOTAL_DASA_YEARS) * ((DASA_YEARS[sub_lord] / TOTAL_DASA_YEARS) * nakshatra_span))
+            if arc_in_sub_sub_lord >= position_in_sub_sub_lord and arc_in_sub_sub_lord < position_in_sub_sub_lord + sub_sub_sub_lord_span:
+                sub_sub_sub_lord = lord
+                break
+            position_in_sub_sub_lord += sub_sub_sub_lord_span
+
+        return nakshatra_lord, sub_lord, sub_sub_lord, sub_sub_sub_lord
 
     def _calculate_all_body_details(self):
         """Calculates positions and lordships for all planets using sidereal coordinates."""
@@ -241,7 +259,7 @@ class KPEngine:
 
             sign_num = int(longitude / 30)
             sign = ZODIAC_SIGNS[sign_num]
-            nl, sl, ssl = self._get_lordships(longitude)
+            nl, sl, ssl, sssl = self._get_lordships(longitude)
 
             planet_data[name] = {
                 'longitude': longitude,
@@ -250,6 +268,7 @@ class KPEngine:
                 'nl': nl,
                 'sl': sl,
                 'ssl': ssl,
+                'sssl': sssl,
                 'is_retrograde': is_retrograde
             }
         return planet_data
@@ -265,7 +284,7 @@ class KPEngine:
             
             sign_num = int(longitude / 30)
             sign = ZODIAC_SIGNS[sign_num]
-            nl, sl, ssl = self._get_lordships(longitude)
+            nl, sl, ssl, sssl = self._get_lordships(longitude)
 
             cusp_data[i + 1] = {
                 'longitude': longitude,
@@ -273,7 +292,8 @@ class KPEngine:
                 'sign_lord': PLANET_SHORT_NAMES[SIGN_LORDS[sign]],
                 'nl': nl,
                 'sl': sl,
-                'ssl': ssl
+                'ssl': ssl,
+                'sssl': sssl
             }
         return cusp_data
 

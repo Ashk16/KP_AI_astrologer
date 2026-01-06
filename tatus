@@ -1,5 +1,0 @@
-[33md2f6ae6[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m CRITICAL FIX: Restore missing tables and Moon timeline
-[33ma4555df[m Fix AttributeError in Streamlit Cloud deployment
-[33md8728b7[m[33m ([m[1;31morigin/Improve_kp[m[33m, [m[1;32mImprove_kp[m[33m)[m Improve KP engine with enhanced analysis features
-[33mcb09119[m[33m ([m[1;31morigin/nifty50_muhurat[m[33m, [m[1;32mnifty50_muhurat[m[33m)[m Fix major KP astrology issues: Add sidereal ayanamsa support and fix muhurta analysis scoring
-[33mec3bd4b[m[33m ([m[1;31morigin/stable_2025_07_07[m[33m, [m[1;32mstable_2025_07_07[m[33m)[m Stable commit 2025-07-07: Enhanced Rahu/Ketu agency implementation and improved Muhurta analysis
