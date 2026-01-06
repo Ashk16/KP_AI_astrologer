@@ -775,6 +775,60 @@ def display_analysis(results):
             return PlanetNameUtils.standardize_for_display(planet_short_name, is_retrograde)
         return planet_short_name
 
+    # === ASCENDANT TIMELINE SECTION (Collapsed by default) ===
+    with st.expander("🔮 Ascendant Timeline (NL & SL Analysis)", expanded=False):
+        st.markdown('<p class="timeline-description">Ascendant cusp timeline showing Nakshatra Lord (NL) and Sub Lord (SL) transitions. Ascendant represents the match start conditions and overall momentum.</p>', unsafe_allow_html=True)
+        
+        if "asc_timeline_df" in display_results and display_results["asc_timeline_df"] is not None:
+            asc_timeline_df = display_results["asc_timeline_df"].copy()
+            
+            # Convert times to IST for display
+            asc_timeline_df['Start Time'] = pd.to_datetime(asc_timeline_df['Start Time']).dt.tz_convert('Asia/Kolkata').dt.strftime('%H:%M:%S')
+            asc_timeline_df['End Time'] = pd.to_datetime(asc_timeline_df['End Time']).dt.tz_convert('Asia/Kolkata').dt.strftime('%H:%M:%S')
+            
+            # Apply retrograde indicators to planet columns
+            if 'NL_Planet' in asc_timeline_df.columns:
+                asc_timeline_df['NL_Planet'] = asc_timeline_df['NL_Planet'].apply(add_retrograde_to_planet_name)
+            if 'SL_Planet' in asc_timeline_df.columns:
+                asc_timeline_df['SL_Planet'] = asc_timeline_df['SL_Planet'].apply(add_retrograde_to_planet_name)
+            
+            # Prepare display DataFrame with only NL and SL
+            display_cols = ['Start Time', 'End Time', 'NL_Planet', 'SL_Planet', 'Score', 'Verdict', 'Comment']
+            asc_display_df = asc_timeline_df[display_cols].copy()
+            
+            # Format Score column
+            if 'Score' in asc_display_df.columns:
+                asc_display_df['Score'] = asc_display_df['Score'].apply(lambda x: f"{x:+.3f}" if pd.notna(x) else "")
+            
+            # Apply team name replacements to Verdict and Comment
+            asc_display_df['Verdict'] = asc_display_df['Verdict'].apply(lambda x: apply_team_name_replacements(x, team_a_name, team_b_name))
+            asc_display_df['Comment'] = asc_display_df['Comment'].apply(lambda x: apply_team_name_replacements(x, team_a_name, team_b_name))
+            
+            # Apply color styling to planet columns and verdict
+            styler_asc = asc_display_df.style.applymap(
+                lambda x: color_timeline_planets_by_score(x, planet_scores),
+                subset=['NL_Planet', 'SL_Planet']
+            ).applymap(
+                lambda x: color_verdict_cell(x, team_a_name, team_b_name),
+                subset=['Verdict']
+            )
+            
+            st.dataframe(styler_asc, use_container_width=True, height=400)
+            
+            # Display summary
+            if "asc_timeline_analysis" in display_results:
+                st.write(display_results["asc_timeline_analysis"]["summary"])
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.write("**Favorable Planets:**")
+                    st.json(display_results['asc_timeline_analysis']['favorable_planets'])
+                with col2:
+                    st.write("**Unfavorable Planets:**")
+                    st.json(display_results['asc_timeline_analysis']['unfavorable_planets'])
+        else:
+            st.info("Ascendant timeline data not available")
+
     st.subheader("Moon SSL Timeline - Enhanced Dynamic Full Granular Detail")
     st.markdown('<p class="timeline-description">Enhanced detailed timeline with dynamic layer analysis showing all Sub-Sub Lord periods. Includes planetary influence percentages for precise timing analysis.</p>', unsafe_allow_html=True)
     moon_timeline_df = display_results["moon_timeline_df"].copy()
@@ -836,21 +890,6 @@ def display_analysis(results):
         else:
             # Display full table with comments - already prepared above
             pass
-        
-        # Add expander for technical details
-        with st.expander("🔬 Technical Details (Layer Influences)", expanded=False):
-            technical_cols = ['Start Time', 'End Time', 'NL_Planet', 'SL_Planet', 'SSL_Planet', 'NL_Influence', 'SL_Influence', 'SSL_Influence', 'Score']
-            tech_df = moon_timeline_df[technical_cols].copy()
-            
-            # Format technical columns for better display
-            for col in ['NL_Influence', 'SL_Influence', 'SSL_Influence']:
-                if col in tech_df.columns:
-                    tech_df[col] = tech_df[col].map(lambda x: f"{x:.1%}" if pd.notna(x) else "")
-            
-            if 'Score' in tech_df.columns:
-                tech_df['Score'] = tech_df['Score'].map(lambda x: f"{x:.3f}" if pd.notna(x) else "")
-            
-            st.dataframe(tech_df, use_container_width=True)
     else:
         # Fallback for older timeline format
         moon_display_df = moon_timeline_df.drop(columns=['Score'] if 'Score' in moon_timeline_df.columns else [])
@@ -874,6 +913,46 @@ def display_analysis(results):
     st.subheader("Unfavorable Planets")
     st.json(display_results['moon_timeline_analysis']['unfavorable_planets'])
 
+    # Display Detailed SSSL Timeline if available
+    if 'detailed_timelines' in display_results and display_results['detailed_timelines']:
+        st.markdown("---")
+        st.subheader("Moon SSSL Timeline - Full Detailed Analysis (NL-SL-SSL-SSSL)")
+        st.markdown('<p class="timeline-description">Enhanced timeline with SSSL (Sub-Sub-Sub Lord) level for finest granularity. Shows all four KP levels: NL, SL, SSL, and SSSL.</p>', unsafe_allow_html=True)
+        
+        detailed_timelines = display_results['detailed_timelines']
+        
+        # Display only the SSSL-Level Timeline (finest granularity with all 4 columns)
+        if 'sssl_timeline' in detailed_timelines and not detailed_timelines['sssl_timeline'].empty:
+            sssl_df = detailed_timelines['sssl_timeline'].copy()
+            sssl_df['Start Time'] = pd.to_datetime(sssl_df['Start Time']).dt.tz_convert('Asia/Kolkata').dt.strftime('%H:%M:%S')
+            sssl_df['End Time'] = pd.to_datetime(sssl_df['End Time']).dt.tz_convert('Asia/Kolkata').dt.strftime('%H:%M:%S')
+            
+            # Apply retrograde indicators
+            for col in ['NL_Planet', 'SL_Planet', 'SSL_Planet', 'SSSL_Planet']:
+                if col in sssl_df.columns:
+                    sssl_df[col] = sssl_df[col].apply(add_retrograde_to_planet_name)
+            
+            # Apply team name replacements
+            sssl_df['Verdict'] = sssl_df['Verdict'].apply(lambda x: apply_team_name_replacements(x, team_a_name, team_b_name))
+            sssl_df['Comment'] = sssl_df['Comment'].apply(lambda x: apply_team_name_replacements(x, team_a_name, team_b_name))
+            
+            # Apply color coding - same as the existing Moon SSL timeline
+            display_cols = ['Start Time', 'End Time', 'NL_Planet', 'SL_Planet', 'SSL_Planet', 'SSSL_Planet', 'Score', 'Verdict', 'Comment']
+            sssl_display_df = sssl_df[display_cols]
+            
+            # Apply styling with color coding for planet columns and verdict
+            styler_sssl = sssl_display_df.style.applymap(
+                lambda x: color_timeline_planets_by_score(x, planet_scores),
+                subset=['NL_Planet', 'SL_Planet', 'SSL_Planet', 'SSSL_Planet']
+            ).applymap(
+                lambda x: color_verdict_cell(x, team_a_name, team_b_name),
+                subset=['Verdict']
+            )
+            
+            st.dataframe(styler_sssl, use_container_width=True, height=400)
+        else:
+            st.info("No SSSL-level timeline data available")
+
 def run_analysis(match_details, timeline_weights=None, house_weights=None):
     """
     Orchestrates the KP core analysis and returns a single, consistent dictionary.
@@ -888,15 +967,29 @@ def run_analysis(match_details, timeline_weights=None, house_weights=None):
         muhurta_analysis = analysis_engine.analyze_muhurta_chart(scoring_method='authentic_kp')
         planets_df = analysis_engine.get_all_planet_details_df()
         cusps_df = engine.get_all_cusps_df()
+        # Generate Ascendant timeline (aggregated - NL and SL only)
+        asc_timeline_gen = TimelineGenerator(engine, 'Ascendant')
+        asc_timeline_df = asc_timeline_gen.generate_aggregated_timeline_df(match_details['datetime_utc'], match_details['duration_hours'])
+        asc_timeline_df, asc_timeline_analysis = analysis_engine.analyze_aggregated_timeline(asc_timeline_df, 'ascendant')
+        
+        # Generate Moon timeline
         moon_timeline_gen = TimelineGenerator(engine, 'Moon')
         moon_timeline_df = moon_timeline_gen.generate_timeline_df(match_details['datetime_utc'], match_details['duration_hours'])
         moon_timeline_df, moon_timeline_analysis = analysis_engine.analyze_timeline(moon_timeline_df, 'ascendant')
+        
+        # Generate detailed timelines at NL, SL, SSL, and SSSL levels
+        detailed_timelines = moon_timeline_gen.generate_detailed_timeline_df(match_details['datetime_utc'], match_details['duration_hours'])
+        analyzed_detailed_timelines = analysis_engine.analyze_detailed_timeline(detailed_timelines, 'ascendant')
+        
         return {
             "muhurta_analysis": muhurta_analysis,
             "planets_df": planets_df,
             "cusps_df": cusps_df,
+            "asc_timeline_df": asc_timeline_df,
+            "asc_timeline_analysis": asc_timeline_analysis,
             "moon_timeline_df": moon_timeline_df,
             "moon_timeline_analysis": moon_timeline_analysis,
+            "detailed_timelines": analyzed_detailed_timelines,
             "match_details": match_details,
             "error": None,
             "traceback": None
