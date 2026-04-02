@@ -27,6 +27,12 @@ from kp_core.kp_engine import KPEngine, PlanetNameUtils
 from kp_core.timeline_generator import TimelineGenerator
 from kp_core.analysis_engine import AnalysisEngine
 
+def _styler_element_map(styler, func, **kwargs):
+    """Compatibility wrapper: uses Styler.map (pandas>=2.1) or Styler.applymap (older)."""
+    if hasattr(styler, 'map'):
+        return styler.map(func, **kwargs)
+    return styler.applymap(func, **kwargs)
+
 
 
 # --- Constants ---
@@ -805,10 +811,12 @@ def display_analysis(results):
             asc_display_df['Comment'] = asc_display_df['Comment'].apply(lambda x: apply_team_name_replacements(x, team_a_name, team_b_name))
             
             # Apply color styling to planet columns and verdict
-            styler_asc = asc_display_df.style.applymap(
-                lambda x: color_timeline_planets_by_score(x, planet_scores),
-                subset=['NL_Planet', 'SL_Planet']
-            ).applymap(
+            styler_asc = _styler_element_map(
+                _styler_element_map(
+                    asc_display_df.style,
+                    lambda x: color_timeline_planets_by_score(x, planet_scores),
+                    subset=['NL_Planet', 'SL_Planet']
+                ),
                 lambda x: color_verdict_cell(x, team_a_name, team_b_name),
                 subset=['Verdict']
             )
@@ -872,10 +880,12 @@ def display_analysis(results):
         if st.checkbox("📝 Show Detailed Comments Separately", key=f"moon_comments_separate_{id(results)}_{hash(str(moon_timeline_df.columns))}"):
             # Display table without comments
             moon_no_comments = moon_display_df.drop(columns=['Comment'])
-            styler_moon_no_comments = moon_no_comments.style.applymap(
-                lambda x: color_timeline_planets_by_score(x, planet_scores),
-                subset=['NL_Planet', 'SL_Planet', 'SSL_Planet']
-            ).applymap(
+            styler_moon_no_comments = _styler_element_map(
+                _styler_element_map(
+                    moon_no_comments.style,
+                    lambda x: color_timeline_planets_by_score(x, planet_scores),
+                    subset=['NL_Planet', 'SL_Planet', 'SSL_Planet']
+                ),
                 lambda x: color_verdict_cell(x, team_a_name, team_b_name),
                 subset=['Verdict']
             )
@@ -897,10 +907,12 @@ def display_analysis(results):
     # Apply coloring to planet columns and verdict column
     # Only show the main dataframe if comments are not shown separately
     if 'NL_Influence' not in moon_timeline_df.columns or not st.session_state.get(f"moon_comments_separate_{id(results)}_{hash(str(moon_timeline_df.columns))}", False):
-        styler_moon = moon_display_df.style.applymap(
-            lambda x: color_timeline_planets_by_score(x, planet_scores),
-            subset=['NL_Planet', 'SL_Planet', 'SSL_Planet']
-        ).applymap(
+        styler_moon = _styler_element_map(
+            _styler_element_map(
+                moon_display_df.style,
+                lambda x: color_timeline_planets_by_score(x, planet_scores),
+                subset=['NL_Planet', 'SL_Planet', 'SSL_Planet']
+            ),
             lambda x: color_verdict_cell(x, team_a_name, team_b_name),
             subset=['Verdict']
         )
@@ -941,10 +953,12 @@ def display_analysis(results):
             sssl_display_df = sssl_df[display_cols]
             
             # Apply styling with color coding for planet columns and verdict
-            styler_sssl = sssl_display_df.style.applymap(
-                lambda x: color_timeline_planets_by_score(x, planet_scores),
-                subset=['NL_Planet', 'SL_Planet', 'SSL_Planet', 'SSSL_Planet']
-            ).applymap(
+            styler_sssl = _styler_element_map(
+                _styler_element_map(
+                    sssl_display_df.style,
+                    lambda x: color_timeline_planets_by_score(x, planet_scores),
+                    subset=['NL_Planet', 'SL_Planet', 'SSL_Planet', 'SSSL_Planet']
+                ),
                 lambda x: color_verdict_cell(x, team_a_name, team_b_name),
                 subset=['Verdict']
             )
