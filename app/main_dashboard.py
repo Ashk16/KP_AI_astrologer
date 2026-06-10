@@ -1223,6 +1223,21 @@ def main():
         min-width: 400px !important;
         width: auto !important;
     }
+
+    /* Highlight Generate Predictions button in sidebar */
+    section[data-testid="stSidebar"] button[kind="primary"] {
+        background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%) !important;
+        border: 1px solid #0d9488 !important;
+        color: #ffffff !important;
+        font-weight: 600 !important;
+        box-shadow: 0 2px 8px rgba(15, 118, 110, 0.35) !important;
+    }
+
+    section[data-testid="stSidebar"] button[kind="primary"]:hover {
+        background: linear-gradient(135deg, #115e59 0%, #0f766e 100%) !important;
+        border-color: #0f766e !important;
+        color: #ffffff !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -1267,7 +1282,7 @@ def main():
             help="Enter time in HH:MM:SS format for maximum accuracy",
         )
 
-        if st.button("Generate Predictions"):
+        if st.button("Generate Predictions", type="primary", use_container_width=True, key="generate_predictions_btn"):
             try:
                 try:
                     match_time = datetime.datetime.strptime(st.session_state.time_str, "%H:%M:%S").time()
