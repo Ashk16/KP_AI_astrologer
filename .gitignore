@@ -150,9 +150,13 @@ Thumbs.db
 *.temp
 *.log
 
-# Streamlit
-.streamlit/
+# Streamlit (keep example template, ignore real secrets)
+.streamlit/secrets.toml
+.streamlit/config.toml
 
 # Local configuration
 .env
-*.local 
+*.local
+
+# Runtime fixture cache (ephemeral on Streamlit Cloud; bundled file is committed)
+data/fixtures_cache.json 

@@ -15,11 +15,14 @@ import matplotlib.colors as colors
 import numpy as np
 
 # --- Path Correction ---
-# Add the root directory of the project to the Python path
-# This allows us to import modules from 'kp_core'
+# Add project root before local package imports (Streamlit runs this file directly).
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if project_root not in sys.path:
-    sys.path.append(project_root)
+    sys.path.insert(0, project_root)
+
+from app.api_config import get_cricapi_key as load_cricapi_key
+from app.fixtures_cache import cache_status, ensure_cache, get_cached_fixtures_for_date
+from app.venue_coords import resolve_venue_coordinates
 
 # --- Actual KP Core Imports ---
 import swisseph as swe
@@ -37,6 +40,65 @@ def _styler_element_map(styler, func, **kwargs):
 
 # --- Constants ---
 ARCHIVE_DIR = "match_archive"
+MANUAL_FIXTURE_OPTION = "__manual__"
+
+
+def get_cricapi_key():
+    """Read CricAPI key from Streamlit secrets, local files, or environment."""
+    try:
+        key = st.secrets["CRICAPI_KEY"]
+        if key:
+            return key
+    except Exception:
+        pass
+    return load_cricapi_key()
+
+
+def _init_match_form_state():
+    defaults = {
+        "team_a": "Team A",
+        "team_b": "Team B",
+        "location_query": "Wankhede Stadium, Mumbai",
+        "time_str": "20:00:00",
+        "lat": 19.0760,
+        "lon": 72.8777,
+        "selected_fixture_id": MANUAL_FIXTURE_OPTION,
+        "last_autofill_fixture_id": None,
+        "last_geocoded_location": None,
+        "match_duration": 9.0,
+    }
+    for key, value in defaults.items():
+        if key not in st.session_state:
+            st.session_state[key] = value
+
+
+def _apply_fixture_autofill(fixture: dict, tz_name: str):
+    st.session_state.team_a = fixture.get("team_a") or st.session_state.team_a
+    st.session_state.team_b = fixture.get("team_b") or st.session_state.team_b
+
+    venue = fixture.get("venue") or st.session_state.location_query
+    st.session_state.location_query = venue
+    st.session_state.last_geocoded_location = venue
+
+    coord = resolve_venue_coordinates(venue)
+    if coord.resolved:
+        st.session_state.lat = coord.lat
+        st.session_state.lon = coord.lon
+    elif venue:
+        lat_from_geo, lon_from_geo = get_lat_lon(venue)
+        if lat_from_geo is not None:
+            st.session_state.lat = lat_from_geo
+            st.session_state.lon = lon_from_geo
+
+    start_time_utc = fixture.get("start_time_utc")
+    if start_time_utc:
+        utc_dt = datetime.datetime.fromisoformat(start_time_utc)
+        if utc_dt.tzinfo is None:
+            utc_dt = utc_dt.replace(tzinfo=pytz.utc)
+        local_dt = utc_dt.astimezone(pytz.timezone(tz_name))
+        st.session_state.time_str = local_dt.strftime("%H:%M:%S")
+
+    st.session_state.last_autofill_fixture_id = fixture.get("fixture_id")
 
 def apply_team_name_replacements(text, asc_team_name, desc_team_name):
     """
@@ -1127,88 +1189,156 @@ def main():
         st.header("Match Details")
 
         st.subheader("New Analysis")
-        team_a = st.text_input("Team A (Ascendant)", "Team A")
-        team_b = st.text_input("Team B (Descendant)", "Team B")
+        _init_match_form_state()
 
-        # --- Location Input ---
-        location_query = st.text_input("Enter Location (e.g., 'Mumbai, India')", "Wankhede Stadium, Mumbai")
+        match_date = st.date_input("Date of Match", datetime.date.today(), key="match_date")
 
-        
-        # Initialize lat/lon
-        lat_val, lon_val = 19.0760, 72.8777 # Default to Mumbai
-
-        if location_query:
-            lat_from_geo, lon_from_geo = get_lat_lon(location_query)
-            if lat_from_geo is not None:
-                lat_val = lat_from_geo
-                lon_val = lon_from_geo
-
-        match_date = st.date_input("Date of Match", datetime.date.today())
-        
-        # Time input as a text field for flexibility
-        time_str = st.text_input("Time of Match (HH:MM:SS)", "20:00:00", help="Enter time in HH:MM:SS format for maximum accuracy")
-        
-        # Timezone selection
-        timezones = pytz.all_timezones
-        default_tz_index = timezones.index('Asia/Kolkata') if 'Asia/Kolkata' in timezones else 0
-        tz_name = st.selectbox("Timezone", timezones, index=default_tz_index)
-
-        lat = st.number_input("Latitude", value=lat_val, format="%.4f")
-        lon = st.number_input("Longitude", value=lon_val, format="%.4f")
-        
-        match_duration = st.number_input("Match Duration (hours)", min_value=1.0, max_value=8.0, value=3.5, step=0.5)
-
-        # Ayanamsa selection
-        st.subheader("Astrological Settings")
-        ayanamsa_options = ['KRISHNAMURTI', 'LAHIRI', 'RAMAN', 'TRUE_CITRA']
-        ayanamsa_choice = st.selectbox(
-            "Ayanamsa (Sidereal Correction)", 
-            ayanamsa_options, 
-            index=0,  # Default to Krishnamurti
-            help="Krishnamurti Ayanamsa is recommended for KP astrology. Lahiri is official in India."
+        time_str = st.text_input(
+            "Time of Match (HH:MM:SS)",
+            key="time_str",
+            help="Enter time in HH:MM:SS format for maximum accuracy",
         )
 
         if st.button("Generate Predictions"):
             try:
-                # Parse the time string - try HH:MM:SS first, then fall back to HH:MM for backward compatibility
                 try:
-                    match_time = datetime.datetime.strptime(time_str, "%H:%M:%S").time()
+                    match_time = datetime.datetime.strptime(st.session_state.time_str, "%H:%M:%S").time()
                 except ValueError:
-                    # Fall back to HH:MM format and add :00 seconds
-                    match_time = datetime.datetime.strptime(time_str, "%H:%M").time()
+                    match_time = datetime.datetime.strptime(st.session_state.time_str, "%H:%M").time()
                     match_time = match_time.replace(second=0)
-                
-                # Combine date and time
+
                 local_datetime = datetime.datetime.combine(match_date, match_time)
-                # Localize the datetime
-                local_tz = pytz.timezone(tz_name)
+                local_tz = pytz.timezone(st.session_state.get("tz_name", "Asia/Kolkata"))
                 localized_dt = local_tz.localize(local_datetime)
-                # Convert to UTC
                 utc_dt = localized_dt.astimezone(pytz.utc)
+
+                team_a_value = st.session_state.team_a
+                team_b_value = st.session_state.team_b
 
                 with st.spinner("Generating astrological analysis..."):
                     new_analysis = run_analysis({
-                        "team_a": team_a,
-                        "team_b": team_b,
+                        "team_a": team_a_value,
+                        "team_b": team_b_value,
                         "datetime_utc": utc_dt,
-                        "lat": lat,
-                        "lon": lon,
-                        "duration_hours": match_duration,
-                        "ayanamsa": ayanamsa_choice
+                        "lat": st.session_state.lat,
+                        "lon": st.session_state.lon,
+                        "duration_hours": st.session_state.get("match_duration", 9.0),
+                        "ayanamsa": st.session_state.get("ayanamsa_choice", "KRISHNAMURTI"),
                     },
                     timeline_weights=st.session_state.timeline_weights,
                     house_weights=st.session_state.house_weights)
-                    
-                    # Add tab name to the analysis
-                    tab_name = f"{team_a} vs {team_b} - {match_date.strftime('%Y-%m-%d')}"
+
+                    tab_name = f"{team_a_value} vs {team_b_value} - {match_date.strftime('%Y-%m-%d')}"
                     new_analysis['tab_name'] = tab_name
-                    
-                    # Add to analyses list and set as active tab
+
                     st.session_state.analyses.append(new_analysis)
                     st.session_state.active_tab = len(st.session_state.analyses) - 1
                     st.rerun()
             except ValueError:
                 st.error("Invalid time format. Please use HH:MM:SS or HH:MM format.")
+
+        api_key = get_cricapi_key()
+        fixture_options = {MANUAL_FIXTURE_OPTION: "Manual entry"}
+        fixtures_by_id = {}
+        cache_caption = None
+        no_fixtures_caption = None
+
+        if api_key:
+            try:
+                cache = ensure_cache(api_key)
+                fixtures = get_cached_fixtures_for_date(api_key, match_date)
+                for fixture in fixtures:
+                    fixture_options[fixture["fixture_id"]] = fixture["label"]
+                    fixtures_by_id[fixture["fixture_id"]] = fixture
+
+                status = cache_status(cache)
+                if status["fixture_count"]:
+                    source_label = "cloud bundle" if status.get("cache_source") == "bundled" else "live cache"
+                    refresh_note = (
+                        f"Next API refresh after {status['next_refresh_utc']}."
+                        if status.get("last_refresh_utc")
+                        else "Will refresh from API when needed."
+                    )
+                    cache_caption = (
+                        f"Fixture cache ({source_label}): {status['fixture_count']} matches "
+                        f"({status['window_start']} to {status['window_end']}). {refresh_note}"
+                    )
+                if len(fixtures) == 0:
+                    no_fixtures_caption = "No fixtures found for this date in the local cache."
+            except Exception as exc:
+                st.warning(f"Could not load fixtures from cache/API: {exc}")
+        else:
+            st.info("Add your key to `.streamlit/secrets.toml` (local) or host secrets (deployed). See `docs/API_KEY_SETUP.md`.")
+
+        if st.session_state.selected_fixture_id not in fixture_options:
+            st.session_state.selected_fixture_id = MANUAL_FIXTURE_OPTION
+
+        selected_fixture_id = st.selectbox(
+            "Select Match",
+            options=list(fixture_options.keys()),
+            format_func=lambda key: fixture_options[key],
+            key="selected_fixture_id",
+        )
+
+        if (
+            selected_fixture_id != MANUAL_FIXTURE_OPTION
+            and selected_fixture_id in fixtures_by_id
+            and selected_fixture_id != st.session_state.last_autofill_fixture_id
+        ):
+            _apply_fixture_autofill(
+                fixtures_by_id[selected_fixture_id],
+                st.session_state.get("tz_name", "Asia/Kolkata"),
+            )
+
+        team_a = st.text_input("Team A (Ascendant)", key="team_a")
+        team_b = st.text_input("Team B (Descendant)", key="team_b")
+
+        location_query = st.text_input(
+            "Enter Location (e.g., 'Mumbai, India')",
+            key="location_query",
+        )
+
+        if (
+            selected_fixture_id == MANUAL_FIXTURE_OPTION
+            and location_query
+            and location_query != st.session_state.get("last_geocoded_location")
+        ):
+            lat_from_geo, lon_from_geo = get_lat_lon(location_query)
+            if lat_from_geo is not None:
+                st.session_state.lat = lat_from_geo
+                st.session_state.lon = lon_from_geo
+                st.session_state.last_geocoded_location = location_query
+
+        lat = st.number_input("Latitude", key="lat", format="%.4f")
+        lon = st.number_input("Longitude", key="lon", format="%.4f")
+
+        match_duration = st.number_input(
+            "Match Duration (hours)",
+            min_value=1.0,
+            max_value=12.0,
+            value=9.0,
+            step=0.5,
+            key="match_duration",
+        )
+
+        timezones = pytz.all_timezones
+        default_tz_index = timezones.index('Asia/Kolkata') if 'Asia/Kolkata' in timezones else 0
+        tz_name = st.selectbox("Timezone", timezones, index=default_tz_index, key="tz_name")
+
+        if cache_caption:
+            st.caption(cache_caption)
+        if no_fixtures_caption:
+            st.caption(no_fixtures_caption)
+
+        st.subheader("Astrological Settings")
+        ayanamsa_options = ['KRISHNAMURTI', 'LAHIRI', 'RAMAN', 'TRUE_CITRA']
+        ayanamsa_choice = st.selectbox(
+            "Ayanamsa (Sidereal Correction)",
+            ayanamsa_options,
+            index=0,
+            key="ayanamsa_choice",
+            help="Krishnamurti Ayanamsa is recommended for KP astrology. Lahiri is official in India.",
+        )
         
         st.divider()
 

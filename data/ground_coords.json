@@ -1,0 +1,5441 @@
+{
+  "_comment": "Ground lat/lon library keyed by sportmonks_id. Built by scripts/build_ground_library.py. Matched first by id, then name.",
+  "grounds": [
+    {
+      "sportmonks_id": 1,
+      "name": "Adelaide Oval",
+      "city": "Adelaide",
+      "country": null,
+      "lat": -34.9156,
+      "lon": 138.5961,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 2,
+      "name": "W.A.C.A. Ground",
+      "city": "East Perth,  Perth, Western Australia",
+      "country": null,
+      "lat": -31.9559,
+      "lon": 115.8772,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 3,
+      "name": "Riverway Stadium",
+      "city": "Thuringowa,  Townsville, Queensland",
+      "country": null,
+      "lat": -19.3153,
+      "lon": 146.7297,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 4,
+      "name": "TIO Stadium",
+      "city": "Marrara,  Darwin, Northern Territory",
+      "country": null,
+      "lat": -12.3911,
+      "lon": 130.877,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 5,
+      "name": "Tasmania Cricket Association Ground",
+      "city": "Queens Domain,  Hobart, Tasmania",
+      "country": null,
+      "lat": -42.878,
+      "lon": 147.334,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 6,
+      "name": "Sydney Cricket Ground",
+      "city": "Moore Park,  Sydney, New South Wales",
+      "country": null,
+      "lat": -33.8917,
+      "lon": 151.2247,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 7,
+      "name": "Stadium Australia",
+      "city": "Homebush Bay,  Sydney, New South Wales",
+      "country": null,
+      "lat": -33.8471,
+      "lon": 151.0633,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 8,
+      "name": "Simonds Stadium",
+      "city": "Geelong, Victoria",
+      "country": null,
+      "lat": -38.1579,
+      "lon": 144.3614,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 9,
+      "name": "Perth Stadium",
+      "city": "Perth, Western Australia",
+      "country": null,
+      "lat": -31.9505,
+      "lon": 115.8895,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 10,
+      "name": "North Tasmania Cricket Association Ground",
+      "city": "Launceston, Tasmania",
+      "country": null,
+      "lat": -41.4208,
+      "lon": 147.1345,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 11,
+      "name": "Melbourne Cricket Ground",
+      "city": "Jolimont,  Melbourne, Victoria",
+      "country": null,
+      "lat": -37.82,
+      "lon": 144.9834,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 12,
+      "name": "Manuka Oval",
+      "city": "Manuka,  Canberra, Australian Capital Territory",
+      "country": null,
+      "lat": -35.318,
+      "lon": 149.134,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 13,
+      "name": "Brisbane Cricket Ground",
+      "city": "Woolloongabba,  Brisbane, Queensland",
+      "country": null,
+      "lat": -27.4858,
+      "lon": 153.0381,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 14,
+      "name": "Bellerive Oval",
+      "city": "Bellerive, Hobart, Tasmania",
+      "country": null,
+      "lat": -42.8772,
+      "lon": 147.3744,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 15,
+      "name": "Bir Sreshtho Flight Lieutenant Matiur Rahman Stadium",
+      "city": "Chittagong",
+      "country": null,
+      "lat": 22.356,
+      "lon": 91.783,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 16,
+      "name": "Sylhet International Cricket Stadium",
+      "city": "Sylhet",
+      "country": null,
+      "lat": 24.894,
+      "lon": 91.868,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 17,
+      "name": "Shere Bangla National Stadium",
+      "city": "Mirpur, Dhaka",
+      "country": null,
+      "lat": 23.815,
+      "lon": 90.361,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 18,
+      "name": "Sheikh Abu Naser Stadium",
+      "city": "Khulna",
+      "country": null,
+      "lat": 22.845,
+      "lon": 89.54,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 19,
+      "name": "Shaheed Chandu Stadium",
+      "city": "Bogra",
+      "country": null,
+      "lat": 24.85,
+      "lon": 89.37,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 20,
+      "name": "MA Aziz Stadium",
+      "city": "Chittagong",
+      "country": null,
+      "lat": 22.356,
+      "lon": 91.783,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 21,
+      "name": "Khan Shaheb Osman Ali Stadium",
+      "city": "Fatullah",
+      "country": null,
+      "lat": 23.631,
+      "lon": 90.503,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 22,
+      "name": "Bangabandhu National Stadium",
+      "city": "Dhaka",
+      "country": null,
+      "lat": 23.727,
+      "lon": 90.396,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 23,
+      "name": "Trent Bridge",
+      "city": "Nottingham",
+      "country": null,
+      "lat": 52.9369,
+      "lon": -1.1322,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 24,
+      "name": "The Rose Bowl",
+      "city": "Southampton",
+      "country": null,
+      "lat": 50.924,
+      "lon": -1.321,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 25,
+      "name": "The Cooper Associates County Ground",
+      "city": "St James Street, Taunton",
+      "country": null,
+      "lat": 51.019,
+      "lon": -3.104,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 26,
+      "name": "The 3aaa County Ground",
+      "city": "Derby",
+      "country": null,
+      "lat": 52.914,
+      "lon": -1.458,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 27,
+      "name": "St Lawrence Ground",
+      "city": "Canterbury",
+      "country": null,
+      "lat": 51.267,
+      "lon": 1.087,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 28,
+      "name": "St Helen's",
+      "city": "Swansea",
+      "country": null,
+      "lat": 51.619,
+      "lon": -3.943,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 29,
+      "name": "Sophia Gardens",
+      "city": "Cardiff",
+      "country": null,
+      "lat": 51.487,
+      "lon": -3.191,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 30,
+      "name": "Riverside Ground",
+      "city": "Chester-le-Street",
+      "country": null,
+      "lat": 54.85,
+      "lon": -1.559,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 31,
+      "name": "Old Trafford",
+      "city": "Stretford, Manchester",
+      "country": null,
+      "lat": 53.4631,
+      "lon": -2.2913,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 32,
+      "name": "North Marine Road Ground",
+      "city": "Scarborough",
+      "country": null,
+      "lat": 54.279,
+      "lon": -0.402,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 33,
+      "name": "Nevill Ground",
+      "city": "Nevill Gate, Tunbridge Wells",
+      "country": null,
+      "lat": 51.132,
+      "lon": 0.263,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 34,
+      "name": "Lord's",
+      "city": "London",
+      "country": null,
+      "lat": 51.5294,
+      "lon": -0.1727,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 35,
+      "name": "Kennington Oval",
+      "city": "London",
+      "country": null,
+      "lat": 51.4821,
+      "lon": -0.1117,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 36,
+      "name": "Headingley",
+      "city": "Leeds",
+      "country": null,
+      "lat": 53.817,
+      "lon": -1.582,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 37,
+      "name": "Grace Road",
+      "city": "Leicester",
+      "country": null,
+      "lat": 52.624,
+      "lon": -1.133,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 38,
+      "name": "Edgbaston",
+      "city": "Birmingham",
+      "country": null,
+      "lat": 52.456,
+      "lon": -1.903,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 39,
+      "name": "County Ground",
+      "city": "Southampton",
+      "country": null,
+      "lat": 50.924,
+      "lon": -1.321,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 40,
+      "name": "County Ground",
+      "city": "Northampton",
+      "country": null,
+      "lat": 52.248,
+      "lon": -0.871,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 41,
+      "name": "New Road",
+      "city": "Worcester",
+      "country": null,
+      "lat": 52.189,
+      "lon": -2.223,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 42,
+      "name": "County Ground",
+      "city": "Hove, Brighton",
+      "country": null,
+      "lat": 50.83,
+      "lon": -0.164,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 43,
+      "name": "County Ground",
+      "city": "Chelmsford",
+      "country": null,
+      "lat": 51.733,
+      "lon": 0.473,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 44,
+      "name": "County Ground",
+      "city": "Bristol",
+      "country": null,
+      "lat": 51.477,
+      "lon": -2.62,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 45,
+      "name": "Bramall Lane",
+      "city": "Sheffield",
+      "country": null,
+      "lat": 53.37,
+      "lon": -1.47,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 46,
+      "name": "Wankhede Stadium",
+      "city": "Mumbai",
+      "country": null,
+      "lat": 18.9389,
+      "lon": 72.8258,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 47,
+      "name": "Vidarbha Cricket Association Stadium",
+      "city": "Nagpur",
+      "country": null,
+      "lat": 21.152,
+      "lon": 79.088,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 48,
+      "name": "Vidarbha Cricket Association Ground",
+      "city": "Nagpur",
+      "country": null,
+      "lat": 21.145,
+      "lon": 79.088,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 49,
+      "name": "University Stadium",
+      "city": "PMG, Thiruvananthapuram,",
+      "country": null,
+      "lat": 8.524,
+      "lon": 76.936,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 50,
+      "name": "University Ground",
+      "city": "Lucknow",
+      "country": null,
+      "lat": 26.85,
+      "lon": 80.95,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 51,
+      "name": "Sawai Mansingh Stadium",
+      "city": "Jaipur",
+      "country": null,
+      "lat": 26.916,
+      "lon": 75.787,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 52,
+      "name": "Saurashtra Cricket Association Stadium",
+      "city": "Rajkot",
+      "country": null,
+      "lat": 22.303,
+      "lon": 70.802,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 53,
+      "name": "Reliance Stadium",
+      "city": "Vadodara",
+      "country": null,
+      "lat": 22.308,
+      "lon": 73.181,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 54,
+      "name": "Rajiv Gandhi International Stadium",
+      "city": "Hyderabad",
+      "country": null,
+      "lat": 17.4065,
+      "lon": 78.5505,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 55,
+      "name": "Punjab Cricket Association IS Bindra Stadium",
+      "city": "Mohali, Chandigarh",
+      "country": null,
+      "lat": 51.4821031,
+      "lon": -0.1117327,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 56,
+      "name": "Nehru Stadium",
+      "city": "Pune",
+      "country": null,
+      "lat": 18.52,
+      "lon": 73.856,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 57,
+      "name": "Maharashtra Cricket Association Stadium",
+      "city": "Pune",
+      "country": null,
+      "lat": 18.674,
+      "lon": 73.806,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 58,
+      "name": "MA Chidambaram Stadium",
+      "city": "Chennai",
+      "country": null,
+      "lat": 13.0627,
+      "lon": 80.2792,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 59,
+      "name": "M.Chinnaswamy Stadium",
+      "city": "Bengaluru",
+      "country": null,
+      "lat": 12.9788,
+      "lon": 77.5996,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 60,
+      "name": "JSCA International Stadium Complex",
+      "city": "Ranchi",
+      "country": null,
+      "lat": 23.356,
+      "lon": 85.325,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 61,
+      "name": "Holkar Cricket Stadium",
+      "city": "Indore",
+      "country": null,
+      "lat": 22.719,
+      "lon": 75.857,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 62,
+      "name": "Himachal Pradesh Cricket Association Stadium",
+      "city": "Dharamsala",
+      "country": null,
+      "lat": 32.219,
+      "lon": 76.323,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 63,
+      "name": "Arun Jaitley Stadium",
+      "city": "Delhi",
+      "country": null,
+      "lat": 28.6377,
+      "lon": 77.2432,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 64,
+      "name": "Eden Gardens",
+      "city": "Kolkata",
+      "country": null,
+      "lat": 22.5645,
+      "lon": 88.3433,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 65,
+      "name": "Barabati Stadium",
+      "city": "Cuttack",
+      "country": null,
+      "lat": 20.462,
+      "lon": 85.883,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 66,
+      "name": "The Village",
+      "city": "Dublin",
+      "country": null,
+      "lat": 53.298,
+      "lon": -6.228,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 67,
+      "name": "Civil Service Cricket Club",
+      "city": "Belfast",
+      "country": null,
+      "lat": 54.5766,
+      "lon": -5.9544,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 68,
+      "name": "Sky Stadium",
+      "city": "Wellington",
+      "country": null,
+      "lat": -41.288,
+      "lon": 174.786,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 69,
+      "name": "University Oval",
+      "city": "Dunedin",
+      "country": null,
+      "lat": -45.87,
+      "lon": 170.51,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 70,
+      "name": "Seddon Park",
+      "city": "Hamilton",
+      "country": null,
+      "lat": -37.785,
+      "lon": 175.283,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 71,
+      "name": "Saxton Oval",
+      "city": "Nelson",
+      "country": null,
+      "lat": -41.27,
+      "lon": 173.283,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 72,
+      "name": "Queenstown Events Centre",
+      "city": "Queenstown",
+      "country": null,
+      "lat": -45.031,
+      "lon": 168.662,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 73,
+      "name": "Pukekura Park",
+      "city": "New Plymouth",
+      "country": null,
+      "lat": -39.057,
+      "lon": 174.075,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 74,
+      "name": "Owen Delany Park",
+      "city": "Taupo",
+      "country": null,
+      "lat": -38.687,
+      "lon": 176.07,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 75,
+      "name": "McLean Park",
+      "city": "Napier",
+      "country": null,
+      "lat": -39.492,
+      "lon": 176.918,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 76,
+      "name": "Hagley Oval",
+      "city": "Christchurch",
+      "country": null,
+      "lat": -43.534,
+      "lon": 172.634,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 77,
+      "name": "Eden Park",
+      "city": "Auckland",
+      "country": null,
+      "lat": -36.875,
+      "lon": 174.744,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 78,
+      "name": "Cobham Oval (New)",
+      "city": "Whangarei",
+      "country": null,
+      "lat": -35.72,
+      "lon": 174.32,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 79,
+      "name": "Carisbrook",
+      "city": "Dunedin",
+      "country": null,
+      "lat": -45.87,
+      "lon": 170.51,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 80,
+      "name": "Bert Sutcliffe Oval",
+      "city": "Lincoln",
+      "country": null,
+      "lat": -43.64,
+      "lon": 172.466,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 81,
+      "name": "Bay Oval",
+      "city": "Mount Maunganu",
+      "country": null,
+      "lat": -37.675,
+      "lon": 176.22,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 82,
+      "name": "Basin Reserve",
+      "city": "Wellington",
+      "country": null,
+      "lat": -41.3,
+      "lon": 174.78,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 83,
+      "name": "AMI Stadium",
+      "city": "Christchurch",
+      "country": null,
+      "lat": -43.534,
+      "lon": 172.634,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 84,
+      "name": "Rawalpindi Cricket Stadium",
+      "city": "Rawalpindi",
+      "country": null,
+      "lat": 33.654,
+      "lon": 73.045,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 85,
+      "name": "Peshawar Club Ground",
+      "city": "Peshawar",
+      "country": null,
+      "lat": 34.015,
+      "lon": 71.58,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 86,
+      "name": "Multan Cricket Stadium",
+      "city": "Multan",
+      "country": null,
+      "lat": 30.198,
+      "lon": 71.468,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 87,
+      "name": "Jinnah Stadium",
+      "city": "Sialkot",
+      "country": null,
+      "lat": 32.494,
+      "lon": 74.522,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 88,
+      "name": "Iqbal Stadium",
+      "city": "Faislabad",
+      "country": null,
+      "lat": 31.418,
+      "lon": 73.089,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 89,
+      "name": "Gaddafi Stadium",
+      "city": "Lahore",
+      "country": null,
+      "lat": 31.513,
+      "lon": 74.333,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 90,
+      "name": "Bugti Stadium",
+      "city": "Quetta",
+      "country": null,
+      "lat": 30.18,
+      "lon": 66.975,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 91,
+      "name": "Bahawal Stadium",
+      "city": "Bahawalpur",
+      "country": null,
+      "lat": 29.395,
+      "lon": 71.682,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 92,
+      "name": "Willowmoore Park",
+      "city": "Benoni",
+      "country": null,
+      "lat": -26.188,
+      "lon": 28.32,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 93,
+      "name": "The Wanderers Stadium",
+      "city": "Johannesburg",
+      "country": null,
+      "lat": -26.131,
+      "lon": 28.017,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 94,
+      "name": "SuperSport Park",
+      "city": "Centurion",
+      "country": null,
+      "lat": -25.859,
+      "lon": 28.195,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 95,
+      "name": "St George's Park",
+      "city": "Port Elizabeth",
+      "country": null,
+      "lat": -33.963,
+      "lon": 25.602,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 96,
+      "name": "Senwes Park",
+      "city": "Potchefstroom",
+      "country": null,
+      "lat": -26.71,
+      "lon": 27.1,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 97,
+      "name": "Old Wanderers",
+      "city": "Johannesburg",
+      "country": null,
+      "lat": -26.131,
+      "lon": 28.017,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 98,
+      "name": "Newlands",
+      "city": "Cape Town",
+      "country": null,
+      "lat": -33.9783,
+      "lon": 18.4278,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 99,
+      "name": "Moses Mabhida Stadium",
+      "city": "Durban",
+      "country": null,
+      "lat": -29.858,
+      "lon": 31.021,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 100,
+      "name": "Mangaung Oval",
+      "city": "Bloemfontein",
+      "country": null,
+      "lat": -29.116,
+      "lon": 26.215,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 101,
+      "name": "Kingsmead",
+      "city": "Durban",
+      "country": null,
+      "lat": -29.858,
+      "lon": 31.021,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 102,
+      "name": "Ellis Park",
+      "city": "Johannesburg",
+      "country": null,
+      "lat": -26.195,
+      "lon": 28.059,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 103,
+      "name": "Diamond Oval",
+      "city": "Kimberley",
+      "country": null,
+      "lat": -28.738,
+      "lon": 24.766,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 104,
+      "name": "Buffalo Park",
+      "city": "East London",
+      "country": null,
+      "lat": -32.99,
+      "lon": 27.914,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 105,
+      "name": "Boland Park",
+      "city": "Paarl",
+      "country": null,
+      "lat": -33.734,
+      "lon": 18.966,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 106,
+      "name": "Tyronne Fernando Stadium",
+      "city": "Moratuwa",
+      "country": null,
+      "lat": 6.773,
+      "lon": 79.882,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 107,
+      "name": "Sinhalese Sports Club",
+      "city": "Colombo",
+      "country": null,
+      "lat": 6.914,
+      "lon": 79.873,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 108,
+      "name": "Rangiri Dambulla International Stadium",
+      "city": "Dambulla",
+      "country": null,
+      "lat": 7.673,
+      "lon": 80.649,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 109,
+      "name": "R.Premadasa Stadium",
+      "city": "Colombo",
+      "country": null,
+      "lat": 6.9344,
+      "lon": 79.8779,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 110,
+      "name": "Pallekele International Cricket Stadium",
+      "city": "Pallekele, Kandy",
+      "country": null,
+      "lat": 7.28,
+      "lon": 80.635,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 111,
+      "name": "P Sara Oval",
+      "city": "Colombo",
+      "country": null,
+      "lat": 6.914,
+      "lon": 79.873,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 112,
+      "name": "Mahinda Rajapaksa International Cricket Stadium",
+      "city": "Hambantota",
+      "country": null,
+      "lat": 6.124,
+      "lon": 81.118,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 113,
+      "name": "Galle International Stadium",
+      "city": "Galle",
+      "country": null,
+      "lat": 6.031,
+      "lon": 80.217,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 114,
+      "name": "Colombo Cricket Club Ground",
+      "city": "Colombo",
+      "country": null,
+      "lat": 6.914,
+      "lon": 79.873,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 115,
+      "name": "Asgiriya Stadium",
+      "city": "Kandy",
+      "country": null,
+      "lat": 7.293,
+      "lon": 80.635,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 116,
+      "name": "Windsor Park",
+      "city": "Roseau",
+      "country": null,
+      "lat": 15.301,
+      "lon": -61.388,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 117,
+      "name": "Warner Park",
+      "city": "Basseterre",
+      "country": null,
+      "lat": 17.302,
+      "lon": -62.717,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 118,
+      "name": "Sir Vivian Richards Stadium",
+      "city": "North Sound",
+      "country": null,
+      "lat": 17.105,
+      "lon": -61.79,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 119,
+      "name": "Sabina Park",
+      "city": "Kingston",
+      "country": null,
+      "lat": 18.002,
+      "lon": -76.79,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 120,
+      "name": "Queen's Park Oval",
+      "city": "Port of Spain",
+      "country": null,
+      "lat": 10.66,
+      "lon": -61.52,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 121,
+      "name": "Providence Stadium",
+      "city": "Providence",
+      "country": null,
+      "lat": 6.801,
+      "lon": -58.168,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 122,
+      "name": "National Cricket Stadium",
+      "city": "St George's",
+      "country": null,
+      "lat": 12.05,
+      "lon": -61.75,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 123,
+      "name": "Kensington Oval",
+      "city": "Bridgetown",
+      "country": null,
+      "lat": 13.105,
+      "lon": -59.62,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 124,
+      "name": "Darren Sammy National Cricket Stadium",
+      "city": "Gros Islet",
+      "country": null,
+      "lat": 14.07,
+      "lon": -60.95,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 125,
+      "name": "Antigua Recreation Ground",
+      "city": "St John's",
+      "country": null,
+      "lat": 17.12,
+      "lon": -61.85,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 126,
+      "name": "Queens Sports Club",
+      "city": "Bulawayo",
+      "country": null,
+      "lat": -20.15,
+      "lon": 28.58,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 127,
+      "name": "Old Hararians",
+      "city": "Harare",
+      "country": null,
+      "lat": -17.825,
+      "lon": 31.05,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 128,
+      "name": "Kwekwe Sports Club",
+      "city": "Kwekwe",
+      "country": null,
+      "lat": -18.97,
+      "lon": 29.82,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 129,
+      "name": "Harare Sports Club",
+      "city": "Harare",
+      "country": null,
+      "lat": -17.825,
+      "lon": 31.05,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 130,
+      "name": "Bulawayo Athletic Club",
+      "city": "Bulawayo",
+      "country": null,
+      "lat": -20.15,
+      "lon": 28.58,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 131,
+      "name": "Dubai International Cricket Stadium",
+      "city": "Dubai",
+      "country": null,
+      "lat": 25.0466,
+      "lon": 55.2191,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 132,
+      "name": "Sheikh Zayed Stadium",
+      "city": "Abu Dhabi",
+      "country": null,
+      "lat": 24.397,
+      "lon": 54.547,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 133,
+      "name": "Sharjah Cricket Stadium",
+      "city": "Sharjah",
+      "country": null,
+      "lat": 25.3243,
+      "lon": 55.4209,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 134,
+      "name": "Barsapara Cricket Stadium",
+      "city": "Guwahati",
+      "country": null,
+      "lat": 26.144,
+      "lon": 91.736,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 135,
+      "name": "Maple Leaf North-West Ground",
+      "city": "King City Ontario",
+      "country": null,
+      "lat": 43.95,
+      "lon": -79.46,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 140,
+      "name": "Dr. Y.S. Rajasekhara Reddy ACA-VDCA Cricket Stadium",
+      "city": "Pothanamallayapalam, Visakhapatnam",
+      "country": null,
+      "lat": 17.72,
+      "lon": 83.224,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 143,
+      "name": "North Sydney Oval",
+      "city": "Sydney",
+      "country": null,
+      "lat": -33.839,
+      "lon": 151.207,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 146,
+      "name": "Junction Oval",
+      "city": "Melbourne",
+      "country": null,
+      "lat": -37.842,
+      "lon": 144.983,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 149,
+      "name": "Hurstville Oval",
+      "city": "Sydney",
+      "country": null,
+      "lat": -33.967,
+      "lon": 151.102,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 152,
+      "name": "Bankstown Oval",
+      "city": "Sydney",
+      "country": null,
+      "lat": -33.917,
+      "lon": 151.033,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 155,
+      "name": "Brabourne Stadium",
+      "city": "Mumbai",
+      "country": null,
+      "lat": 18.9389,
+      "lon": 72.8258,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 158,
+      "name": "Drummoyne Oval",
+      "city": "Sydney",
+      "country": null,
+      "lat": -33.855,
+      "lon": 151.155,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 161,
+      "name": "Central Broward Regional Park Stadium Turf Ground",
+      "city": "Lauderhill, Florida",
+      "country": null,
+      "lat": 26.14,
+      "lon": -80.2,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 164,
+      "name": "Greenfield International Stadium",
+      "city": "Karyavattom,  Thiruvananthapuram",
+      "country": null,
+      "lat": 8.524,
+      "lon": 76.936,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 167,
+      "name": "Allan Border Field",
+      "city": "Brisbane",
+      "country": null,
+      "lat": -27.435,
+      "lon": 153.008,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 170,
+      "name": "Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium",
+      "city": "Lucknow",
+      "country": null,
+      "lat": 26.85,
+      "lon": 80.95,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 173,
+      "name": "National Stadium",
+      "city": "Karachi",
+      "country": null,
+      "lat": 24.86,
+      "lon": 67.01,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 176,
+      "name": "Yarrow Stadium",
+      "city": "New Plymouth",
+      "country": null,
+      "lat": -39.057,
+      "lon": 174.075,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 179,
+      "name": "Eden Park Outer Oval",
+      "city": "Auckland",
+      "country": null,
+      "lat": -36.875,
+      "lon": 174.744,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 182,
+      "name": "Narendra Modi Stadium",
+      "city": "Ahmedabad",
+      "country": null,
+      "lat": 23.0915,
+      "lon": 72.5975,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 185,
+      "name": "Sydney Showground Stadium",
+      "city": "Sydney, New South Wales",
+      "country": null,
+      "lat": -33.843,
+      "lon": 150.948,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 188,
+      "name": "Molyneux Park",
+      "city": "Alexandra",
+      "country": null,
+      "lat": -45.25,
+      "lon": 169.39,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 194,
+      "name": "The Gabba",
+      "city": "Brisbane",
+      "country": null,
+      "lat": -27.4858,
+      "lon": 153.0381,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 197,
+      "name": "Docklands Stadium",
+      "city": "Melbourne",
+      "country": null,
+      "lat": -37.8165,
+      "lon": 144.9475,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 200,
+      "name": "Carrara Oval",
+      "city": "Carrara, Queensland",
+      "country": null,
+      "lat": -28.002,
+      "lon": 153.38,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 203,
+      "name": "Shaheed Veer Narayan Singh International Stadium",
+      "city": "Raipur",
+      "country": null,
+      "lat": 21.251,
+      "lon": 81.629,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 206,
+      "name": "Mainpower Oval",
+      "city": "Rangiora",
+      "country": null,
+      "lat": -43.304,
+      "lon": 172.598,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 209,
+      "name": "Queen's Park",
+      "city": "Invercargill",
+      "country": null,
+      "lat": -46.413,
+      "lon": 168.353,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 212,
+      "name": "Green Park",
+      "city": "Kanpur",
+      "country": null,
+      "lat": 26.449,
+      "lon": 80.332,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 215,
+      "name": "Aurora Stadium",
+      "city": "Launceston, Tasmania",
+      "country": null,
+      "lat": -41.4208,
+      "lon": 147.1345,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 218,
+      "name": "Traeger Park",
+      "city": "Alice Springs, Northern Territory",
+      "country": null,
+      "lat": -23.698,
+      "lon": 133.88,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 221,
+      "name": "County Ground, New Road",
+      "city": "Worcester",
+      "country": null,
+      "lat": 52.189,
+      "lon": -2.223,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 224,
+      "name": "Uxbridge Cricket Club Ground",
+      "city": "Uxbridge",
+      "country": null,
+      "lat": 51.545,
+      "lon": -0.478,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 227,
+      "name": "Merchant Taylors' School Ground",
+      "city": "Northwood",
+      "country": null,
+      "lat": 51.61,
+      "lon": -0.42,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 230,
+      "name": "The Kent County Cricket Ground",
+      "city": "New Beckenham",
+      "country": null,
+      "lat": 51.41,
+      "lon": 0.02,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 233,
+      "name": "College Ground",
+      "city": "Cheltenham",
+      "country": null,
+      "lat": 51.9,
+      "lon": -2.08,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 236,
+      "name": "Queen's Park",
+      "city": "Chesterfield",
+      "country": null,
+      "lat": 53.235,
+      "lon": -1.425,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 239,
+      "name": "Arundel Castle",
+      "city": "Arundel",
+      "country": null,
+      "lat": 50.854,
+      "lon": -0.553,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 242,
+      "name": "Old Deer Park",
+      "city": "Richmond",
+      "country": null,
+      "lat": 51.46,
+      "lon": -0.303,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 245,
+      "name": "Aigburth",
+      "city": "Liverpool",
+      "country": null,
+      "lat": 53.375,
+      "lon": -2.94,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 248,
+      "name": "Woodbridge Road",
+      "city": "Guildford",
+      "country": null,
+      "lat": 51.235,
+      "lon": -0.57,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 251,
+      "name": "Trafalgar Road Ground",
+      "city": "Birkdale, Southpor",
+      "country": null,
+      "lat": 53.622,
+      "lon": -3.015,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 254,
+      "name": "Colwyn Bay Cricket Club Ground",
+      "city": "Colwyn Bay, Wales",
+      "country": null,
+      "lat": 53.295,
+      "lon": -3.726,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 257,
+      "name": "Haslegrave Ground",
+      "city": "Loughborough",
+      "country": null,
+      "lat": 52.77,
+      "lon": -1.21,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 260,
+      "name": "Clifton Park Ground",
+      "city": "York",
+      "country": null,
+      "lat": 53.96,
+      "lon": -1.087,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 263,
+      "name": "Stanley Park",
+      "city": "Blackpool",
+      "country": null,
+      "lat": 53.815,
+      "lon": -3.05,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 266,
+      "name": "ICC Academy",
+      "city": "Dubai",
+      "country": null,
+      "lat": 25.0466,
+      "lon": 55.2191,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 269,
+      "name": "Castle Avenue",
+      "city": "Dublin",
+      "country": null,
+      "lat": 53.298,
+      "lon": -6.228,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 272,
+      "name": "Gliderol Stadium",
+      "city": "Adelaide",
+      "country": null,
+      "lat": -34.9156,
+      "lon": 138.5961,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 275,
+      "name": "North Dalton Park",
+      "city": "Wollongong, New South Wales",
+      "country": null,
+      "lat": -34.425,
+      "lon": 150.893,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 278,
+      "name": "Cazaly's Stadium",
+      "city": "Westcourt, Cairns, Queensland",
+      "country": null,
+      "lat": -16.918,
+      "lon": 145.748,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 281,
+      "name": "Radlett Cricket Club",
+      "city": "Radlett",
+      "country": null,
+      "lat": 51.686,
+      "lon": -0.316,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 284,
+      "name": "Roseworth Terrace",
+      "city": "Gosforth",
+      "country": null,
+      "lat": 55.006,
+      "lon": -1.62,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 287,
+      "name": "Welbeck Colliery Cricket Club Ground",
+      "city": "Market Warsop, Nottinghamshire",
+      "country": null,
+      "lat": 53.17,
+      "lon": -1.05,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 290,
+      "name": "Oakham School Ground",
+      "city": "Oakham",
+      "country": null,
+      "lat": 52.67,
+      "lon": -0.73,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 293,
+      "name": "The Saffrons",
+      "city": "Eastbourne",
+      "country": null,
+      "lat": 50.77,
+      "lon": 0.28,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 296,
+      "name": "Geelong Cricket Ground",
+      "city": "Geelong",
+      "country": null,
+      "lat": -38.1579,
+      "lon": 144.3614,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 299,
+      "name": "Brian Lara Stadium",
+      "city": "Tarouba",
+      "country": null,
+      "lat": 10.29,
+      "lon": -61.45,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 302,
+      "name": "West Park Oval",
+      "city": "Burnie, Tasmania",
+      "country": null,
+      "lat": -41.054,
+      "lon": 145.903,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 305,
+      "name": "Eastern Oval",
+      "city": "Ballarat, Victoria",
+      "country": null,
+      "lat": -37.562,
+      "lon": 143.858,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 308,
+      "name": "Ted Summerton Reserve",
+      "city": "Moe, Victoria",
+      "country": null,
+      "lat": -38.178,
+      "lon": 146.26,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 311,
+      "name": "Casey Fields No. 4",
+      "city": "Melbourne, Victoria",
+      "country": null,
+      "lat": -38.115,
+      "lon": 145.3,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 314,
+      "name": "Karen Rolton Oval",
+      "city": "Adelaide, South Australia",
+      "country": null,
+      "lat": -34.9156,
+      "lon": 138.5961,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 317,
+      "name": "Lilac Hill Park",
+      "city": "Perth, Western",
+      "country": null,
+      "lat": -31.9505,
+      "lon": 115.8895,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 320,
+      "name": "Blacktown International Sportspark",
+      "city": "Rooty Hill,  Sydney, New South Wales",
+      "country": null,
+      "lat": -33.771,
+      "lon": 150.906,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 323,
+      "name": "Harrup Park",
+      "city": "Mackay, Queensland",
+      "country": null,
+      "lat": -21.142,
+      "lon": 149.186,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 326,
+      "name": "Tribhuvan University International Cricket Ground",
+      "city": "Kirtipur",
+      "country": null,
+      "lat": 27.68,
+      "lon": 85.28,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 329,
+      "name": "Three Ws Oval",
+      "city": "Cave Hill, Barbados  University of the West Indies, Cave Hill, Barbados",
+      "country": null,
+      "lat": 13.13,
+      "lon": -59.62,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 332,
+      "name": "Camberwell Sports Ground",
+      "city": "Camberwell,  Melbourne, Victoria",
+      "country": null,
+      "lat": -37.825,
+      "lon": 145.07,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 335,
+      "name": "Lavington Sports Oval",
+      "city": "Albury, New South Wales",
+      "country": null,
+      "lat": -36.074,
+      "lon": 146.914,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 338,
+      "name": "Howell Oval",
+      "city": "Penrith,  Sydney, New South Wales",
+      "country": null,
+      "lat": -33.751,
+      "lon": 150.694,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 341,
+      "name": "Howell Oval",
+      "city": "Penrith,  Sydney, New South Wales",
+      "country": null,
+      "lat": -33.751,
+      "lon": 150.694,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 344,
+      "name": "Robertson Oval",
+      "city": "Wagga Wagga, New South Wales",
+      "country": null,
+      "lat": -35.108,
+      "lon": 147.369,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 347,
+      "name": "SSP Cricket Ground",
+      "city": "Dhangadi",
+      "country": null,
+      "lat": 28.21,
+      "lon": 81.25,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 350,
+      "name": "Fapla International Cricket Ground",
+      "city": "Dhangadi",
+      "country": null,
+      "lat": 28.21,
+      "lon": 81.25,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 353,
+      "name": "Al Amerat Cricket Ground Oman Cricket (Ministry Turf 1)",
+      "city": "Al Amarat",
+      "country": null,
+      "lat": 23.57,
+      "lon": 58.39,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 356,
+      "name": "City Oval",
+      "city": "Pietermaritzburg",
+      "country": null,
+      "lat": -29.6,
+      "lon": 30.379,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 359,
+      "name": "Mutare Sports Club",
+      "city": "Mutare, Manicaland",
+      "country": null,
+      "lat": -18.97,
+      "lon": 29.82,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 362,
+      "name": "Recreation Ground",
+      "city": "Oudtshoorn",
+      "country": null,
+      "lat": -33.59,
+      "lon": 22.2,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 365,
+      "name": "Rajiv Gandhi International Cricket Stadium",
+      "city": "Dehra Dun, Uttarakhand",
+      "country": null,
+      "lat": 30.316,
+      "lon": 78.032,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 368,
+      "name": "Takashinga Sports Club",
+      "city": "Highfield, Harare",
+      "country": null,
+      "lat": -17.825,
+      "lon": 31.05,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 371,
+      "name": "La Manga Club Bottom Ground",
+      "city": "Cartagena, Murcia",
+      "country": null,
+      "lat": 37.602,
+      "lon": -0.98,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 376,
+      "name": "Wanderers Cricket Ground",
+      "city": "Windhoek",
+      "country": null,
+      "lat": -22.56,
+      "lon": 17.083,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 379,
+      "name": "United Cricket Club",
+      "city": "Windhoek",
+      "country": null,
+      "lat": -22.56,
+      "lon": 17.083,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 382,
+      "name": "Affies Park",
+      "city": "Windhoek",
+      "country": null,
+      "lat": -22.56,
+      "lon": 17.083,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 388,
+      "name": "VRA Cricket Ground",
+      "city": "Amstelveen",
+      "country": null,
+      "lat": 52.29,
+      "lon": 4.85,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 391,
+      "name": "Gorse Lane",
+      "city": "Grantham",
+      "country": null,
+      "lat": 52.915,
+      "lon": -0.64,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 394,
+      "name": "Grange Cricket Club",
+      "city": "Edinburgh",
+      "country": null,
+      "lat": 55.96,
+      "lon": -3.21,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 397,
+      "name": "Royal Brussels Cricket Ground",
+      "city": "Brussels",
+      "country": null,
+      "lat": 50.85,
+      "lon": 4.35,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 400,
+      "name": "Newport Stadium",
+      "city": "Newport",
+      "country": null,
+      "lat": 51.59,
+      "lon": -2.99,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 403,
+      "name": "Clontarf Cricket Club Ground",
+      "city": "Durbin",
+      "country": null,
+      "lat": 53.298,
+      "lon": -6.228,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 405,
+      "name": "Newclose County Cricket Ground",
+      "city": "Newport",
+      "country": null,
+      "lat": 50.7,
+      "lon": -1.29,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 408,
+      "name": "Sportpark Maarschalkerweerd",
+      "city": "Utrecht",
+      "country": null,
+      "lat": 52.09,
+      "lon": 5.12,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 411,
+      "name": "College Field",
+      "city": "St Peter Port",
+      "country": null,
+      "lat": 49.46,
+      "lon": -2.54,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 414,
+      "name": "The John Fretwell Sporting Complex",
+      "city": "Nettleworth, Nottinghamshire",
+      "country": null,
+      "lat": 53.1,
+      "lon": -1.05,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 417,
+      "name": "Hazelaarweg",
+      "city": "Rotterdam",
+      "country": null,
+      "lat": 51.92,
+      "lon": 4.48,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 420,
+      "name": "Sportpark Het Schootsveld",
+      "city": "Deventer",
+      "country": null,
+      "lat": 52.25,
+      "lon": 6.16,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 423,
+      "name": "York Cricket Club",
+      "city": "York",
+      "country": null,
+      "lat": 53.96,
+      "lon": -1.087,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 426,
+      "name": "Chester Road North Ground",
+      "city": "Kidderminster",
+      "country": null,
+      "lat": 52.385,
+      "lon": -2.25,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 429,
+      "name": "Kinrara Academy Oval",
+      "city": "Kuala Lumpur",
+      "country": null,
+      "lat": 3.14,
+      "lon": 101.69,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 432,
+      "name": "Sedbergh School",
+      "city": "Sedbergh, Cumbria",
+      "country": null,
+      "lat": 54.322,
+      "lon": -2.527,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 435,
+      "name": "Bready Cricket Club",
+      "city": "Bready",
+      "country": null,
+      "lat": 54.87,
+      "lon": -7.38,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 438,
+      "name": "West End Park International Cricket Stadium",
+      "city": "Doha",
+      "country": null,
+      "lat": 25.32,
+      "lon": 51.44,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 441,
+      "name": "Svanholm Park",
+      "city": "Brondby",
+      "country": null,
+      "lat": 55.64,
+      "lon": 12.08,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 444,
+      "name": "CAA Centre",
+      "city": "Brampton, Ontario",
+      "country": null,
+      "lat": 43.717,
+      "lon": -79.65,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 447,
+      "name": "NPR College Ground",
+      "city": "Dindigul, Tamil Nadu",
+      "country": null,
+      "lat": 10.362,
+      "lon": 77.969,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 450,
+      "name": "Indian Cement Company Ground",
+      "city": "Sankar Nagar, Tirunelveli",
+      "country": null,
+      "lat": 8.73,
+      "lon": 77.76,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 453,
+      "name": "Sportpark Westvliet",
+      "city": "The Hague",
+      "country": null,
+      "lat": 52.08,
+      "lon": 4.31,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 456,
+      "name": "Mannofield Park",
+      "city": "Aberdeen",
+      "country": null,
+      "lat": 57.15,
+      "lon": -2.09,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 459,
+      "name": "Kerava National Cricket Ground",
+      "city": "Kerava",
+      "country": null,
+      "lat": 60.4,
+      "lon": 25.1,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 462,
+      "name": "White Hill Field, Sandys Parish",
+      "city": "Hamilton",
+      "country": null,
+      "lat": 32.294,
+      "lon": -64.784,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 465,
+      "name": "National Stadium",
+      "city": "Hamilton",
+      "country": null,
+      "lat": 32.294,
+      "lon": -64.784,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 468,
+      "name": "Srikantadatta Narasimha Raja Wadeyar Ground",
+      "city": "Mysore",
+      "country": null,
+      "lat": 12.296,
+      "lon": 76.639,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 471,
+      "name": "Moara Vlasiei Cricket Ground",
+      "city": "Ilfov County",
+      "country": null,
+      "lat": 44.55,
+      "lon": 26.08,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 474,
+      "name": "Mercantile Cricket Association Ground",
+      "city": "Colombo",
+      "country": null,
+      "lat": 6.914,
+      "lon": 79.873,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 477,
+      "name": "Chatsworth Stadium",
+      "city": "Durban",
+      "country": null,
+      "lat": -29.858,
+      "lon": 31.021,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 480,
+      "name": "Free Trade Zone Sports Complex",
+      "city": "Katunayake",
+      "country": null,
+      "lat": 7.18,
+      "lon": 79.88,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 483,
+      "name": "Abbottabad Cricket Stadium",
+      "city": "Abbottabad",
+      "country": null,
+      "lat": 34.168,
+      "lon": 73.242,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 486,
+      "name": "United Bank Limited Sports Complex",
+      "city": "Karachi",
+      "country": null,
+      "lat": 24.86,
+      "lon": 67.01,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 489,
+      "name": "Affies Park",
+      "city": "Windhoek",
+      "country": null,
+      "lat": -22.56,
+      "lon": 17.083,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 492,
+      "name": "Indian Association Ground",
+      "city": "Singapore",
+      "country": null,
+      "lat": 1.352,
+      "lon": 103.82,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 495,
+      "name": "Khan Research Laboratory Ground",
+      "city": "Rawalpindi",
+      "country": null,
+      "lat": 33.654,
+      "lon": 73.045,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 498,
+      "name": "ICC Academy Ground No 2",
+      "city": "Dubai",
+      "country": null,
+      "lat": 25.0466,
+      "lon": 55.2191,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 501,
+      "name": "Tolerance Oval",
+      "city": "Abu Dhabi",
+      "country": null,
+      "lat": 24.397,
+      "lon": 54.547,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 504,
+      "name": "Conaree Sports Club",
+      "city": "Basseterre",
+      "country": null,
+      "lat": 17.302,
+      "lon": -62.717,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 507,
+      "name": "Invermay Park",
+      "city": "Launceston",
+      "country": null,
+      "lat": -41.4208,
+      "lon": 147.1345,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 510,
+      "name": "Nuriootpa Centennial Park",
+      "city": "Nuriootpa, South Australia",
+      "country": null,
+      "lat": -34.476,
+      "lon": 139.01,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 513,
+      "name": "Fitzherbert Park",
+      "city": "Palmerston North",
+      "country": null,
+      "lat": -40.352,
+      "lon": 175.617,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 516,
+      "name": "Ekana Cricket Stadium B ground",
+      "city": "Lucknow",
+      "country": null,
+      "lat": 26.85,
+      "lon": 80.95,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 519,
+      "name": "Lincoln No 3",
+      "city": "Lincoln",
+      "country": null,
+      "lat": -43.64,
+      "lon": 172.466,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 522,
+      "name": "National Bank of Pakistan Sports Complex",
+      "city": "Karachi",
+      "country": null,
+      "lat": 24.86,
+      "lon": 67.01,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 525,
+      "name": "State Bank of Pakistan Sports Complex",
+      "city": "Karachi",
+      "country": null,
+      "lat": 24.86,
+      "lon": 67.01,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 528,
+      "name": "New Wanderers Stadium",
+      "city": "Johannesburg",
+      "country": null,
+      "lat": -26.131,
+      "lon": 28.017,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 531,
+      "name": "Coolidge Cricket Ground,",
+      "city": "Coolidge",
+      "country": null,
+      "lat": 17.004,
+      "lon": -61.772,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 534,
+      "name": "North-West University No1 Ground",
+      "city": "Potchefstroom",
+      "country": null,
+      "lat": -26.71,
+      "lon": 27.1,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 537,
+      "name": "Country Club B Field",
+      "city": "Kimberley",
+      "country": null,
+      "lat": -28.738,
+      "lon": 24.766,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 540,
+      "name": "Witrand Cricket Field",
+      "city": "Potchefstroom",
+      "country": null,
+      "lat": -26.71,
+      "lon": 27.1,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 543,
+      "name": "North-West University No2 Ground",
+      "city": "Potchefstroom",
+      "country": null,
+      "lat": -26.71,
+      "lon": 27.1,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 546,
+      "name": "Colin Maiden Park",
+      "city": "Auckland",
+      "country": null,
+      "lat": -36.875,
+      "lon": 174.744,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 549,
+      "name": "Greater Noida Sports Complex Ground",
+      "city": "Greater Noida",
+      "country": null,
+      "lat": 28.474,
+      "lon": 77.536,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 552,
+      "name": "Desert Springs Cricket Ground",
+      "city": "Almeria",
+      "country": null,
+      "lat": 36.84,
+      "lon": -2.46,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 555,
+      "name": "Gymkhana Club Ground",
+      "city": "Nairobi",
+      "country": null,
+      "lat": -1.292,
+      "lon": 36.822,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 558,
+      "name": "Vanuatu Cricket Ground",
+      "city": "Vanuatu",
+      "country": null,
+      "lat": -17.733,
+      "lon": 168.327,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 561,
+      "name": "Arnos Vale Ground",
+      "city": "Arnos Vale",
+      "country": null,
+      "lat": 13.15,
+      "lon": -61.2,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 564,
+      "name": "Marrara Cricket Ground No. 2",
+      "city": "Marrara, Darwin, Northern Territory",
+      "country": null,
+      "lat": -12.3911,
+      "lon": 130.877,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 567,
+      "name": "Cazalys Oval",
+      "city": "Woodroffe , Northern Territory",
+      "country": null,
+      "lat": -12.3911,
+      "lon": 130.877,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 570,
+      "name": "Marrara Cricket Ground No. 1",
+      "city": "Marrara, Darwin, Northern Territory",
+      "country": null,
+      "lat": -12.3911,
+      "lon": 130.877,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 573,
+      "name": "Gardens Oval",
+      "city": "The Gardens, Darwin, Northern Territory",
+      "country": null,
+      "lat": -12.3911,
+      "lon": 130.877,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 576,
+      "name": "Tracy Village Oval",
+      "city": "Wanguri, Darwin, Northern Territory",
+      "country": null,
+      "lat": -12.3911,
+      "lon": 130.877,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 579,
+      "name": "Fred's Pass",
+      "city": "Darwin, Northern Territory",
+      "country": null,
+      "lat": -12.3911,
+      "lon": 130.877,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 582,
+      "name": "Kahlin Oval",
+      "city": "Larrakeyah, Darwin, Northern Territory",
+      "country": null,
+      "lat": -12.3911,
+      "lon": 130.877,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 585,
+      "name": "Tikkurila Cricket Ground",
+      "city": "Vantaa",
+      "country": null,
+      "lat": 60.29,
+      "lon": 25.04,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 588,
+      "name": "Kummerfeld Sports Verein",
+      "city": "Kummerfeld",
+      "country": null,
+      "lat": 53.65,
+      "lon": 10.0,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 591,
+      "name": "Vinor Cricket Ground",
+      "city": "Prague",
+      "country": null,
+      "lat": 50.106,
+      "lon": 14.523,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 594,
+      "name": "MTV Herrenhausen",
+      "city": "Hannover",
+      "country": null,
+      "lat": 52.37,
+      "lon": 9.74,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 597,
+      "name": "Marsta Cricket Club",
+      "city": "Stockholm",
+      "country": null,
+      "lat": 59.33,
+      "lon": 18.07,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 600,
+      "name": "Velvary Cricket Ground",
+      "city": "Prague",
+      "country": null,
+      "lat": 50.106,
+      "lon": 14.523,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 603,
+      "name": "Grundenmoos",
+      "city": "St Gallen",
+      "country": null,
+      "lat": 47.42,
+      "lon": 9.37,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 606,
+      "name": "Nightcliff Oval",
+      "city": "Darwin, Northern Territory",
+      "country": null,
+      "lat": -12.3911,
+      "lon": 130.877,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 609,
+      "name": "Scott Page Field",
+      "city": "Prague",
+      "country": null,
+      "lat": 50.106,
+      "lon": 14.523,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 612,
+      "name": "Brno Cricket Ground",
+      "city": "Brno",
+      "country": null,
+      "lat": 49.195,
+      "lon": 16.608,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 615,
+      "name": "Karsby Cricket Center",
+      "city": "Stockholm",
+      "country": null,
+      "lat": 59.33,
+      "lon": 18.07,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 618,
+      "name": "Kviberg",
+      "city": "Gothenburg",
+      "country": null,
+      "lat": 57.72,
+      "lon": 12.0,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 621,
+      "name": "Frankfurt CC",
+      "city": "Frankfurt",
+      "country": null,
+      "lat": 50.11,
+      "lon": 8.682,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 624,
+      "name": "Ypsonas Cricket Ground",
+      "city": "Limassol",
+      "country": null,
+      "lat": 34.68,
+      "lon": 33.04,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 627,
+      "name": "Estonian National Cricket & Rugby Ground",
+      "city": "Tallinn",
+      "country": null,
+      "lat": 59.437,
+      "lon": 24.753,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 630,
+      "name": "Brunton Memorial Ground",
+      "city": "Radlett",
+      "country": null,
+      "lat": 51.686,
+      "lon": -0.316,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 633,
+      "name": "Ostrapark RCD Cricket ground",
+      "city": "Dresden",
+      "country": null,
+      "lat": 51.05,
+      "lon": 13.74,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 636,
+      "name": "Pierre Werner Cricket Ground",
+      "city": "Walferdange",
+      "country": null,
+      "lat": 49.66,
+      "lon": 6.13,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 639,
+      "name": "The Belgian Oval",
+      "city": "Gent",
+      "country": null,
+      "lat": 51.05,
+      "lon": 3.72,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 642,
+      "name": "Seebarn Cricket Ground",
+      "city": "Seebarn",
+      "country": null,
+      "lat": 48.25,
+      "lon": 16.52,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 645,
+      "name": "GB Oval",
+      "city": "Szodliget",
+      "country": null,
+      "lat": 47.68,
+      "lon": 19.25,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 648,
+      "name": "Roma Capannelle Cricket Ground",
+      "city": "Rome",
+      "country": null,
+      "lat": 41.834,
+      "lon": 12.594,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 651,
+      "name": "Vassil Levski National Sports AcademyVasil Levski",
+      "city": "Sofia",
+      "country": null,
+      "lat": 42.697,
+      "lon": 23.322,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 654,
+      "name": "Kabul International Cricket Stadium",
+      "city": "Kabul",
+      "country": null,
+      "lat": 34.555,
+      "lon": 69.207,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 657,
+      "name": "Cartaxo Cricket Ground",
+      "city": "Cartaxo",
+      "country": null,
+      "lat": 39.16,
+      "lon": -8.99,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 660,
+      "name": "Sportpark Bermweg",
+      "city": "Capelle",
+      "country": null,
+      "lat": 51.92,
+      "lon": 4.58,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 663,
+      "name": "County Ground",
+      "city": "Derby",
+      "country": null,
+      "lat": 52.914,
+      "lon": -1.458,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 666,
+      "name": "Frankfurt Oval",
+      "city": "Frankfurt",
+      "country": null,
+      "lat": 50.11,
+      "lon": 8.682,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 669,
+      "name": "Vic Cricket Ground",
+      "city": "Barcelona",
+      "country": null,
+      "lat": 41.385,
+      "lon": 2.173,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 672,
+      "name": "Park 25 No.2",
+      "city": "Adelaide, South Australia",
+      "country": null,
+      "lat": -34.9156,
+      "lon": 138.5961,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 675,
+      "name": "Montjuïc Olympic Ground",
+      "city": "Barcelona",
+      "country": null,
+      "lat": 41.364,
+      "lon": 2.155,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 678,
+      "name": "Pindi Club Ground'Rawalpindi",
+      "city": "rawa",
+      "country": null,
+      "lat": 33.654,
+      "lon": 73.045,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 681,
+      "name": "Dr PVG Raju ACA Sports Complex",
+      "city": "Vizianagaram, Andhra Pradesh",
+      "country": null,
+      "lat": 18.11,
+      "lon": 83.42,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 684,
+      "name": "Rural Development Trust Stadium",
+      "city": "Anantapur",
+      "country": null,
+      "lat": 14.681,
+      "lon": 77.6,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 687,
+      "name": "Roma Spinaceto Cricket Ground",
+      "city": "Rome",
+      "country": null,
+      "lat": 41.8,
+      "lon": 12.45,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 690,
+      "name": "Cricket Association Puducherry Siechem Ground",
+      "city": "Puducherry",
+      "country": null,
+      "lat": 11.941,
+      "lon": 79.808,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 693,
+      "name": "Marsa Sports Club",
+      "city": "Malta",
+      "country": null,
+      "lat": 35.89,
+      "lon": 14.49,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 696,
+      "name": "KSCA Cricket Ground",
+      "city": "Alur, Bengaluru",
+      "country": null,
+      "lat": 13.07,
+      "lon": 77.58,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 699,
+      "name": "KSCA Cricket Ground 3",
+      "city": "Alur, Bengaluru",
+      "country": null,
+      "lat": 13.07,
+      "lon": 77.58,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 702,
+      "name": "KSCA Cricket Ground 2",
+      "city": "Alur, Bengaluru",
+      "country": null,
+      "lat": 13.07,
+      "lon": 77.58,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 705,
+      "name": "Jadavpur University Campus",
+      "city": "Kolkata",
+      "country": null,
+      "lat": 22.52,
+      "lon": 88.37,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 708,
+      "name": "F.B. Colony Ground",
+      "city": "Vadodara",
+      "country": null,
+      "lat": 22.308,
+      "lon": 73.181,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 711,
+      "name": "Moti Bagh Stadium",
+      "city": "Vadodara",
+      "country": null,
+      "lat": 22.308,
+      "lon": 73.181,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 714,
+      "name": "Emerald High School Ground",
+      "city": "Indore",
+      "country": null,
+      "lat": 22.719,
+      "lon": 75.857,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 717,
+      "name": "Bandra Kurla Complex",
+      "city": "Mumbai",
+      "country": null,
+      "lat": 19.06,
+      "lon": 72.867,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 720,
+      "name": "Guru Nanak College Ground",
+      "city": "Chennai",
+      "country": null,
+      "lat": 13.04,
+      "lon": 80.23,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 723,
+      "name": "TI Cycles Ground",
+      "city": "Murugappa",
+      "country": null,
+      "lat": 13.04,
+      "lon": 80.23,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 726,
+      "name": "Sri Ramachandra Medical College Ground",
+      "city": "Chennai",
+      "country": null,
+      "lat": 13.04,
+      "lon": 80.23,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 729,
+      "name": "Sri Sivasubramaniya Nadar College of Engineering Ground",
+      "city": "Chennai",
+      "country": null,
+      "lat": 12.87,
+      "lon": 80.22,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 732,
+      "name": "Dr DY Patil Sports Academy",
+      "city": "Mumbai",
+      "country": null,
+      "lat": 19.04,
+      "lon": 73.02,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 734,
+      "name": "Oval Rastignano",
+      "city": "Bologna",
+      "country": null,
+      "lat": 44.468,
+      "lon": 11.358,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 737,
+      "name": "Ian Healy Ova",
+      "city": "Kalinga, Brisbane",
+      "country": null,
+      "lat": -27.4858,
+      "lon": 153.0381,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 743,
+      "name": "Kent County Cricket Club",
+      "city": "Kent",
+      "country": null,
+      "lat": 51.267,
+      "lon": 1.087,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 746,
+      "name": "Venezia Cricket Ground",
+      "city": "Venezia",
+      "country": null,
+      "lat": 45.44,
+      "lon": 12.32,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 749,
+      "name": "Milan Cricket Ground",
+      "city": "Milan",
+      "country": null,
+      "lat": 45.464,
+      "lon": 9.19,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 752,
+      "name": "Estádio Municipal de Miranda do Corvo",
+      "city": "Miranda do Corvo",
+      "country": null,
+      "lat": 40.21,
+      "lon": -8.42,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 755,
+      "name": "JCC Brescia Cricket",
+      "city": "Brescia",
+      "country": null,
+      "lat": 45.54,
+      "lon": 10.22,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 758,
+      "name": "Gerry Wood Oval",
+      "city": "Adelaide",
+      "country": null,
+      "lat": -34.9156,
+      "lon": 138.5961,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 761,
+      "name": "DXC Arena",
+      "city": "Melbourne",
+      "country": null,
+      "lat": -37.82,
+      "lon": 144.9834,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 764,
+      "name": "Bayer Uerdingen Cricket Ground",
+      "city": "Krefeld",
+      "country": null,
+      "lat": 51.34,
+      "lon": 6.56,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 767,
+      "name": "Kiel Cricket Ground",
+      "city": "Kiel",
+      "country": null,
+      "lat": 54.32,
+      "lon": 10.14,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 770,
+      "name": "Kibworth Cricket Club Ground",
+      "city": "Kibworth",
+      "country": null,
+      "lat": 52.54,
+      "lon": -0.99,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 773,
+      "name": "Boughton Hall Cricket Club Ground",
+      "city": "Chester",
+      "country": null,
+      "lat": 53.19,
+      "lon": -2.89,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 776,
+      "name": "FP Fenner's Ground",
+      "city": "Cambridge",
+      "country": null,
+      "lat": 52.205,
+      "lon": 0.115,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 779,
+      "name": "Cartama Oval",
+      "city": "Cartama",
+      "country": null,
+      "lat": 36.71,
+      "lon": -4.62,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 782,
+      "name": "Norsborg Cricket Ground",
+      "city": "Stockholm",
+      "country": null,
+      "lat": 59.33,
+      "lon": 18.07,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 785,
+      "name": "International Sports Stadium",
+      "city": "Coffs Harbour, New South Wales",
+      "country": null,
+      "lat": -30.296,
+      "lon": 153.115,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 788,
+      "name": "Rugby Cricket Dresden eV",
+      "city": "Dresden",
+      "country": null,
+      "lat": 51.05,
+      "lon": 13.74,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 791,
+      "name": "Gucherre Cricket Ground",
+      "city": "Albergaria",
+      "country": null,
+      "lat": 40.69,
+      "lon": -8.48,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 794,
+      "name": "Al Amerat Cricket Ground Oman Cricket (Ministry Turf 2)",
+      "city": "Al Amarat",
+      "country": null,
+      "lat": 23.57,
+      "lon": 58.39,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 797,
+      "name": "Polo Farm Sports Club",
+      "city": "Canterbury",
+      "country": null,
+      "lat": 51.278,
+      "lon": 1.089,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 800,
+      "name": "Rookwood",
+      "city": "Sale, Chesire",
+      "country": null,
+      "lat": 53.43,
+      "lon": -2.32,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 803,
+      "name": "Happy Valley Groung",
+      "city": "Episkopi",
+      "country": null,
+      "lat": 34.67,
+      "lon": 32.87,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 806,
+      "name": "Croatia",
+      "city": "Croatia",
+      "country": null,
+      "lat": 45.1,
+      "lon": 15.2,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 809,
+      "name": "Hotel Resnik Cricket Ground",
+      "city": "Croatia",
+      "country": null,
+      "lat": 43.51,
+      "lon": 16.44,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 812,
+      "name": "Sheikh Zayed Stadium Nursery 2",
+      "city": "Abu Dhabi",
+      "country": null,
+      "lat": 24.397,
+      "lon": 54.547,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 815,
+      "name": "The Sevens Stadium",
+      "city": "Dubai",
+      "country": null,
+      "lat": 25.0466,
+      "lon": 55.2191,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 818,
+      "name": "Sporting Alfas Cricket Club",
+      "city": "Alicante",
+      "country": null,
+      "lat": 38.35,
+      "lon": -0.48,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 821,
+      "name": "Gurgaon Cricket Ground",
+      "city": "Sultanpur",
+      "country": null,
+      "lat": 28.46,
+      "lon": 77.03,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 824,
+      "name": "Andhra Cricket Association Stadium",
+      "city": "Mangalagiri",
+      "country": null,
+      "lat": 16.43,
+      "lon": 80.56,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 827,
+      "name": "Anghara Cricket Association Ground",
+      "city": "Mulapadu",
+      "country": null,
+      "lat": 16.43,
+      "lon": 80.56,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 830,
+      "name": "CH Bansi Cricket Stadium",
+      "city": "Lahli",
+      "country": null,
+      "lat": 29.95,
+      "lon": 76.4,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 833,
+      "name": "Nehru Stadium",
+      "city": "Guwahati",
+      "country": null,
+      "lat": 26.144,
+      "lon": 91.736,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 836,
+      "name": "Roma Cricket Ground",
+      "city": "Rome",
+      "country": null,
+      "lat": 41.834,
+      "lon": 12.594,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 839,
+      "name": "Palam A Ground,Model Sports Complex",
+      "city": "Dehli",
+      "country": null,
+      "lat": 28.567,
+      "lon": 77.103,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 842,
+      "name": "Masvingo Sports Club",
+      "city": "Masvingo",
+      "country": null,
+      "lat": -20.07,
+      "lon": 30.83,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 845,
+      "name": "John Davies Oval",
+      "city": "Queenstown",
+      "country": null,
+      "lat": -45.031,
+      "lon": 168.662,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 848,
+      "name": "Alembic Ground",
+      "city": "Vadodara",
+      "country": null,
+      "lat": 22.308,
+      "lon": 73.181,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 851,
+      "name": "Everest Cricket Club Ground",
+      "city": "Georgetown",
+      "country": null,
+      "lat": 6.801,
+      "lon": -58.168,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 854,
+      "name": "Diego Martin Sporting Complex",
+      "city": "Diego Martin",
+      "country": null,
+      "lat": 10.72,
+      "lon": -61.53,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 857,
+      "name": "Vikas Cricket Ground",
+      "city": "Cuttack",
+      "country": null,
+      "lat": 20.462,
+      "lon": 85.883,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 860,
+      "name": "Sardar Patel Stadium B Ground",
+      "city": "Ahmedabad",
+      "country": null,
+      "lat": 23.0915,
+      "lon": 72.5975,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 863,
+      "name": "Saurashtra Cricket Association Stadium C",
+      "city": "Rajkot",
+      "country": null,
+      "lat": 22.303,
+      "lon": 70.802,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 866,
+      "name": "St Xaviers College Ground, Thumba",
+      "city": "Thiruvananthapuram",
+      "country": null,
+      "lat": 8.524,
+      "lon": 76.936,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 869,
+      "name": "Videocon Academy Ground",
+      "city": "Kolkata",
+      "country": null,
+      "lat": 22.52,
+      "lon": 88.37,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 872,
+      "name": "Calcutta Cricket and Football Ground, Ballygunj",
+      "city": "Kolkata",
+      "country": null,
+      "lat": 22.52,
+      "lon": 88.37,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 875,
+      "name": "Vikash Cricket Ground",
+      "city": "Bhubaneswar",
+      "country": null,
+      "lat": 20.296,
+      "lon": 85.824,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 878,
+      "name": "Indian Institute of Technology Chemplast Ground, Velacherry",
+      "city": "Chennai",
+      "country": null,
+      "lat": 13.04,
+      "lon": 80.23,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 881,
+      "name": "Narendra Modi Stadium A Ground",
+      "city": "Ahmedabad",
+      "country": null,
+      "lat": 23.0915,
+      "lon": 72.5975,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 884,
+      "name": "House of Northern Cricket Ground",
+      "city": "Islamabad",
+      "country": null,
+      "lat": 33.654,
+      "lon": 73.045,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 887,
+      "name": "Lahore City Cricket Association Ground",
+      "city": "Lahore",
+      "country": null,
+      "lat": 31.513,
+      "lon": 74.333,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 890,
+      "name": "Southend Club Cricket Stadium",
+      "city": "Karachi",
+      "country": null,
+      "lat": 24.86,
+      "lon": 67.01,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 893,
+      "name": "Pembroke Cricket Club",
+      "city": "Dublin",
+      "country": null,
+      "lat": 53.298,
+      "lon": -6.228,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 896,
+      "name": "Moosa Stadium",
+      "city": "Pearland, Texas",
+      "country": null,
+      "lat": 29.54,
+      "lon": -95.32,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 899,
+      "name": "King George V Sports Ground",
+      "city": "Castel",
+      "country": null,
+      "lat": 49.18,
+      "lon": -2.11,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 902,
+      "name": "Just Cricket Academy Ground",
+      "city": "Bengaluru",
+      "country": null,
+      "lat": 12.9788,
+      "lon": 77.5996,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 905,
+      "name": "Prairie View Cricket Complex",
+      "city": "Houston",
+      "country": null,
+      "lat": 29.76,
+      "lon": -95.64,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 908,
+      "name": "Meersen",
+      "city": "Gent",
+      "country": null,
+      "lat": 51.05,
+      "lon": 3.72,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 911,
+      "name": "SNR College Cricket Ground",
+      "city": "Coimbatore",
+      "country": null,
+      "lat": 11.016,
+      "lon": 76.956,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 914,
+      "name": "Titwood",
+      "city": "Glasgow",
+      "country": null,
+      "lat": 55.842,
+      "lon": -4.28,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 917,
+      "name": "Lisicji Jarak Cricket Ground",
+      "city": "Belgrade",
+      "country": null,
+      "lat": 44.817,
+      "lon": 20.463,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 920,
+      "name": "Cambusdoon New Ground",
+      "city": "Ayr",
+      "country": null,
+      "lat": 55.458,
+      "lon": -4.629,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 923,
+      "name": "SCF Cricket Ground",
+      "city": "Salem, Tamil Nadu",
+      "country": null,
+      "lat": 11.664,
+      "lon": 78.146,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 926,
+      "name": "The Gnoll",
+      "city": "Neath",
+      "country": null,
+      "lat": 51.662,
+      "lon": -3.79,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 929,
+      "name": "Amini Park",
+      "city": "Port Moresby",
+      "country": null,
+      "lat": -9.478,
+      "lon": 147.15,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 932,
+      "name": "Welbeck Abbey Cricket Ground",
+      "city": "Welbeck",
+      "country": null,
+      "lat": 53.25,
+      "lon": -1.05,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 935,
+      "name": "Vrijbroek Cricket Ground",
+      "city": "Mechelen",
+      "country": null,
+      "lat": 51.03,
+      "lon": 4.48,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 938,
+      "name": "Independence Park",
+      "city": "Port Vila",
+      "country": null,
+      "lat": -17.733,
+      "lon": 168.327,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 941,
+      "name": "Sylhet Outer Stadium",
+      "city": "Sylhet",
+      "country": null,
+      "lat": 24.894,
+      "lon": 91.868,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 944,
+      "name": "Sano International Cricket Ground",
+      "city": "Sano, Kanto",
+      "country": null,
+      "lat": 35.58,
+      "lon": 139.43,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 947,
+      "name": "Budenec Oval, Zagreb",
+      "city": "Zagreb",
+      "country": null,
+      "lat": 45.815,
+      "lon": 15.982,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 950,
+      "name": "Jaipuria Vidyalaya Ground",
+      "city": "Jaipur",
+      "country": null,
+      "lat": 26.916,
+      "lon": 75.787,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 953,
+      "name": "Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium B",
+      "city": "Lucknow",
+      "country": null,
+      "lat": 26.85,
+      "lon": 80.95,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 956,
+      "name": "Daly College Ground",
+      "city": "Indore",
+      "country": null,
+      "lat": 22.719,
+      "lon": 75.857,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 959,
+      "name": "Maharaja Yadavindra Singh International Cricket Stadium, Mullanpur",
+      "city": "Chandigarh",
+      "country": null,
+      "lat": 30.69,
+      "lon": 76.737,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 962,
+      "name": "KL Saini Ground",
+      "city": "Jaipur",
+      "country": null,
+      "lat": 26.916,
+      "lon": 75.787,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 965,
+      "name": "Annadil Burhani Ground",
+      "city": "Dar-es-Salaam",
+      "country": null,
+      "lat": -6.792,
+      "lon": 39.208,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 968,
+      "name": "Lahore City Cricket Association Ground",
+      "city": "Lahore",
+      "country": null,
+      "lat": 31.513,
+      "lon": 74.333,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 971,
+      "name": "Latrobe Recreation Ground",
+      "city": "Latrobe",
+      "country": null,
+      "lat": -41.238,
+      "lon": 146.405,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 974,
+      "name": "Gahanga International Cricket Stadium",
+      "city": "Kigali City",
+      "country": null,
+      "lat": -1.95,
+      "lon": 30.06,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 977,
+      "name": "Integrated Polytechnic Regional Centre",
+      "city": "Kigali City",
+      "country": null,
+      "lat": -1.95,
+      "lon": 30.06,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 980,
+      "name": "SICA ground",
+      "city": "Rangpo, Sikkim",
+      "country": null,
+      "lat": 27.04,
+      "lon": 88.47,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 983,
+      "name": "Nagaland Cricket Stadium, Sovima",
+      "city": "Dimapur, Nagaland",
+      "country": null,
+      "lat": 25.91,
+      "lon": 93.73,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 986,
+      "name": "Urja Stadium",
+      "city": "Patna",
+      "country": null,
+      "lat": 25.594,
+      "lon": 85.137,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 989,
+      "name": "Maharaja Bir Bikram College Stadium",
+      "city": "Collegetilla, Agartala",
+      "country": null,
+      "lat": 23.831,
+      "lon": 91.286,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 992,
+      "name": "Bayuemas Oval",
+      "city": "Kuala Lumpur",
+      "country": null,
+      "lat": 3.14,
+      "lon": 101.69,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 995,
+      "name": "Hostel Ground JKCA",
+      "city": "Jammu",
+      "country": null,
+      "lat": 32.726,
+      "lon": 74.857,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 998,
+      "name": "Cricket Association Puducherry Ground 2",
+      "city": "Puducherry",
+      "country": null,
+      "lat": 11.941,
+      "lon": 79.808,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1001,
+      "name": "Goa Cricket Association Academy Ground",
+      "city": "Porvorim",
+      "country": null,
+      "lat": 15.5,
+      "lon": 73.83,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1004,
+      "name": "Kheda District Cricket Association Ground",
+      "city": "Nadiad",
+      "country": null,
+      "lat": 22.69,
+      "lon": 72.87,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1007,
+      "name": "UKM-YSD Cricket Oval",
+      "city": "Bangi",
+      "country": null,
+      "lat": 2.94,
+      "lon": 101.78,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1010,
+      "name": "Meghalaya Cricket Association Cricket Ground",
+      "city": "Shillong",
+      "country": null,
+      "lat": 25.578,
+      "lon": 91.893,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1013,
+      "name": "Keenan Stadium",
+      "city": "Jamshedpur",
+      "country": null,
+      "lat": 22.805,
+      "lon": 86.203,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1016,
+      "name": "Gujarat State Fertilizer Corporation Ground",
+      "city": "Fertilizer Nagar, Vadodara",
+      "country": null,
+      "lat": 22.308,
+      "lon": 73.181,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1019,
+      "name": "Gujarat College Ground",
+      "city": "Ahmedabad",
+      "country": null,
+      "lat": 23.022,
+      "lon": 72.571,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1022,
+      "name": "Karnail Singh Stadium",
+      "city": "Delhi",
+      "country": null,
+      "lat": 28.6377,
+      "lon": 77.2432,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1025,
+      "name": "Lal Bahadur Shastri Stadium",
+      "city": "Vallabh Vidyanagar, Anand",
+      "country": null,
+      "lat": 22.55,
+      "lon": 72.93,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1028,
+      "name": "Abhimanyu Cricket Academy",
+      "city": "Dehradun, Uttarakhand",
+      "country": null,
+      "lat": 30.316,
+      "lon": 78.032,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1031,
+      "name": "DRIEMS Ground",
+      "city": "Tangi, Cuttack",
+      "country": null,
+      "lat": 20.35,
+      "lon": 85.82,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1034,
+      "name": "Shastri Maidan",
+      "city": "Vallabh Vidyanagar, Anand",
+      "country": null,
+      "lat": 22.55,
+      "lon": 72.93,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1037,
+      "name": "Lalabhai Contractor Stadium",
+      "city": "Surat",
+      "country": null,
+      "lat": 21.17,
+      "lon": 72.83,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1040,
+      "name": "DY Patil Academy",
+      "city": "Ambi",
+      "country": null,
+      "lat": 18.674,
+      "lon": 73.806,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1043,
+      "name": "Amingaon Cricket Ground",
+      "city": "Guwahati",
+      "country": null,
+      "lat": 26.144,
+      "lon": 91.736,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1046,
+      "name": "Sector 16 Stadium",
+      "city": "Chandigarh",
+      "country": null,
+      "lat": 30.69,
+      "lon": 76.737,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1049,
+      "name": "Atal Bihari Vajpayee Stadium",
+      "city": "Nadaun",
+      "country": null,
+      "lat": 31.47,
+      "lon": 76.27,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1052,
+      "name": "Willowmoore Park B Field",
+      "city": "Benoni",
+      "country": null,
+      "lat": -26.188,
+      "lon": 28.32,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1055,
+      "name": "Bengal Cricket Academy Ground",
+      "city": "Kalyani, West Bengal",
+      "country": null,
+      "lat": 22.975,
+      "lon": 88.434,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1058,
+      "name": "Barkatullah Khan Stadium",
+      "city": "Jodhpur",
+      "country": null,
+      "lat": 26.238,
+      "lon": 73.024,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1061,
+      "name": "Moin-ul-Haq Stadium",
+      "city": "Patna",
+      "country": null,
+      "lat": 25.594,
+      "lon": 85.137,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1064,
+      "name": "Hurlingham Club Ground",
+      "city": "Hurlingham, Buenos Aires",
+      "country": null,
+      "lat": -34.57,
+      "lon": -58.42,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1067,
+      "name": "Mission Road Ground",
+      "city": "Mong Kok",
+      "country": null,
+      "lat": 22.32,
+      "lon": 114.17,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1070,
+      "name": "Belgrano Athletic Club Ground",
+      "city": "Buenos Aires",
+      "country": null,
+      "lat": -34.57,
+      "lon": -58.42,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1073,
+      "name": "Terdthai Cricket Ground",
+      "city": "Bangkok",
+      "country": null,
+      "lat": 13.756,
+      "lon": 100.502,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1076,
+      "name": "Mulpani Cricket Ground",
+      "city": "Kathmandu",
+      "country": null,
+      "lat": 27.71,
+      "lon": 85.32,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1079,
+      "name": "Europa Sports Complex",
+      "city": "Gibraltar",
+      "country": null,
+      "lat": 36.14,
+      "lon": -5.35,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1082,
+      "name": "Sir Paul Getty,s Ground",
+      "city": "Wormsley",
+      "country": null,
+      "lat": 51.66,
+      "lon": -0.92,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1085,
+      "name": "Sano International Cricket Ground 2,",
+      "city": "Sano, Kanto",
+      "country": null,
+      "lat": 35.58,
+      "lon": 139.43,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1088,
+      "name": "National Sports Academy Vasil Levski",
+      "city": "Sofia",
+      "country": null,
+      "lat": 42.697,
+      "lon": 23.322,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1091,
+      "name": "Malek Cricket Ground 1",
+      "city": "Ajman",
+      "country": null,
+      "lat": 25.3243,
+      "lon": 55.4209,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1094,
+      "name": "Enborne Lodge",
+      "city": "Newbury",
+      "country": null,
+      "lat": 51.4,
+      "lon": -1.32,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1097,
+      "name": "The Ageas Bowl",
+      "city": "Southampton",
+      "country": null,
+      "lat": 50.924,
+      "lon": -1.321,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1100,
+      "name": "Seat Unique Riverside",
+      "city": "Chester-le-Street",
+      "country": null,
+      "lat": 54.85,
+      "lon": -1.559,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1103,
+      "name": "The Spitfire Ground",
+      "city": "Canterbury",
+      "country": null,
+      "lat": 51.267,
+      "lon": 1.087,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1106,
+      "name": "Grand Prairie Stadium",
+      "city": "Dallas",
+      "country": null,
+      "lat": 32.745,
+      "lon": -97.09,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1109,
+      "name": "Church Street Park",
+      "city": "Morrisville",
+      "country": null,
+      "lat": 35.84,
+      "lon": -78.84,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1112,
+      "name": "Farmers Cricket Club",
+      "city": "St Martin",
+      "country": null,
+      "lat": 49.18,
+      "lon": -2.11,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1115,
+      "name": "King William;s College",
+      "city": "Castletown",
+      "country": null,
+      "lat": 54.15,
+      "lon": -4.48,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1118,
+      "name": "Moseley Cricket Club Ground",
+      "city": "Solihull",
+      "country": null,
+      "lat": 52.41,
+      "lon": -1.78,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1121,
+      "name": "Millfield School. Street",
+      "city": "Millfield",
+      "country": null,
+      "lat": 51.19,
+      "lon": -2.72,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1124,
+      "name": "Goldenacre",
+      "city": "Edinburgh",
+      "country": null,
+      "lat": 55.96,
+      "lon": -3.21,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1127,
+      "name": "Cricket Association Puducherry Ground 3",
+      "city": "Puducherry",
+      "country": null,
+      "lat": 11.941,
+      "lon": 79.808,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1130,
+      "name": "Foxgrove Road",
+      "city": "Beckenham",
+      "country": null,
+      "lat": 51.41,
+      "lon": 0.02,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1133,
+      "name": "Edgbaston Foundation Community Sports Ground",
+      "city": "Birmingham",
+      "country": null,
+      "lat": 52.456,
+      "lon": -1.903,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1136,
+      "name": "Shoaib Akhtar Cricket Stadium, Rawalpindi",
+      "city": "Rawalpindi",
+      "country": null,
+      "lat": 33.654,
+      "lon": 73.045,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1139,
+      "name": "Kasiga College Ground",
+      "city": "Dehradun",
+      "country": null,
+      "lat": 30.316,
+      "lon": 78.032,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1142,
+      "name": "JSCA Oval Ground",
+      "city": "Ranchi",
+      "country": null,
+      "lat": 23.356,
+      "lon": 85.325,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1145,
+      "name": "Sharad Pawar Cricket Academy BKC",
+      "city": "Mumbai",
+      "country": null,
+      "lat": 19.06,
+      "lon": 72.867,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1148,
+      "name": "Great Barrier Reef Arena, Mackay",
+      "city": "Mackay",
+      "country": null,
+      "lat": -21.142,
+      "lon": 149.186,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1151,
+      "name": "Mladost Cricket Ground",
+      "city": "Zagreb",
+      "country": null,
+      "lat": 45.815,
+      "lon": 15.982,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1154,
+      "name": "Maharana Pratap College Ground",
+      "city": "Dehra Dun",
+      "country": null,
+      "lat": 30.316,
+      "lon": 78.032,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1157,
+      "name": "Nationzl Bank Cricket Arena",
+      "city": "Karachi",
+      "country": null,
+      "lat": 24.86,
+      "lon": 67.01,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1160,
+      "name": "Mirpur Cricket Stadium",
+      "city": "Mirpur",
+      "country": null,
+      "lat": 23.815,
+      "lon": 90.361,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1163,
+      "name": "HPC Oval Ground",
+      "city": "Karachi",
+      "country": null,
+      "lat": 24.86,
+      "lon": 67.01,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1166,
+      "name": "Molana Azad Stadium",
+      "city": "Jammu",
+      "country": null,
+      "lat": 32.726,
+      "lon": 74.857,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1169,
+      "name": "Sher-i-Kashmir Stadium",
+      "city": "Srinagar",
+      "country": null,
+      "lat": 34.083,
+      "lon": 74.797,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1172,
+      "name": "Old Edwardians Cricket Club A Ground",
+      "city": "Johannesburg",
+      "country": null,
+      "lat": -26.131,
+      "lon": 28.017,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1175,
+      "name": "Indira Gandhi Stadium, Park Maidan",
+      "city": "Solapur",
+      "country": null,
+      "lat": 17.659,
+      "lon": 75.906,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1178,
+      "name": "Sanatana Dharma College Ground",
+      "city": "Alappuzha",
+      "country": null,
+      "lat": 9.498,
+      "lon": 76.338,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1181,
+      "name": "Sardar Vallabhai Patel Stadium",
+      "city": "Valsad",
+      "country": null,
+      "lat": 20.61,
+      "lon": 72.93,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1184,
+      "name": "KSCA Hubli Cricket Ground,",
+      "city": "Hubli",
+      "country": null,
+      "lat": 15.364,
+      "lon": 75.124,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1187,
+      "name": "ADSA Railways Cricket Ground",
+      "city": "Vallabh Vidyanagar, Anand",
+      "country": null,
+      "lat": 22.55,
+      "lon": 72.93,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1190,
+      "name": "GS Patel Stadium",
+      "city": "Nadiad",
+      "country": null,
+      "lat": 22.69,
+      "lon": 72.87,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1193,
+      "name": "Jalan Outdoor Stadium",
+      "city": "Dibrugarh",
+      "country": null,
+      "lat": 27.472,
+      "lon": 94.912,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1196,
+      "name": "NexGen Cricket Ground",
+      "city": "Hyderabad",
+      "country": null,
+      "lat": 17.4065,
+      "lon": 78.5505,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1199,
+      "name": "Victoria Park Stadium",
+      "city": "Meerut",
+      "country": null,
+      "lat": 28.984,
+      "lon": 77.706,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1202,
+      "name": "Kotambi Stadium",
+      "city": "Vadodara",
+      "country": null,
+      "lat": 22.308,
+      "lon": 73.181,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1205,
+      "name": "St George's Park",
+      "city": "Gqeberha",
+      "country": null,
+      "lat": -33.963,
+      "lon": 25.602,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1208,
+      "name": "Mangaldoi Sports Association Ground",
+      "city": "Ward No 2, Mangaldoi",
+      "country": null,
+      "lat": 26.5,
+      "lon": 92.03,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1211,
+      "name": "Sanosara Cricket Ground A",
+      "city": "Rajkot",
+      "country": null,
+      "lat": 22.303,
+      "lon": 70.802,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1214,
+      "name": "Jamia Millia Islamia University Ground",
+      "city": "Delhi",
+      "country": null,
+      "lat": 28.6377,
+      "lon": 77.2432,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1217,
+      "name": "Cricket Central",
+      "city": "Sydney",
+      "country": null,
+      "lat": -33.8917,
+      "lon": 151.2247,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1220,
+      "name": "Nassau County International Cricket Stadium",
+      "city": "New York",
+      "country": null,
+      "lat": 40.73,
+      "lon": -73.59,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1223,
+      "name": "Forthill",
+      "city": "Dundee",
+      "country": null,
+      "lat": 56.46,
+      "lon": -3.05,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1226,
+      "name": "Achimota Senior Secondary School A Field",
+      "city": "Accra",
+      "country": null,
+      "lat": 5.603,
+      "lon": -0.187,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1229,
+      "name": "Achimota Senior Secondary School B Field",
+      "city": "Accra",
+      "country": null,
+      "lat": 5.603,
+      "lon": -0.187,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1231,
+      "name": "ASD Jinnah Cricket Club",
+      "city": "Brescia",
+      "country": null,
+      "lat": 45.54,
+      "lon": 10.22,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1234,
+      "name": "Sportpark Harga",
+      "city": "Schiedam",
+      "country": null,
+      "lat": 51.92,
+      "lon": 4.48,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1237,
+      "name": "Simar Cricket Ground",
+      "city": "Roma",
+      "country": null,
+      "lat": 41.834,
+      "lon": 12.594,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1240,
+      "name": "Royal Brunswick Ground",
+      "city": "Brighton",
+      "country": null,
+      "lat": 50.83,
+      "lon": -0.164,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1243,
+      "name": "Valburga Cricket Ground",
+      "city": "Ljubljana",
+      "country": null,
+      "lat": 46.05,
+      "lon": 14.505,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1246,
+      "name": "Whitegate Park",
+      "city": "Blackpool",
+      "country": null,
+      "lat": 53.815,
+      "lon": -3.05,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1249,
+      "name": "Sikh Union Club Ground",
+      "city": "Nairobi",
+      "country": null,
+      "lat": -1.292,
+      "lon": 36.822,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1252,
+      "name": "Lindum Sports Club",
+      "city": "Lincoln",
+      "country": null,
+      "lat": 53.23,
+      "lon": -0.54,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1255,
+      "name": "Sportpark Duivesteijn",
+      "city": "Voorburg",
+      "country": null,
+      "lat": 52.08,
+      "lon": 4.31,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1258,
+      "name": "Kent County Cricket Ground",
+      "city": "Beckenham",
+      "country": null,
+      "lat": 51.41,
+      "lon": 0.02,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1261,
+      "name": "Rugby School Ground",
+      "city": "Rugby, Warwickshire",
+      "country": null,
+      "lat": 52.37,
+      "lon": -1.26,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1264,
+      "name": "Faleata Oval No 2",
+      "city": "Apia",
+      "country": null,
+      "lat": -13.833,
+      "lon": -171.75,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1267,
+      "name": "Selangor Turf Club",
+      "city": "Kuala Lumpur",
+      "country": null,
+      "lat": 3.14,
+      "lon": 101.69,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1270,
+      "name": "Guernsey Rovers Athletic Club Ground",
+      "city": "Port Soif",
+      "country": null,
+      "lat": 49.46,
+      "lon": -2.54,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1271,
+      "name": "YSD-UKM Cricket Oval",
+      "city": "Bangi",
+      "country": null,
+      "lat": 2.94,
+      "lon": 101.78,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1272,
+      "name": "Old Edwardian Sports Club",
+      "city": "Solihull",
+      "country": null,
+      "lat": 52.41,
+      "lon": -1.78,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1273,
+      "name": "Rural Development Trust Stadium B",
+      "city": "Anantapur",
+      "country": null,
+      "lat": 14.681,
+      "lon": 77.6,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1274,
+      "name": "University of Dar-es-Salaam",
+      "city": "Dar-es-Salaam",
+      "country": null,
+      "lat": -6.792,
+      "lon": 39.208,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1275,
+      "name": "Gymkhana Club Ground",
+      "city": "Dar-es-Salaam",
+      "country": null,
+      "lat": -6.792,
+      "lon": 39.208,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1276,
+      "name": "Yeonhui Cricket Ground",
+      "city": "Incheon",
+      "country": null,
+      "lat": 37.46,
+      "lon": 126.67,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1277,
+      "name": "New Madhavrao Scindia Cricket Stadium",
+      "city": "Gwalior",
+      "country": null,
+      "lat": 26.218,
+      "lon": 78.182,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1278,
+      "name": "Bakshi Stadium",
+      "city": "Wazir Bagh Srinagar",
+      "country": null,
+      "lat": 34.083,
+      "lon": 74.797,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1279,
+      "name": "Government Model Senior Secondary School, Sector 26",
+      "city": "Chandigarh",
+      "country": null,
+      "lat": 30.69,
+      "lon": 76.737,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1280,
+      "name": "Sports Galaxy Cricket Ground",
+      "city": "Lucknow",
+      "country": null,
+      "lat": 26.85,
+      "lon": 80.95,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1281,
+      "name": "Ruaraka Sports Club Ground",
+      "city": "Nairobi",
+      "country": null,
+      "lat": -1.292,
+      "lon": 36.822,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1282,
+      "name": "Seven Districts Ground",
+      "city": "Ajman",
+      "country": null,
+      "lat": 25.3243,
+      "lon": 55.4209,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1283,
+      "name": "Gokulbhai Somabhai Patel Stadium",
+      "city": "Nadiad",
+      "country": null,
+      "lat": 22.69,
+      "lon": 72.87,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1284,
+      "name": "Bhausaheb Bandodkar Ground",
+      "city": "Goa",
+      "country": null,
+      "lat": 15.5,
+      "lon": 73.83,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1285,
+      "name": "Chhatrapati Sambhajinagar Ground",
+      "city": "Aurangabad",
+      "country": null,
+      "lat": 19.876,
+      "lon": 75.343,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1286,
+      "name": "Diamond Club Ground",
+      "city": "Islamabad",
+      "country": null,
+      "lat": 33.654,
+      "lon": 73.045,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1287,
+      "name": "National Ground",
+      "city": "Islamabad",
+      "country": null,
+      "lat": 33.654,
+      "lon": 73.045,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1288,
+      "name": "Marghzar Cricket Ground",
+      "city": "Islamabad",
+      "country": null,
+      "lat": 33.654,
+      "lon": 73.045,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1289,
+      "name": "Ashfaq Cricket Ground Sirdheri",
+      "city": "Charsadda",
+      "country": null,
+      "lat": 34.145,
+      "lon": 71.742,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1290,
+      "name": "Jinnah Stadium",
+      "city": "Gujranwala",
+      "country": null,
+      "lat": 32.162,
+      "lon": 74.188,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1291,
+      "name": "Saeed Sports City",
+      "city": "Lahore",
+      "country": null,
+      "lat": 31.513,
+      "lon": 74.333,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1292,
+      "name": "Rana Naveed Cricket Academy",
+      "city": "Sheikhupura",
+      "country": null,
+      "lat": 31.715,
+      "lon": 73.978,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1293,
+      "name": "Sir Frank Worrell Memorial Ground",
+      "city": "St Augustine",
+      "country": null,
+      "lat": 10.66,
+      "lon": -61.52,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1294,
+      "name": "Gohati Cricket Stadium",
+      "city": "Swabi",
+      "country": null,
+      "lat": 34.12,
+      "lon": 72.47,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1295,
+      "name": "Railway Cricket Ground",
+      "city": "Haripur",
+      "country": null,
+      "lat": 33.8,
+      "lon": 72.93,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1296,
+      "name": "University of Doha for Science and Technology, Doha",
+      "city": "Doha",
+      "country": null,
+      "lat": 25.32,
+      "lon": 51.44,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1297,
+      "name": "Gymkhana Ground",
+      "city": "Hyderabad",
+      "country": null,
+      "lat": 17.4065,
+      "lon": 78.5505,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1298,
+      "name": "Tafawa Balewa Square Cricket Oval",
+      "city": "Lagos",
+      "country": null,
+      "lat": 6.455,
+      "lon": 3.394,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1299,
+      "name": "University of Lagos Cricket Oval",
+      "city": "Lagos",
+      "country": null,
+      "lat": 6.455,
+      "lon": 3.394,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1300,
+      "name": "Niranjan Shah Stadium C",
+      "city": "Rajkot",
+      "country": null,
+      "lat": 22.303,
+      "lon": 70.802,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1301,
+      "name": "St George's College Ground",
+      "city": "Buenos Aires",
+      "country": null,
+      "lat": -34.57,
+      "lon": -58.42,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1302,
+      "name": "St Albans Club",
+      "city": "Corimayo, Buenos Aires",
+      "country": null,
+      "lat": -34.57,
+      "lon": -58.42,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1303,
+      "name": "Madhavrao Scindia Cricket Ground",
+      "city": "Rajkot",
+      "country": null,
+      "lat": 22.303,
+      "lon": 70.802,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1304,
+      "name": "Kennards Hire Community Oval",
+      "city": "Auckland",
+      "country": null,
+      "lat": -36.875,
+      "lon": 174.744,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1305,
+      "name": "WPCC",
+      "city": "Cape Town",
+      "country": null,
+      "lat": -33.9783,
+      "lon": 18.4278,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1306,
+      "name": "Paul Roos Gymnasium",
+      "city": "Stellenbosch",
+      "country": null,
+      "lat": -33.934,
+      "lon": 18.86,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1307,
+      "name": "Cello Basin Reserve",
+      "city": "Wellington",
+      "country": null,
+      "lat": -41.3,
+      "lon": 174.78,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1308,
+      "name": "University of Otago Oval",
+      "city": "Dunedin",
+      "country": null,
+      "lat": -45.87,
+      "lon": 170.51,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1309,
+      "name": "Johor Cricket Academy Oval",
+      "city": "Johor",
+      "country": null,
+      "lat": 1.49,
+      "lon": 103.76,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1310,
+      "name": "Borneo Cricket Ground",
+      "city": "Sarawak",
+      "country": null,
+      "lat": 1.55,
+      "lon": 110.34,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1311,
+      "name": "Golf Club Ground (Anant Kanhere Maidan)",
+      "city": "Nasik",
+      "country": null,
+      "lat": 19.997,
+      "lon": 73.79,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1312,
+      "name": "Narendra Modi Stadium B Ground",
+      "city": "Ahmedabad",
+      "country": null,
+      "lat": 23.0915,
+      "lon": 72.5975,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1313,
+      "name": "Miraj International Cricket Stadium",
+      "city": "Upli Odan, Rajasthan",
+      "country": null,
+      "lat": 25.32,
+      "lon": 74.62,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1314,
+      "name": "Santarem Cricket Ground",
+      "city": "Albergaria",
+      "country": null,
+      "lat": 40.69,
+      "lon": -8.48,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1315,
+      "name": "Namibia Cricket Ground",
+      "city": "Windhoek",
+      "country": null,
+      "lat": -22.56,
+      "lon": 17.083,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1316,
+      "name": "Oakland Coliseum",
+      "city": "California",
+      "country": null,
+      "lat": 37.751,
+      "lon": -122.201,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1317,
+      "name": "Tin Kwong Road Recreation Ground",
+      "city": "Mong Kok",
+      "country": null,
+      "lat": 22.32,
+      "lon": 114.17,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1318,
+      "name": "Bill Pippen Oval",
+      "city": "Gold Coast",
+      "country": null,
+      "lat": -28.002,
+      "lon": 153.38,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1319,
+      "name": "Fabio Fabbri Cricket Ground",
+      "city": "Bologna",
+      "country": null,
+      "lat": 44.468,
+      "lon": 11.358,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1320,
+      "name": "Colts Cricket Club Ground",
+      "city": "Colombo",
+      "country": null,
+      "lat": 6.914,
+      "lon": 79.873,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1321,
+      "name": "Kunduz Cricket Ground",
+      "city": "Kunduz",
+      "country": null,
+      "lat": 36.728,
+      "lon": 68.867,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1322,
+      "name": "Stars Arena Hofstade",
+      "city": "Zemst",
+      "country": null,
+      "lat": 50.97,
+      "lon": 4.47,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1323,
+      "name": "TCA Oval",
+      "city": "Blantyre",
+      "country": null,
+      "lat": -15.786,
+      "lon": 35.005,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1324,
+      "name": "Sportclub Krefeld 1905 e.V. Cricket Ground",
+      "city": "Krefeld",
+      "country": null,
+      "lat": 51.34,
+      "lon": 6.56,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1325,
+      "name": "Botkyrka Cricket Center",
+      "city": "Stockholm",
+      "country": null,
+      "lat": 59.33,
+      "lon": 18.07,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1326,
+      "name": "Guildford Bason",
+      "city": "Merrow Down, Guildford",
+      "country": null,
+      "lat": 51.235,
+      "lon": -0.57,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1327,
+      "name": "Mitchells and Butlers",
+      "city": "Portland Road, Birmingham",
+      "country": null,
+      "lat": 52.456,
+      "lon": -1.903,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1328,
+      "name": "Raynes Park Sports Ground",
+      "city": "Wimbledon",
+      "country": null,
+      "lat": 51.42,
+      "lon": -0.22,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1329,
+      "name": "Cazalys Arena Palmerston",
+      "city": "Darwin",
+      "country": null,
+      "lat": -12.3911,
+      "lon": 130.877,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1330,
+      "name": "BCCI Centre of Excellence Ground",
+      "city": "Bengaluru",
+      "country": null,
+      "lat": 12.9788,
+      "lon": 77.5996,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1331,
+      "name": "BCCI Centre of Excellence Ground B",
+      "city": "Bengaluru",
+      "country": null,
+      "lat": 12.9788,
+      "lon": 77.5996,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1332,
+      "name": "Taunton Vale Sports Club Ground",
+      "city": "Taunton",
+      "country": null,
+      "lat": 51.019,
+      "lon": -3.104,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1333,
+      "name": "BC Place Stadium",
+      "city": "Vancouver",
+      "country": null,
+      "lat": 49.277,
+      "lon": -123.108,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1334,
+      "name": "Imran Khan Cricket Stadium",
+      "city": "Peshawar",
+      "country": null,
+      "lat": 34.015,
+      "lon": 71.58,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1335,
+      "name": "Madan Paliwal Miraj Sports Centre",
+      "city": "Rajsamand, Rajasthan",
+      "country": null,
+      "lat": 25.07,
+      "lon": 73.88,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1336,
+      "name": "Pithwala Stadium",
+      "city": "Bhimpore, Surat",
+      "country": null,
+      "lat": 21.17,
+      "lon": 72.83,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1337,
+      "name": "Tinsukia District Sports Association Ground",
+      "city": "Kachujan, Tinsukia",
+      "country": null,
+      "lat": 27.49,
+      "lon": 95.36,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1338,
+      "name": "Kaushiki Cricket Ground, Jim Corbett",
+      "city": "Ramnagar, Uttarakhand",
+      "country": null,
+      "lat": 29.39,
+      "lon": 79.13,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1339,
+      "name": "KSCA Navule Stadium",
+      "city": "Shimoga",
+      "country": null,
+      "lat": 13.93,
+      "lon": 75.57,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1340,
+      "name": "KCA Cricket Ground, Mangalapuram",
+      "city": "Thiruvananthapuram",
+      "country": null,
+      "lat": 8.524,
+      "lon": 76.936,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1341,
+      "name": "Shahid Kamruzzaman Stadium",
+      "city": "Rajshahi, Rajshahi",
+      "country": null,
+      "lat": 24.374,
+      "lon": 88.601,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1342,
+      "name": "Ch Bansi Lal Cricket Stadium",
+      "city": "Rohtak",
+      "country": null,
+      "lat": 28.89,
+      "lon": 76.64,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1343,
+      "name": "ACA-VDCA Cricket Stadium",
+      "city": "Visakhapatnam",
+      "country": null,
+      "lat": 17.72,
+      "lon": 83.224,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1344,
+      "name": "KIIT Stadium",
+      "city": "Bhubaneswar",
+      "country": null,
+      "lat": 20.296,
+      "lon": 85.824,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1345,
+      "name": "Deccan Gymkhana Ground",
+      "city": "Pune",
+      "country": null,
+      "lat": 18.52,
+      "lon": 73.856,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1346,
+      "name": "Veerangan Cricket Academy Ground",
+      "city": "Pune",
+      "country": null,
+      "lat": 18.52,
+      "lon": 73.856,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1347,
+      "name": "Sanosara Cricket Ground B",
+      "city": "Rajkot",
+      "country": null,
+      "lat": 22.303,
+      "lon": 70.802,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1348,
+      "name": "Anantam Ground",
+      "city": "Jaipur",
+      "country": null,
+      "lat": 26.916,
+      "lon": 75.787,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1349,
+      "name": "Usha Martin Ground",
+      "city": "Ranchi",
+      "country": null,
+      "lat": 23.356,
+      "lon": 85.325,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1350,
+      "name": "Dr Soni Stadium",
+      "city": "Jaipur",
+      "country": null,
+      "lat": 26.916,
+      "lon": 75.787,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1351,
+      "name": "High Performance Oval",
+      "city": "Windhoek",
+      "country": null,
+      "lat": -22.56,
+      "lon": 17.083,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1352,
+      "name": "ACA Cricket Academy Ground, Fulung",
+      "city": "Guwahati",
+      "country": null,
+      "lat": 26.144,
+      "lon": 91.736,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1353,
+      "name": "1919 Sportz Cricket Stadium",
+      "city": "Goa",
+      "country": null,
+      "lat": 15.5,
+      "lon": 73.83,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1354,
+      "name": "Jimmy Powell Oval",
+      "city": "George Town",
+      "country": null,
+      "lat": 19.29,
+      "lon": -81.38,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1355,
+      "name": "Sri Ramakrishna College of Arts and Science Ground",
+      "city": "Coimbatore",
+      "country": null,
+      "lat": 11.016,
+      "lon": 76.956,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1356,
+      "name": "Gandhi Sports Complex Ground",
+      "city": "Amritsar",
+      "country": null,
+      "lat": 31.634,
+      "lon": 74.872,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1357,
+      "name": "Captain Roop Singh Stadium",
+      "city": "Gwalior",
+      "country": null,
+      "lat": 26.218,
+      "lon": 78.182,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1358,
+      "name": "Indira Gandhi International Cricket Stadium",
+      "city": "Haldwani",
+      "country": null,
+      "lat": 29.218,
+      "lon": 79.528,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1359,
+      "name": "Solvangs Park",
+      "city": "Copenhagen",
+      "country": null,
+      "lat": 55.676,
+      "lon": 12.568,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1360,
+      "name": "Korogi Sports Park",
+      "city": "Nisshin",
+      "country": null,
+      "lat": 35.17,
+      "lon": 137.05,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1361,
+      "name": "The Maer Ground",
+      "city": "Exmouth",
+      "country": null,
+      "lat": 50.62,
+      "lon": -3.41,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1362,
+      "name": "Happy Valley Ground 2",
+      "city": "Episkopi",
+      "country": null,
+      "lat": 34.67,
+      "lon": 32.87,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1363,
+      "name": "Botswana Cricket Association Oval 1",
+      "city": "Gaborone",
+      "country": null,
+      "lat": -24.628,
+      "lon": 25.923,
+      "source": "manual"
+    },
+    {
+      "sportmonks_id": 1364,
+      "name": "Botswana Cricket Association Oval 2",
+      "city": "Gaborone",
+      "country": null,
+      "lat": -24.628,
+      "lon": 25.923,
+      "source": "manual"
+    }
+  ]
+}
