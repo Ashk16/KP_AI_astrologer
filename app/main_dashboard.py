@@ -100,6 +100,54 @@ def _apply_fixture_autofill(fixture: dict, tz_name: str):
 
     st.session_state.last_autofill_fixture_id = fixture.get("fixture_id")
 
+
+def _load_sidebar_fixtures(api_key, match_date):
+    """Load fixture dropdown data from cache."""
+    fixture_options = {MANUAL_FIXTURE_OPTION: "Manual entry"}
+    fixtures_by_id = {}
+    cache = None
+    cache_caption = None
+    no_fixtures_caption = None
+    api_warning = None
+
+    if not api_key:
+        api_warning = "Add your key to `.streamlit/secrets.toml` (local) or host secrets (deployed). See `docs/API_KEY_SETUP.md`."
+        return fixture_options, fixtures_by_id, cache, cache_caption, no_fixtures_caption, api_warning
+
+    try:
+        cache = ensure_cache(api_key)
+        fixtures = get_cached_fixtures_for_date(api_key, match_date)
+        for fixture in fixtures:
+            fixture_options[fixture["fixture_id"]] = fixture["label"]
+            fixtures_by_id[fixture["fixture_id"]] = fixture
+
+        status = cache_status(cache)
+        if status["fixture_count"]:
+            source_label = "cloud bundle" if status.get("cache_source") == "bundled" else "live cache"
+            refresh_note = (
+                f"Next API refresh after {status['next_refresh_utc']}."
+                if status.get("last_refresh_utc")
+                else "Will refresh from API when needed."
+            )
+            cache_caption = (
+                f"Fixture cache ({source_label}): {status['fixture_count']} matches "
+                f"({status['window_start']} to {status['window_end']}). {refresh_note}"
+            )
+        if len(fixtures) == 0:
+            no_fixtures_caption = "No fixtures found for this date in the local cache."
+    except Exception as exc:
+        api_warning = f"Could not load fixtures from cache/API: {exc}"
+
+    return fixture_options, fixtures_by_id, cache, cache_caption, no_fixtures_caption, api_warning
+
+
+def _resolve_match_date():
+    match_date_val = st.session_state.get("match_date", datetime.date.today())
+    if isinstance(match_date_val, str):
+        return datetime.date.fromisoformat(match_date_val)
+    return match_date_val
+
+
 def apply_team_name_replacements(text, asc_team_name, desc_team_name):
     """
     Intelligently replaces generic team references with actual team names while preserving technical terms.
@@ -1191,6 +1239,26 @@ def main():
         st.subheader("New Analysis")
         _init_match_form_state()
 
+        api_key = get_cricapi_key()
+        pending_match_date = _resolve_match_date()
+        fixture_options, fixtures_by_id, _, _, _, early_api_warning = _load_sidebar_fixtures(
+            api_key, pending_match_date
+        )
+
+        if st.session_state.selected_fixture_id not in fixture_options:
+            st.session_state.selected_fixture_id = MANUAL_FIXTURE_OPTION
+
+        pending_fixture_id = st.session_state.get("selected_fixture_id", MANUAL_FIXTURE_OPTION)
+        if (
+            pending_fixture_id != MANUAL_FIXTURE_OPTION
+            and pending_fixture_id in fixtures_by_id
+            and pending_fixture_id != st.session_state.get("last_autofill_fixture_id")
+        ):
+            _apply_fixture_autofill(
+                fixtures_by_id[pending_fixture_id],
+                st.session_state.get("tz_name", "Asia/Kolkata"),
+            )
+
         match_date = st.date_input("Date of Match", datetime.date.today(), key="match_date")
 
         time_str = st.text_input(
@@ -1237,38 +1305,15 @@ def main():
             except ValueError:
                 st.error("Invalid time format. Please use HH:MM:SS or HH:MM format.")
 
-        api_key = get_cricapi_key()
-        fixture_options = {MANUAL_FIXTURE_OPTION: "Manual entry"}
-        fixtures_by_id = {}
-        cache_caption = None
-        no_fixtures_caption = None
+        fixture_options, fixtures_by_id, _, cache_caption, no_fixtures_caption, api_warning = _load_sidebar_fixtures(
+            api_key, match_date
+        )
 
-        if api_key:
-            try:
-                cache = ensure_cache(api_key)
-                fixtures = get_cached_fixtures_for_date(api_key, match_date)
-                for fixture in fixtures:
-                    fixture_options[fixture["fixture_id"]] = fixture["label"]
-                    fixtures_by_id[fixture["fixture_id"]] = fixture
-
-                status = cache_status(cache)
-                if status["fixture_count"]:
-                    source_label = "cloud bundle" if status.get("cache_source") == "bundled" else "live cache"
-                    refresh_note = (
-                        f"Next API refresh after {status['next_refresh_utc']}."
-                        if status.get("last_refresh_utc")
-                        else "Will refresh from API when needed."
-                    )
-                    cache_caption = (
-                        f"Fixture cache ({source_label}): {status['fixture_count']} matches "
-                        f"({status['window_start']} to {status['window_end']}). {refresh_note}"
-                    )
-                if len(fixtures) == 0:
-                    no_fixtures_caption = "No fixtures found for this date in the local cache."
-            except Exception as exc:
-                st.warning(f"Could not load fixtures from cache/API: {exc}")
-        else:
-            st.info("Add your key to `.streamlit/secrets.toml` (local) or host secrets (deployed). See `docs/API_KEY_SETUP.md`.")
+        if api_warning:
+            if api_warning.startswith("Add your key"):
+                st.info(api_warning)
+            else:
+                st.warning(api_warning)
 
         if st.session_state.selected_fixture_id not in fixture_options:
             st.session_state.selected_fixture_id = MANUAL_FIXTURE_OPTION
@@ -1279,16 +1324,6 @@ def main():
             format_func=lambda key: fixture_options[key],
             key="selected_fixture_id",
         )
-
-        if (
-            selected_fixture_id != MANUAL_FIXTURE_OPTION
-            and selected_fixture_id in fixtures_by_id
-            and selected_fixture_id != st.session_state.last_autofill_fixture_id
-        ):
-            _apply_fixture_autofill(
-                fixtures_by_id[selected_fixture_id],
-                st.session_state.get("tz_name", "Asia/Kolkata"),
-            )
 
         team_a = st.text_input("Team A (Ascendant)", key="team_a")
         team_b = st.text_input("Team B (Descendant)", key="team_b")
