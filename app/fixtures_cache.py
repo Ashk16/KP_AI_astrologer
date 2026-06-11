@@ -8,7 +8,10 @@ import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from app.cricapi_client import _fixture_id, _normalize_match, _request_matches
+try:
+    from app.cricapi_client import _fixture_id, _normalize_match, _request_matches
+except ImportError:
+    from cricapi_client import _fixture_id, _normalize_match, _request_matches
 
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 RUNTIME_CACHE_PATH = _PROJECT_ROOT / "data" / "fixtures_cache.json"

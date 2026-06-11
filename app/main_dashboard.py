@@ -15,18 +15,29 @@ import matplotlib.colors as colors
 import numpy as np
 
 # --- Path Correction ---
-# Add project root before local package imports (Streamlit runs this file directly).
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
+# Streamlit Cloud runs this file directly; ensure both repo root and app/ are importable.
+_APP_DIR = os.path.dirname(os.path.abspath(__file__))
+_PROJECT_ROOT = os.path.dirname(_APP_DIR)
+for _path in (_PROJECT_ROOT, _APP_DIR):
+    if _path not in sys.path:
+        sys.path.insert(0, _path)
 
-from app.api_config import get_cricapi_key as load_cricapi_key
-from app.fixtures_cache import cache_status, ensure_cache, get_cached_fixtures_for_date
-from app.venue_coords import (
-    list_ground_options,
-    resolve_venue_coordinates,
-    search_ground_options,
-)
+try:
+    from app.api_config import get_cricapi_key as load_cricapi_key
+    from app.fixtures_cache import cache_status, ensure_cache, get_cached_fixtures_for_date
+    from app.venue_coords import (
+        list_ground_options,
+        resolve_venue_coordinates,
+        search_ground_options,
+    )
+except ImportError:
+    from api_config import get_cricapi_key as load_cricapi_key
+    from fixtures_cache import cache_status, ensure_cache, get_cached_fixtures_for_date
+    from venue_coords import (
+        list_ground_options,
+        resolve_venue_coordinates,
+        search_ground_options,
+    )
 
 # --- Actual KP Core Imports ---
 import swisseph as swe

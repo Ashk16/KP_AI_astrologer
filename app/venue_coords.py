@@ -7,7 +7,7 @@ import os
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 _DEFAULT_LIBRARY = _PROJECT_ROOT / "data" / "ground_coords.json"
@@ -109,7 +109,7 @@ def format_ground_label(ground: Dict[str, Any]) -> str:
     name = str(ground.get("name") or "").strip()
     city = str(ground.get("city") or "").strip()
     if name and city:
-        return f"{name} — {city}"
+        return f"{name} - {city}"
     return name or city
 
 
@@ -143,7 +143,7 @@ def search_ground_options(query: Optional[str], limit: int = 10) -> List[Dict[st
     if len(needle) < 2:
         return []
 
-    matches: List[tuple[int, Dict[str, Any]]] = []
+    matches: List[Tuple[int, Dict[str, Any]]] = []
     for option in list_ground_options():
         name_key = _normalize(option["name"])
         city_key = _normalize(option["city"])
@@ -185,3 +185,13 @@ def resolve_venue_coordinates(venue: Optional[str]) -> CoordResult:
             )
 
     return CoordResult(None, None, "none")
+
+
+__all__ = [
+    "CoordResult",
+    "format_ground_label",
+    "list_ground_options",
+    "load_library",
+    "resolve_venue_coordinates",
+    "search_ground_options",
+]
