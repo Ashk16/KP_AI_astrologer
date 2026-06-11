@@ -98,8 +98,76 @@ def _venue_name_candidates(venue: str) -> List[str]:
     return deduped
 
 
+def _ground_key(ground: Dict[str, Any]) -> str:
+    sportmonks_id = ground.get("sportmonks_id")
+    if sportmonks_id is not None:
+        return str(sportmonks_id)
+    return _normalize(ground.get("name")) or "ground"
+
+
+def format_ground_label(ground: Dict[str, Any]) -> str:
+    name = str(ground.get("name") or "").strip()
+    city = str(ground.get("city") or "").strip()
+    if name and city:
+        return f"{name} — {city}"
+    return name or city
+
+
+def list_ground_options() -> List[Dict[str, Any]]:
+    """Return searchable ground options with coordinates from the library."""
+    options: List[Dict[str, Any]] = []
+    for ground in load_library().get("grounds", []):
+        if not _valid(ground.get("lat"), ground.get("lon")):
+            continue
+        name = str(ground.get("name") or "").strip()
+        if not name:
+            continue
+        options.append(
+            {
+                "key": _ground_key(ground),
+                "name": name,
+                "label": format_ground_label(ground),
+                "city": str(ground.get("city") or "").strip(),
+                "lat": float(ground["lat"]),
+                "lon": float(ground["lon"]),
+            }
+        )
+
+    options.sort(key=lambda item: item["label"].lower())
+    return options
+
+
+def search_ground_options(query: Optional[str], limit: int = 10) -> List[Dict[str, Any]]:
+    """Return ground options whose name or city partially matches the query."""
+    needle = _normalize(query)
+    if len(needle) < 2:
+        return []
+
+    matches: List[tuple[int, Dict[str, Any]]] = []
+    for option in list_ground_options():
+        name_key = _normalize(option["name"])
+        city_key = _normalize(option["city"])
+        label_key = _normalize(option["label"])
+
+        score = 0
+        if name_key == needle or label_key == needle:
+            score = 100
+        elif name_key.startswith(needle):
+            score = 80
+        elif needle in name_key:
+            score = 60
+        elif needle in label_key or needle in city_key:
+            score = 40
+
+        if score:
+            matches.append((score, option))
+
+    matches.sort(key=lambda item: (-item[0], item[1]["label"].lower()))
+    return [option for _, option in matches[:limit]]
+
+
 def resolve_venue_coordinates(venue: Optional[str]) -> CoordResult:
-    """Resolve lat/lon for a CricAPI venue string using the ground library."""
+    """Resolve lat/lon for a venue string using the ground library."""
     if not venue:
         return CoordResult(None, None, "none")
 

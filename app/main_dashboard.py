@@ -22,7 +22,11 @@ if project_root not in sys.path:
 
 from app.api_config import get_cricapi_key as load_cricapi_key
 from app.fixtures_cache import cache_status, ensure_cache, get_cached_fixtures_for_date
-from app.venue_coords import resolve_venue_coordinates
+from app.venue_coords import (
+    list_ground_options,
+    resolve_venue_coordinates,
+    search_ground_options,
+)
 
 # --- Actual KP Core Imports ---
 import swisseph as swe
@@ -41,6 +45,7 @@ def _styler_element_map(styler, func, **kwargs):
 # --- Constants ---
 ARCHIVE_DIR = "match_archive"
 MANUAL_FIXTURE_OPTION = "__manual__"
+CUSTOM_VENUE_KEY = "__custom_venue__"
 
 
 def get_cricapi_key():
@@ -78,17 +83,7 @@ def _apply_fixture_autofill(fixture: dict, tz_name: str):
 
     venue = fixture.get("venue") or st.session_state.location_query
     st.session_state.location_query = venue
-    st.session_state.last_geocoded_location = venue
-
-    coord = resolve_venue_coordinates(venue)
-    if coord.resolved:
-        st.session_state.lat = coord.lat
-        st.session_state.lon = coord.lon
-    elif venue:
-        lat_from_geo, lon_from_geo = get_lat_lon(venue)
-        if lat_from_geo is not None:
-            st.session_state.lat = lat_from_geo
-            st.session_state.lon = lon_from_geo
+    _resolve_and_apply_location(venue)
 
     start_time_utc = fixture.get("start_time_utc")
     if start_time_utc:
@@ -414,6 +409,112 @@ def color_verdict_cell(verdict_text, team_a_name="Team A", team_b_name="Team B")
         return 'background-color: rgba(255, 0, 0, 0.2); color: #800000; font-weight: 400'  # Red 80% transparency
     
     return ''  # No styling for unrecognized patterns
+
+def _apply_selected_ground(ground: dict) -> None:
+    st.session_state.location_query = ground["name"]
+    st.session_state.lat = ground["lat"]
+    st.session_state.lon = ground["lon"]
+    st.session_state.last_geocoded_location = ground["name"]
+
+
+def _resolve_and_apply_location(location_str: str) -> str:
+    """Resolve lat/lon using the ground library first, then geocoding."""
+    location_str = (location_str or "").strip()
+    if not location_str:
+        return "none"
+
+    coord = resolve_venue_coordinates(location_str)
+    if coord.resolved:
+        st.session_state.lat = coord.lat
+        st.session_state.lon = coord.lon
+        st.session_state.last_geocoded_location = location_str
+        return "library"
+
+    lat_from_geo, lon_from_geo = get_lat_lon(location_str)
+    if lat_from_geo is not None:
+        st.session_state.lat = lat_from_geo
+        st.session_state.lon = lon_from_geo
+        st.session_state.last_geocoded_location = location_str
+        return "geocoder"
+
+    return "none"
+
+
+def _render_manual_venue_inputs() -> None:
+    """Venue picker for manual entry: library suggestions first, geocoder as fallback."""
+    grounds = list_ground_options()
+    ground_by_key = {ground["key"]: ground for ground in grounds}
+    picker_options = [CUSTOM_VENUE_KEY] + [ground["key"] for ground in grounds]
+
+    def _format_venue_option(key: str) -> str:
+        if key == CUSTOM_VENUE_KEY:
+            return "Enter custom location (not in list)"
+        return ground_by_key[key]["label"]
+
+    picked = st.selectbox(
+        "Venue",
+        options=picker_options,
+        format_func=_format_venue_option,
+        key="venue_picker",
+        help="Type to search known cricket grounds. Listed venues use coordinates from the ground library.",
+    )
+
+    if picked != CUSTOM_VENUE_KEY:
+        ground = ground_by_key[picked]
+        _apply_selected_ground(ground)
+        st.caption(
+            f"Coordinates from ground library: {ground['lat']:.4f}, {ground['lon']:.4f}"
+        )
+        return
+
+    location_query = st.text_input(
+        "Enter Location (e.g., 'Wankhede Stadium, Mumbai')",
+        key="location_query",
+    )
+    query = (location_query or "").strip()
+
+    if query and query != st.session_state.get("last_geocoded_location"):
+        coord = resolve_venue_coordinates(query)
+        if coord.resolved:
+            st.session_state.lat = coord.lat
+            st.session_state.lon = coord.lon
+            st.session_state.last_geocoded_location = query
+            st.caption(f"Matched ground library entry: {coord.matched_name}")
+        else:
+            suggestions = search_ground_options(query, limit=8)
+            if suggestions:
+                st.caption("Pick a suggested ground below, or keep typing to refine your search.")
+            else:
+                source = _resolve_and_apply_location(query)
+                if source == "geocoder":
+                    st.caption("Coordinates from geocoder (venue not found in ground library).")
+    elif query:
+        coord = resolve_venue_coordinates(query)
+        if coord.resolved:
+            st.caption(f"Using ground library: {coord.matched_name}")
+        elif st.session_state.get("last_geocoded_location") == query:
+            st.caption("Using geocoded coordinates.")
+
+    if len(query) >= 2:
+        suggestions = search_ground_options(query, limit=8)
+        if suggestions:
+            suggestion_labels = {item["key"]: item["label"] for item in suggestions}
+
+            def _apply_suggestion() -> None:
+                selected_key = st.session_state.get("venue_suggestion_pick")
+                if not selected_key or selected_key not in ground_by_key:
+                    return
+                _apply_selected_ground(ground_by_key[selected_key])
+                st.session_state.venue_picker = selected_key
+
+            st.selectbox(
+                "Suggestions from ground library",
+                options=[""] + list(suggestion_labels.keys()),
+                format_func=lambda key: "Select a suggested ground..." if not key else suggestion_labels[key],
+                key="venue_suggestion_pick",
+                on_change=_apply_suggestion,
+            )
+
 
 @st.cache_data
 def get_lat_lon(location_str):
@@ -1343,21 +1444,13 @@ def main():
         team_a = st.text_input("Team A (Ascendant)", key="team_a")
         team_b = st.text_input("Team B (Descendant)", key="team_b")
 
-        location_query = st.text_input(
-            "Enter Location (e.g., 'Mumbai, India')",
-            key="location_query",
-        )
-
-        if (
-            selected_fixture_id == MANUAL_FIXTURE_OPTION
-            and location_query
-            and location_query != st.session_state.get("last_geocoded_location")
-        ):
-            lat_from_geo, lon_from_geo = get_lat_lon(location_query)
-            if lat_from_geo is not None:
-                st.session_state.lat = lat_from_geo
-                st.session_state.lon = lon_from_geo
-                st.session_state.last_geocoded_location = location_query
+        if selected_fixture_id == MANUAL_FIXTURE_OPTION:
+            _render_manual_venue_inputs()
+        else:
+            st.text_input(
+                "Enter Location (e.g., 'Mumbai, India')",
+                key="location_query",
+            )
 
         lat = st.number_input("Latitude", key="lat", format="%.4f")
         lon = st.number_input("Longitude", key="lon", format="%.4f")
