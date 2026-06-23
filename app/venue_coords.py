@@ -56,23 +56,81 @@ def load_library(path: Optional[Path] = None) -> Dict[str, Any]:
         return json.load(fh)
 
 
-def _lookup_by_name(grounds: List[Dict[str, Any]], name: Optional[str]) -> Optional[Dict[str, Any]]:
+def _split_venue(venue: str) -> Tuple[str, Optional[str]]:
+    """Split CricAPI-style 'Stadium, City' strings into name and city parts."""
+    venue = venue.strip()
+    if "," in venue:
+        name, city = venue.split(",", 1)
+        return name.strip(), city.strip() or None
+    return venue, None
+
+
+def _city_matches(ground_city: Optional[str], query_city: Optional[str]) -> bool:
+    key_city = _normalize(query_city)
+    if not key_city:
+        return True
+    g_city = _normalize(ground_city)
+    if not g_city:
+        return False
+    return key_city == g_city or key_city in g_city or g_city in key_city
+
+
+def _names_fuzzy_match(query_name: str, ground_name: str) -> bool:
+    """True when library and query names refer to the same ground."""
+    query_key = _normalize(query_name)
+    ground_key = _normalize(ground_name)
+    if not query_key or not ground_key:
+        return False
+    if query_key == ground_key or query_key in ground_key or ground_key in query_key:
+        return True
+    query_tokens = set(query_key.split())
+    ground_tokens = set(ground_key.split())
+    return query_tokens.issubset(ground_tokens) or ground_tokens.issubset(query_tokens)
+
+
+def _lookup_by_name(
+    grounds: List[Dict[str, Any]],
+    name: Optional[str],
+    city: Optional[str] = None,
+) -> Optional[Dict[str, Any]]:
+    """Match a ground by name, using city to disambiguate duplicate stadium names."""
     key_name = _normalize(name)
     if not key_name:
         return None
 
-    for ground in grounds:
-        if not _valid(ground.get("lat"), ground.get("lon")):
-            continue
-        if _normalize(ground.get("name")) == key_name:
-            return ground
+    exact_name_matches = [
+        ground
+        for ground in grounds
+        if _valid(ground.get("lat"), ground.get("lon"))
+        and _normalize(ground.get("name")) == key_name
+    ]
 
+    if city:
+        for ground in exact_name_matches:
+            if _city_matches(ground.get("city"), city):
+                return ground
+
+    if len(exact_name_matches) == 1:
+        return exact_name_matches[0]
+
+    if exact_name_matches:
+        return None
+
+    fuzzy_matches: List[Dict[str, Any]] = []
     for ground in grounds:
         if not _valid(ground.get("lat"), ground.get("lon")):
             continue
-        ground_name = _normalize(ground.get("name"))
-        if key_name in ground_name or ground_name in key_name:
-            return ground
+        if _names_fuzzy_match(key_name, str(ground.get("name") or "")):
+            fuzzy_matches.append(ground)
+
+    if city:
+        for ground in fuzzy_matches:
+            if _city_matches(ground.get("city"), city):
+                return ground
+        return None
+
+    if len(fuzzy_matches) == 1:
+        return fuzzy_matches[0]
 
     return None
 
@@ -173,15 +231,21 @@ def resolve_venue_coordinates(venue: Optional[str]) -> CoordResult:
 
     library = load_library()
     grounds = library.get("grounds", [])
+    _, venue_city = _split_venue(venue)
 
     for candidate in _venue_name_candidates(venue):
-        hit = _lookup_by_name(grounds, candidate)
+        cand_name, cand_city = _split_venue(candidate)
+        hit = _lookup_by_name(
+            grounds,
+            cand_name,
+            city=cand_city or venue_city,
+        )
         if hit is not None:
             return CoordResult(
                 float(hit["lat"]),
                 float(hit["lon"]),
                 "library",
-                matched_name=hit.get("name"),
+                matched_name=format_ground_label(hit),
             )
 
     return CoordResult(None, None, "none")
