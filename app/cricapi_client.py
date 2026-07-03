@@ -34,6 +34,7 @@ class Fixture:
             "start_time_utc": self.start_time_utc.isoformat() if self.start_time_utc else None,
             "match_type": self.match_type,
             "status": self.status,
+            "source": "cricapi",
         }
 
 

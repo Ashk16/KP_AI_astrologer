@@ -23,7 +23,7 @@ for _path in (_PROJECT_ROOT, _APP_DIR):
         sys.path.insert(0, _path)
 
 try:
-    from app.api_config import get_cricapi_key as load_cricapi_key
+    from app.api_config import get_cricapi_key as load_cricapi_key, get_sportmonks_key as load_sportmonks_key
     from app.fixtures_cache import cache_status, ensure_cache, get_cached_fixtures_for_date
     from app.venue_coords import (
         list_ground_options,
@@ -31,7 +31,7 @@ try:
         search_ground_options,
     )
 except ImportError:
-    from api_config import get_cricapi_key as load_cricapi_key
+    from api_config import get_cricapi_key as load_cricapi_key, get_sportmonks_key as load_sportmonks_key
     from fixtures_cache import cache_status, ensure_cache, get_cached_fixtures_for_date
     from venue_coords import (
         list_ground_options,
@@ -57,6 +57,17 @@ def _styler_element_map(styler, func, **kwargs):
 ARCHIVE_DIR = "match_archive"
 MANUAL_FIXTURE_OPTION = "__manual__"
 CUSTOM_VENUE_KEY = "__custom_venue__"
+
+
+def get_sportmonks_key():
+    """Read Sportmonks API key from Streamlit secrets, local files, or environment."""
+    try:
+        key = st.secrets["SPORTMONKS_API_KEY"]
+        if key:
+            return key
+    except (KeyError, TypeError, AttributeError):
+        pass
+    return load_sportmonks_key()
 
 
 def get_cricapi_key():
@@ -107,7 +118,7 @@ def _apply_fixture_autofill(fixture: dict, tz_name: str):
     st.session_state.last_autofill_fixture_id = fixture.get("fixture_id")
 
 
-def _load_sidebar_fixtures(api_key, match_date):
+def _load_sidebar_fixtures(cricapi_key, sportmonks_key, match_date):
     """Load fixture dropdown data from cache."""
     fixture_options = {MANUAL_FIXTURE_OPTION: "Manual entry"}
     fixtures_by_id = {}
@@ -116,13 +127,20 @@ def _load_sidebar_fixtures(api_key, match_date):
     no_fixtures_caption = None
     api_warning = None
 
-    if not api_key:
-        api_warning = "Add your key to `.streamlit/secrets.toml` (local) or host secrets (deployed). See `docs/API_KEY_SETUP.md`."
+    if not cricapi_key and not sportmonks_key:
+        api_warning = (
+            "Add CRICAPI_KEY and/or SPORTMONKS_API_KEY to `.streamlit/secrets.toml` "
+            "(local) or host secrets (deployed). See `docs/API_KEY_SETUP.md`."
+        )
         return fixture_options, fixtures_by_id, cache, cache_caption, no_fixtures_caption, api_warning
 
     try:
-        cache = ensure_cache(api_key)
-        fixtures = get_cached_fixtures_for_date(api_key, match_date)
+        cache = ensure_cache(cricapi_key=cricapi_key, sportmonks_key=sportmonks_key)
+        fixtures = get_cached_fixtures_for_date(
+            cricapi_key=cricapi_key,
+            sportmonks_key=sportmonks_key,
+            target_date=match_date,
+        )
         for fixture in fixtures:
             fixture_options[fixture["fixture_id"]] = fixture["label"]
             fixtures_by_id[fixture["fixture_id"]] = fixture
@@ -130,13 +148,14 @@ def _load_sidebar_fixtures(api_key, match_date):
         status = cache_status(cache)
         if status["fixture_count"]:
             source_label = "cloud bundle" if status.get("cache_source") == "bundled" else "live cache"
+            provider_label = ", ".join(status.get("providers") or ["cricapi"])
             refresh_note = (
                 f"Next API refresh after {status['next_refresh_utc']}."
                 if status.get("last_refresh_utc")
                 else "Will refresh from API when needed."
             )
             cache_caption = (
-                f"Fixture cache ({source_label}): {status['fixture_count']} matches "
+                f"Fixture cache ({source_label}, {provider_label}): {status['fixture_count']} matches "
                 f"({status['window_start']} to {status['window_end']}). {refresh_note}"
             )
         if len(fixtures) == 0:
@@ -1366,10 +1385,11 @@ def main():
         st.subheader("New Analysis")
         _init_match_form_state()
 
-        api_key = get_cricapi_key()
+        cricapi_key = get_cricapi_key()
+        sportmonks_key = get_sportmonks_key()
         pending_match_date = _resolve_match_date()
         fixture_options, fixtures_by_id, _, _, _, early_api_warning = _load_sidebar_fixtures(
-            api_key, pending_match_date
+            cricapi_key, sportmonks_key, pending_match_date
         )
 
         if st.session_state.selected_fixture_id not in fixture_options:
@@ -1433,11 +1453,11 @@ def main():
                 st.error("Invalid time format. Please use HH:MM:SS or HH:MM format.")
 
         fixture_options, fixtures_by_id, _, cache_caption, no_fixtures_caption, api_warning = _load_sidebar_fixtures(
-            api_key, match_date
+            cricapi_key, sportmonks_key, match_date
         )
 
         if api_warning:
-            if api_warning.startswith("Add your key"):
+            if api_warning.startswith("Add CRICAPI_KEY"):
                 st.info(api_warning)
             else:
                 st.warning(api_warning)

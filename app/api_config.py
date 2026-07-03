@@ -40,3 +40,32 @@ def get_cricapi_key() -> Optional[str]:
             return key
 
     return None
+
+
+def get_sportmonks_key() -> Optional[str]:
+    """Read Sportmonks API key from environment, .env, or Streamlit secrets file."""
+    key = os.getenv("SPORTMONKS_API_KEY")
+    if key:
+        return key
+
+    if _ENV_PATH.exists():
+        try:
+            from dotenv import load_dotenv
+
+            load_dotenv(_ENV_PATH, override=False)
+        except ImportError:
+            pass
+        key = os.getenv("SPORTMONKS_API_KEY")
+        if key:
+            return key
+
+    if _SECRETS_PATH.exists():
+        try:
+            secrets = toml.load(_SECRETS_PATH)
+        except Exception:
+            secrets = {}
+        key = secrets.get("SPORTMONKS_API_KEY")
+        if key and key not in {"PASTE_YOUR_API_KEY_HERE", "your_sportmonks_key_here"}:
+            return key
+
+    return None

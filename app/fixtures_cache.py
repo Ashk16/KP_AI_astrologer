@@ -1,17 +1,20 @@
-"""Persist cricket fixtures locally and refresh from CricAPI at most every 24 hours."""
+"""Persist cricket fixtures locally and refresh from CricAPI + Sportmonks."""
 
 from __future__ import annotations
 
 import datetime as dt
 import json
-import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 try:
     from app.cricapi_client import _fixture_id, _normalize_match, _request_matches
+    from app.fixture_merge import merge_fixture_lists
+    from app.sportmonks_fixtures import fetch_sportmonks_fixtures_for_window
 except ImportError:
     from cricapi_client import _fixture_id, _normalize_match, _request_matches
+    from fixture_merge import merge_fixture_lists
+    from sportmonks_fixtures import fetch_sportmonks_fixtures_for_window
 
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 RUNTIME_CACHE_PATH = _PROJECT_ROOT / "data" / "fixtures_cache.json"
@@ -35,6 +38,9 @@ def _empty_cache() -> Dict[str, Any]:
         "window_start": start.isoformat(),
         "window_end": end.isoformat(),
         "api_requests_used": 0,
+        "cricapi_requests_used": 0,
+        "sportmonks_requests_used": 0,
+        "providers": [],
         "fixtures": [],
         "cache_source": "empty",
     }
@@ -104,7 +110,11 @@ def cache_is_stale(cache: Dict[str, Any], reference_date: Optional[dt.date] = No
     return cached_start != window_start.isoformat() or cached_end != window_end.isoformat()
 
 
-def _fetch_raw_matches(api_key: str) -> Tuple[List[Dict[str, Any]], int]:
+def _fetch_cricapi_fixtures(
+    api_key: str,
+    window_start: dt.date,
+    window_end: dt.date,
+) -> Tuple[List[Dict[str, Any]], int]:
     raw_matches: List[Dict[str, Any]] = []
     seen_ids = set()
     requests_used = 0
@@ -129,13 +139,6 @@ def _fetch_raw_matches(api_key: str) -> Tuple[List[Dict[str, Any]], int]:
             seen_ids.add(fixture_id)
             raw_matches.append(match)
 
-    return raw_matches, requests_used
-
-
-def refresh_cache(api_key: str, reference_date: Optional[dt.date] = None) -> Dict[str, Any]:
-    window_start, window_end = fixture_window(reference_date)
-    raw_matches, requests_used = _fetch_raw_matches(api_key)
-
     fixtures: List[Dict[str, Any]] = []
     seen_fixture_ids = set()
     for match in raw_matches:
@@ -147,20 +150,54 @@ def refresh_cache(api_key: str, reference_date: Optional[dt.date] = None) -> Dic
         if fixture.fixture_id in seen_fixture_ids:
             continue
         seen_fixture_ids.add(fixture.fixture_id)
-        fixtures.append(fixture.to_dict())
+        fixture_dict = fixture.to_dict()
+        fixture_dict["fixture_id"] = f"cricapi:{fixture.fixture_id}"
+        fixtures.append(fixture_dict)
 
-    fixtures.sort(
-        key=lambda item: (
-            item.get("match_date") or "",
-            item.get("start_time_utc") or "",
+    return fixtures, requests_used
+
+
+def refresh_cache(
+    cricapi_key: Optional[str] = None,
+    sportmonks_key: Optional[str] = None,
+    reference_date: Optional[dt.date] = None,
+) -> Dict[str, Any]:
+    if not cricapi_key and not sportmonks_key:
+        raise ValueError("At least one of cricapi_key or sportmonks_key is required.")
+
+    window_start, window_end = fixture_window(reference_date)
+    cricapi_fixtures: List[Dict[str, Any]] = []
+    sportmonks_fixtures: List[Dict[str, Any]] = []
+    cricapi_requests = 0
+    sportmonks_requests = 0
+    providers: List[str] = []
+
+    if cricapi_key:
+        cricapi_fixtures, cricapi_requests = _fetch_cricapi_fixtures(
+            cricapi_key,
+            window_start,
+            window_end,
         )
-    )
+        providers.append("cricapi")
+
+    if sportmonks_key:
+        sportmonks_fixtures, sportmonks_requests = fetch_sportmonks_fixtures_for_window(
+            sportmonks_key,
+            window_start,
+            window_end,
+        )
+        providers.append("sportmonks")
+
+    fixtures = merge_fixture_lists(cricapi_fixtures, sportmonks_fixtures)
 
     cache = {
         "last_refresh_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
         "window_start": window_start.isoformat(),
         "window_end": window_end.isoformat(),
-        "api_requests_used": requests_used,
+        "api_requests_used": cricapi_requests + sportmonks_requests,
+        "cricapi_requests_used": cricapi_requests,
+        "sportmonks_requests_used": sportmonks_requests,
+        "providers": providers,
         "fixtures": fixtures,
         "cache_source": "runtime",
     }
@@ -168,13 +205,20 @@ def refresh_cache(api_key: str, reference_date: Optional[dt.date] = None) -> Dic
     return cache
 
 
-def ensure_cache(api_key: str, force_refresh: bool = False) -> Dict[str, Any]:
+def ensure_cache(
+    cricapi_key: Optional[str] = None,
+    sportmonks_key: Optional[str] = None,
+    force_refresh: bool = False,
+) -> Dict[str, Any]:
     cache = load_cache()
     if not force_refresh and not cache_is_stale(cache):
         return cache
 
+    if not cricapi_key and not sportmonks_key:
+        return cache
+
     try:
-        return refresh_cache(api_key)
+        return refresh_cache(cricapi_key, sportmonks_key)
     except Exception:
         if cache.get("fixtures"):
             return cache
@@ -182,11 +226,19 @@ def ensure_cache(api_key: str, force_refresh: bool = False) -> Dict[str, Any]:
 
 
 def get_cached_fixtures_for_date(
-    api_key: str,
-    target_date: dt.date,
+    cricapi_key: Optional[str] = None,
+    sportmonks_key: Optional[str] = None,
+    target_date: Optional[dt.date] = None,
     force_refresh: bool = False,
 ) -> List[Dict[str, Any]]:
-    cache = ensure_cache(api_key, force_refresh=force_refresh)
+    if target_date is None:
+        target_date = dt.date.today()
+
+    cache = ensure_cache(
+        cricapi_key=cricapi_key,
+        sportmonks_key=sportmonks_key,
+        force_refresh=force_refresh,
+    )
     target_iso = target_date.isoformat()
     fixtures = [
         fixture
@@ -204,6 +256,10 @@ def cache_status(cache: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     if last_refresh is not None:
         next_refresh = last_refresh + REFRESH_INTERVAL
 
+    providers = cache.get("providers") or []
+    if not providers and cache.get("fixtures"):
+        providers = sorted({fixture.get("source") for fixture in cache["fixtures"] if fixture.get("source")})
+
     return {
         "last_refresh_utc": cache.get("last_refresh_utc"),
         "next_refresh_utc": next_refresh.isoformat() if next_refresh else None,
@@ -211,6 +267,9 @@ def cache_status(cache: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         "window_end": cache.get("window_end"),
         "fixture_count": len(cache.get("fixtures", [])),
         "api_requests_used": cache.get("api_requests_used", 0),
+        "cricapi_requests_used": cache.get("cricapi_requests_used", 0),
+        "sportmonks_requests_used": cache.get("sportmonks_requests_used", 0),
+        "providers": providers,
         "is_stale": cache_is_stale(cache),
         "cache_source": cache.get("cache_source", "unknown"),
     }

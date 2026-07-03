@@ -1,8 +1,9 @@
 # CricAPI Key Setup
 
-The fixture auto-fill feature needs a free CricAPI key from [cricketdata.org/signup](https://cricketdata.org/signup.aspx).
+The fixture auto-fill feature loads schedules from **CricAPI** and/or **Sportmonks**.
+Configure at least one key (both recommended for the widest match coverage).
 
-**Never commit your real API key to GitHub.**
+**Never commit your real API keys to GitHub.**
 
 ## Local development (recommended)
 
@@ -13,17 +14,21 @@ Edit this file on your machine:
 ```
 
 ```toml
-CRICAPI_KEY = "your_actual_key_here"
+CRICAPI_KEY = "your_cricapi_key_here"
+SPORTMONKS_API_KEY = "your_sportmonks_key_here"
 ```
 
 This file is gitignored and will not be pushed to GitHub.
+
+You can reuse the same `SPORTMONKS_API_KEY` from your `Cricket_KP` project.
 
 ## Alternative: `.env` file
 
 Create a `.env` file in the project root (also gitignored):
 
 ```
-CRICAPI_KEY=your_actual_key_here
+CRICAPI_KEY=your_cricapi_key_here
+SPORTMONKS_API_KEY=your_sportmonks_key_here
 ```
 
 ## Streamlit Cloud / hosted deployment
@@ -31,10 +36,11 @@ CRICAPI_KEY=your_actual_key_here
 On [Streamlit Community Cloud](https://streamlit.io/cloud), open your app settings and paste the same TOML into **Secrets**:
 
 ```toml
-CRICAPI_KEY = "your_actual_key_here"
+CRICAPI_KEY = "your_cricapi_key_here"
+SPORTMONKS_API_KEY = "your_sportmonks_key_here"
 ```
 
-Other hosts (Railway, Render, etc.): set `CRICAPI_KEY` as an environment variable in the platform dashboard.
+Other hosts (Railway, Render, etc.): set `CRICAPI_KEY` and `SPORTMONKS_API_KEY` as environment variables in the platform dashboard.
 
 ## Verify
 
@@ -44,16 +50,16 @@ Run the app:
 streamlit run app/main_dashboard.py
 ```
 
-Pick a date in the sidebar. If the key is configured, the **Select Match** dropdown will load fixtures instead of showing the setup message.
+Pick a date in the sidebar. If at least one key is configured, the **Select Match** dropdown will load fixtures instead of showing the setup message.
 
 ## Fixture cache
 
-To stay within the free 100 requests/day limit, fixtures use a two-layer cache:
+To stay within API limits, fixtures use a two-layer cache:
 
 | File | Committed to Git? | Purpose |
 |------|-------------------|---------|
 | `data/fixtures_cache_bundled.json` | Yes | Shipped with every deploy; keeps the match dropdown available after Streamlit Cloud sleep/restart |
-| `data/fixtures_cache.json` | No | Runtime overlay refreshed from CricAPI (lost when the cloud container restarts) |
+| `data/fixtures_cache.json` | No | Runtime overlay refreshed from APIs (lost when the cloud container restarts) |
 
 ### How it works
 
