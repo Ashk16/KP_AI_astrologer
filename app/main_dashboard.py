@@ -592,6 +592,18 @@ def get_lat_lon(location_str):
     st.warning("Geocoder service is unavailable. Please enter coordinates manually.")
     return None, None
 
+_DF_KEYS = ('planets_df', 'cusps_df', 'moon_timeline_df', 'asc_timeline_df')
+
+
+def _restore_dataframe(value):
+    """Restore a DataFrame from its archived JSON string representation."""
+    if isinstance(value, pd.DataFrame):
+        return value
+    if isinstance(value, str):
+        return pd.read_json(value, orient='split')
+    return pd.DataFrame()
+
+
 def save_analysis(results):
     """Saves the complete analysis results to a JSON file using the standardized structure."""
     match_details = results['match_details']
@@ -606,19 +618,24 @@ def save_analysis(results):
     
     filepath = os.path.join(ARCHIVE_DIR, filename)
 
-    # Create a deep copy to modify for serialization
-    data_to_save = {k: v for k, v in results.items() if not isinstance(v, pd.DataFrame)}
+    # Exclude DataFrame fields; they are serialized separately below
+    data_to_save = {
+        k: v for k, v in results.items()
+        if k not in _DF_KEYS and k != 'detailed_timelines'
+    }
     data_to_save['match_details'] = results['match_details'].copy()
-
-    # Convert dataframes and datetime to JSON serializable formats
-    data_to_save['planets_df'] = results['planets_df'].to_json(orient='split')
-    data_to_save['cusps_df'] = results['cusps_df'].to_json(orient='split')
-    data_to_save['moon_timeline_df'] = results['moon_timeline_df'].to_json(orient='split')
     data_to_save['match_details']['datetime_utc'] = match_details['datetime_utc'].isoformat()
-    
-    # Preserve team mapping if present
-    if 'team_mapping' in results:
-        data_to_save['team_mapping'] = results['team_mapping']
+
+    for key in _DF_KEYS:
+        if key in results and results[key] is not None:
+            data_to_save[key] = results[key].to_json(orient='split')
+
+    if results.get('detailed_timelines'):
+        data_to_save['detailed_timelines'] = {
+            level: df.to_json(orient='split')
+            for level, df in results['detailed_timelines'].items()
+            if isinstance(df, pd.DataFrame)
+        }
 
     with open(filepath, 'w') as f:
         json.dump(data_to_save, f, indent=4)
@@ -648,9 +665,22 @@ def load_analysis(filename):
         loaded_data['match_details'] = match_details
     
     # Restore dataframes from JSON
-    loaded_data['planets_df'] = pd.read_json(loaded_data['planets_df'], orient='split')
-    loaded_data['cusps_df'] = pd.read_json(loaded_data['cusps_df'], orient='split') if 'cusps_df' in loaded_data else KPEngine(match_details['datetime_utc'], match_details['lat'], match_details['lon']).get_all_cusps_df()
-    loaded_data['moon_timeline_df'] = pd.read_json(loaded_data['moon_timeline_df'], orient='split')
+    for key in _DF_KEYS:
+        if key in loaded_data:
+            loaded_data[key] = _restore_dataframe(loaded_data[key])
+
+    if 'cusps_df' not in loaded_data:
+        md = loaded_data['match_details']
+        dt = md['datetime_utc']
+        if isinstance(dt, str):
+            dt = datetime.datetime.fromisoformat(dt)
+        loaded_data['cusps_df'] = KPEngine(dt, md['lat'], md['lon']).get_all_cusps_df()
+
+    if loaded_data.get('detailed_timelines'):
+        loaded_data['detailed_timelines'] = {
+            level: _restore_dataframe(json_str)
+            for level, json_str in loaded_data['detailed_timelines'].items()
+        }
     
     # Restore datetime
     loaded_data['match_details']['datetime_utc'] = datetime.datetime.fromisoformat(
@@ -673,6 +703,66 @@ def get_saved_matches():
 def get_ist_time(dt_utc):
     """Convert UTC datetime to IST"""
     return pd.to_datetime(dt_utc).tz_convert('Asia/Kolkata')
+
+
+def _resolve_venue_display_name(location_query: str) -> str:
+    """Prefer the matched ground-library name when available."""
+    query = (location_query or "").strip()
+    if not query:
+        return "Not specified"
+    coord = resolve_venue_coordinates(query)
+    if coord.resolved and coord.matched_name:
+        return coord.matched_name
+    return query
+
+
+def _format_utc_datetime(dt_utc):
+    """Normalize stored UTC datetimes for display."""
+    if isinstance(dt_utc, str):
+        dt_utc = datetime.datetime.fromisoformat(dt_utc)
+    if dt_utc.tzinfo is None:
+        dt_utc = pytz.utc.localize(dt_utc)
+    return dt_utc.astimezone(pytz.utc)
+
+
+def _render_match_header(match_details):
+    """Display venue, coordinates, and start time at the top of the chart."""
+    team_a = match_details.get('team_a', 'Team A')
+    team_b = match_details.get('team_b', 'Team B')
+    venue = (
+        match_details.get('venue_name')
+        or match_details.get('location')
+        or 'Not specified'
+    )
+    lat = match_details.get('lat')
+    lon = match_details.get('lon')
+    tz_name = match_details.get('timezone', 'Asia/Kolkata')
+    dt_utc = match_details.get('datetime_utc')
+
+    st.markdown(f"### {team_a} vs {team_b}")
+
+    col_venue, col_coords, col_start = st.columns(3)
+    with col_venue:
+        st.markdown(f"**Venue:** {venue}")
+    with col_coords:
+        if lat is not None and lon is not None:
+            st.markdown(f"**Coordinates:** {lat:.4f}, {lon:.4f}")
+        else:
+            st.markdown("**Coordinates:** Not specified")
+    with col_start:
+        if dt_utc:
+            dt_utc = _format_utc_datetime(dt_utc)
+            local_tz = pytz.timezone(tz_name)
+            local_dt = dt_utc.astimezone(local_tz)
+            tz_label = tz_name.split('/')[-1].replace('_', ' ')
+            st.markdown(
+                f"**Start Time:** {local_dt.strftime('%Y-%m-%d %H:%M:%S')} ({tz_label})"
+            )
+            st.caption(f"UTC: {dt_utc.strftime('%Y-%m-%d %H:%M:%S')}")
+        else:
+            st.markdown("**Start Time:** Not specified")
+
+    st.divider()
 
 # Function removed as magnitude categorization is no longer used
 
@@ -741,8 +831,10 @@ def display_analysis(results):
     """Display the analysis results with enhanced formatting."""
     display_results = results
     
-    # Display astrological settings information
     match_details = display_results.get('match_details', {})
+    _render_match_header(match_details)
+
+    # Display astrological settings information
     ayanamsa = match_details.get('ayanamsa', 'KRISHNAMURTI')
     
     # Create ayanamsa info box
@@ -1431,6 +1523,8 @@ def main():
                 team_b_value = st.session_state.team_b
 
                 with st.spinner("Generating astrological analysis..."):
+                    tz_name = st.session_state.get("tz_name", "Asia/Kolkata")
+                    location_query = st.session_state.get("location_query", "")
                     new_analysis = run_analysis({
                         "team_a": team_a_value,
                         "team_b": team_b_value,
@@ -1439,6 +1533,8 @@ def main():
                         "lon": st.session_state.lon,
                         "duration_hours": st.session_state.get("match_duration", 9.0),
                         "ayanamsa": st.session_state.get("ayanamsa_choice", "KRISHNAMURTI"),
+                        "venue_name": _resolve_venue_display_name(location_query),
+                        "timezone": tz_name,
                     },
                     timeline_weights=st.session_state.timeline_weights,
                     house_weights=st.session_state.house_weights)
@@ -1530,10 +1626,12 @@ def main():
             with st.spinner("Loading analysis..."):
                 loaded_analysis = load_analysis(match_to_load)
                 
-                # Add tab name to the loaded analysis
                 match_details = loaded_analysis['match_details']
-                tab_name = f"{match_details['team_a']} vs {match_details['team_b']} - {match_details['datetime_utc'].strftime('%Y-%m-%d')}"
-                loaded_analysis['tab_name'] = tab_name
+                if not loaded_analysis.get('tab_name'):
+                    loaded_analysis['tab_name'] = (
+                        f"{match_details['team_a']} vs {match_details['team_b']} "
+                        f"- {match_details['datetime_utc'].strftime('%Y-%m-%d')}"
+                    )
                 
                 # Add to analyses list and set as active tab
                 st.session_state.analyses.append(loaded_analysis)
