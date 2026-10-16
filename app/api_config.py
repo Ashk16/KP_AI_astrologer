@@ -6,11 +6,21 @@ import os
 from pathlib import Path
 from typing import Optional
 
-import toml
-
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 _SECRETS_PATH = _PROJECT_ROOT / ".streamlit" / "secrets.toml"
 _ENV_PATH = _PROJECT_ROOT / ".env"
+
+
+def _load_toml(path: Path) -> dict:
+    """Parse a TOML file using stdlib tomllib (3.11+) or the toml package."""
+    try:
+        import tomllib
+    except ImportError:
+        import toml  # type: ignore
+
+        return toml.load(path)
+    with path.open("rb") as fh:
+        return tomllib.load(fh)
 
 
 def get_cricapi_key() -> Optional[str]:
@@ -32,7 +42,7 @@ def get_cricapi_key() -> Optional[str]:
 
     if _SECRETS_PATH.exists():
         try:
-            secrets = toml.load(_SECRETS_PATH)
+            secrets = _load_toml(_SECRETS_PATH)
         except Exception:
             secrets = {}
         key = secrets.get("CRICAPI_KEY")
@@ -61,7 +71,7 @@ def get_sportmonks_key() -> Optional[str]:
 
     if _SECRETS_PATH.exists():
         try:
-            secrets = toml.load(_SECRETS_PATH)
+            secrets = _load_toml(_SECRETS_PATH)
         except Exception:
             secrets = {}
         key = secrets.get("SPORTMONKS_API_KEY")
